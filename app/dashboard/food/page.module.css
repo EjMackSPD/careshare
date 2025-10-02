@@ -1,0 +1,379 @@
+.container {
+  min-height: 100vh;
+  background: #f8f9fa;
+  padding-top: 81px;
+}
+
+.layout {
+  display: flex;
+  min-height: calc(100vh - 81px);
+}
+
+.main {
+  flex: 1;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  width: 100%;
+  margin-left: 260px;
+}
+
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.pageHeader h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #212529;
+  margin: 0 0 0.5rem 0;
+}
+
+.subtitle {
+  color: #6c757d;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.contentWrapper {
+  display: flex;
+  gap: 2rem;
+}
+
+.leftContent {
+  flex: 1;
+}
+
+/* Order For Section */
+.orderForSection {
+  margin-bottom: 1.5rem;
+}
+
+.orderForSection label {
+  display: block;
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.familySelect {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #e9ecef;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.familySelect:hover {
+  border-color: #6366f1;
+}
+
+.familySelect:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.tab {
+  background: none;
+  border: none;
+  padding: 1rem 2rem;
+  font-weight: 500;
+  font-size: 1rem;
+  color: #6c757d;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+}
+
+.tab:hover {
+  color: #212529;
+}
+
+.tab.activeTab {
+  color: #212529;
+  border-bottom-color: #212529;
+  font-weight: 600;
+}
+
+/* Search and Filter */
+.searchFilterRow {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.searchBar {
+  position: relative;
+  flex: 1;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+}
+
+.searchBar input {
+  width: 100%;
+  padding: 0.85rem 1rem 0.85rem 3rem;
+  border: 1px solid #e9ecef;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background: white;
+  transition: all 0.2s;
+}
+
+.searchBar input:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.cuisineFilter {
+  padding: 0.85rem 1rem;
+  border: 1px solid #e9ecef;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 180px;
+}
+
+.cuisineFilter:hover {
+  border-color: #6366f1;
+}
+
+.cuisineFilter:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* Restaurant Cards */
+.restaurantsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.restaurantCard {
+  background: white;
+  padding: 1.75rem;
+  border-radius: 1rem;
+  border: 1px solid #e9ecef;
+  transition: all 0.2s;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.restaurantCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  border-color: #6366f1;
+}
+
+.featuredBadge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: #6366f1;
+  color: white;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.restaurantIcon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.restaurantCard h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #212529;
+  margin: 0 0 0.35rem 0;
+}
+
+.category {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin: 0 0 1.25rem 0;
+}
+
+.restaurantDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.detailItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+.detailLabel {
+  color: #6c757d;
+}
+
+.orderBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem;
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 0.5rem;
+  color: #495057;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: auto;
+}
+
+.orderBtn:hover {
+  background: #6366f1;
+  color: white;
+  border-color: #6366f1;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Cart Sidebar */
+.cartSidebar {
+  width: 380px;
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  height: fit-content;
+  position: sticky;
+  top: 100px;
+}
+
+.cartHeader h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #212529;
+  margin: 0 0 0.5rem 0;
+}
+
+.cartHeader p {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin: 0 0 2rem 0;
+}
+
+.emptyCart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+.emptyCart svg {
+  color: #adb5bd;
+  margin-bottom: 1rem;
+}
+
+.emptyCart p {
+  color: #6c757d;
+  margin: 0;
+}
+
+.checkoutBtn {
+  width: 100%;
+  padding: 1rem;
+  background: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 2rem;
+}
+
+.checkoutBtn:hover:not(:disabled) {
+  background: #4f46e5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.checkoutBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 1400px) {
+  .restaurantsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 1024px) {
+  .contentWrapper {
+    flex-direction: column;
+  }
+
+  .cartSidebar {
+    width: 100%;
+    position: static;
+  }
+
+  .restaurantsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .searchFilterRow {
+    flex-direction: column;
+  }
+
+  .cuisineFilter {
+    width: 100%;
+  }
+
+  .restaurantsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
