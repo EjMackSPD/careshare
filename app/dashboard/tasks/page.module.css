@@ -476,12 +476,17 @@
   width: 18px;
   height: 18px;
   flex-shrink: 0;
+  min-width: 18px;
+  margin: 0;
 }
 
 .memberOption span {
   flex: 1;
   font-size: 0.95rem;
   color: #212529;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .selectedMembers {

@@ -69,8 +69,8 @@ export default async function FamiliesPage() {
               >
                 <div className={styles.familyCardHeader}>
                   <h2>{family.name}</h2>
-                  {family.role === 'organizer' && (
-                    <span className={styles.badge}>Organizer</span>
+                  {family.role === 'CARE_MANAGER' && (
+                    <span className={styles.badge}>⭐ Care Manager</span>
                   )}
                 </div>
                 {family.elderName && (
