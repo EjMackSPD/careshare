@@ -75,6 +75,7 @@ model User {
   messages        Message[]
   lifeStories     LifeStory[]
   medications     Medication[]
+  notes           Note[]
 
   @@index([email])
 }
@@ -107,6 +108,7 @@ model Family {
   messages      Message[]
   lifeStories   LifeStory[]
   medications   Medication[]
+  notes         Note[]
 
   @@index([createdBy])
 }
@@ -433,4 +435,24 @@ model Medication {
   @@index([familyId])
   @@index([userId])
   @@index([active])
+}
+
+// Care notes and updates
+model Note {
+  id        String   @id @default(cuid())
+  familyId  String
+  userId    String
+  title     String?
+  content   String   @db.Text
+  category  String?  // health, care, observation, general
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([familyId])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([category])
 }

@@ -306,3 +306,116 @@
   text-decoration: underline;
 }
 
+/* Notes Functionality */
+.noteHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.addNoteBtn {
+  background: #6366f1;
+  color: white;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.addNoteBtn:hover {
+  background: #4f46e5;
+  transform: scale(1.1);
+}
+
+.addNoteForm {
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 0.5rem;
+}
+
+.noteInput {
+  width: 100%;
+  padding: 0.65rem;
+  border: 1px solid #dee2e6;
+  border-radius: 0.35rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  resize: vertical;
+  margin-bottom: 0.5rem;
+}
+
+.noteInput:focus {
+  outline: none;
+  border-color: #6366f1;
+}
+
+.noteActions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.noteCancelBtn,
+.noteSaveBtn {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.noteCancelBtn {
+  background: white;
+  color: #495057;
+  border: 1px solid #dee2e6;
+}
+
+.noteCancelBtn:hover {
+  background: #f8f9fa;
+}
+
+.noteSaveBtn {
+  background: #6366f1;
+  color: white;
+}
+
+.noteSaveBtn:hover {
+  background: #4f46e5;
+}
+
+.notesList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.noteItem {
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 0.5rem;
+  border-left: 3px solid #6366f1;
+}
+
+.noteContent {
+  color: #212529;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  margin: 0 0 0.5rem 0;
+}
+
+.noteAuthor {
+  color: #6c757d;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+

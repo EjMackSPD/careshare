@@ -131,6 +131,7 @@ export default async function Dashboard() {
             <CareRecipientWidget 
               elderName={families[0]?.elderName}
               elderAge={families[0]?.elderBirthday ? new Date().getFullYear() - new Date(families[0].elderBirthday).getFullYear() : undefined}
+              familyId={families[0]?.id}
             />
           </div>
           <div className={styles.widgetMedium}>
