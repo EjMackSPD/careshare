@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, EventType, CostStatus } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
@@ -53,28 +53,28 @@ async function main() {
     {
       title: 'Doctor Appointment - Cardiology',
       description: 'Annual heart checkup with Dr. Johnson',
-      type: 'APPOINTMENT',
+      type: EventType.APPOINTMENT,
       eventDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
       location: 'Springfield Medical Center',
     },
     {
       title: 'Grandma Mary\'s Birthday',
       description: 'Birthday celebration at her home',
-      type: 'BIRTHDAY',
+      type: EventType.BIRTHDAY,
       eventDate: new Date('2025-06-15'),
       location: '123 Oak Street',
     },
     {
       title: 'Weekly Grocery Delivery',
       description: 'Regular grocery delivery from Fresh Market',
-      type: 'FOOD_DELIVERY',
+      type: EventType.FOOD_DELIVERY,
       eventDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days from now
       location: 'Home delivery',
     },
     {
       title: 'Family Sunday Visit',
       description: 'Weekly family dinner and check-in',
-      type: 'VISIT',
+      type: EventType.VISIT,
       eventDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // 5 days from now
       location: '123 Oak Street',
     },
@@ -96,28 +96,28 @@ async function main() {
     {
       description: 'Monthly Medication Refills',
       amount: 245.50,
-      status: 'PENDING',
+      status: CostStatus.PENDING,
       dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       splitType: 'EQUAL',
     },
     {
       description: 'Home Care Assistant (20 hours)',
       amount: 600.00,
-      status: 'PAID',
+      status: CostStatus.PAID,
       paidDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
       splitType: 'EQUAL',
     },
     {
       description: 'Emergency Medical Alert System',
       amount: 89.99,
-      status: 'PENDING',
+      status: CostStatus.PENDING,
       dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
       splitType: 'EQUAL',
     },
     {
       description: 'Wheelchair Ramp Installation',
       amount: 1250.00,
-      status: 'PAID',
+      status: CostStatus.PAID,
       paidDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
       splitType: 'EQUAL',
     },

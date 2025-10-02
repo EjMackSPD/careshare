@@ -315,7 +315,37 @@
   font-size: 1.5rem;
 }
 
+/* Widget Grid */
+.widgetGrid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.widgetLarge {
+  grid-column: span 8;
+}
+
+.widgetMedium {
+  grid-column: span 4;
+}
+
+@media (max-width: 1200px) {
+  .widgetLarge {
+    grid-column: span 12;
+  }
+  
+  .widgetMedium {
+    grid-column: span 6;
+  }
+}
+
 @media (max-width: 768px) {
+  .widgetMedium {
+    grid-column: span 12;
+  }
+}
   .cards {
     grid-template-columns: 1fr;
   }

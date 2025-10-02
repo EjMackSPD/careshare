@@ -4,6 +4,13 @@ import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import Navigation from '../components/Navigation'
 import LeftNavigation from '../components/LeftNavigation'
+import CareRecipientWidget from '../components/widgets/CareRecipientWidget'
+import TasksWidget from '../components/widgets/TasksWidget'
+import FinancialWidget from '../components/widgets/FinancialWidget'
+import CalendarWidget from '../components/widgets/CalendarWidget'
+import CollaborationWidget from '../components/widgets/CollaborationWidget'
+import ResourcesWidget from '../components/widgets/ResourcesWidget'
+import CarePlanWidget from '../components/widgets/CarePlanWidget'
 import styles from './page.module.css'
 
 export default async function Dashboard() {
@@ -115,6 +122,34 @@ export default async function Dashboard() {
             </div>
           </div>
         )}
+
+        {/* Widget Grid */}
+        <div className={styles.widgetGrid}>
+          <div className={styles.widgetLarge}>
+            <CareRecipientWidget 
+              elderName={families[0]?.elderName}
+              elderAge={families[0]?.elderBirthday ? new Date().getFullYear() - new Date(families[0].elderBirthday).getFullYear() : undefined}
+            />
+          </div>
+          <div className={styles.widgetMedium}>
+            <TasksWidget />
+          </div>
+          <div className={styles.widgetMedium}>
+            <FinancialWidget />
+          </div>
+          <div className={styles.widgetMedium}>
+            <CalendarWidget />
+          </div>
+          <div className={styles.widgetMedium}>
+            <CollaborationWidget />
+          </div>
+          <div className={styles.widgetLarge}>
+            <ResourcesWidget />
+          </div>
+          <div className={styles.widgetLarge}>
+            <CarePlanWidget />
+          </div>
+        </div>
 
         {families.length === 0 ? (
           <div className={styles.emptyState}>
