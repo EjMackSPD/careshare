@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+import { EventType, CostStatus } from '@prisma/client'
 
 export async function POST() {
   try {
@@ -48,7 +49,7 @@ export async function POST() {
         {
           title: 'Doctor Appointment - Cardiology',
           description: 'Annual heart checkup with Dr. Johnson',
-          type: 'APPOINTMENT',
+          type: EventType.APPOINTMENT,
           eventDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
           location: 'Springfield Medical Center',
           familyId: demoFamily.id,
@@ -56,7 +57,7 @@ export async function POST() {
         {
           title: 'Grandma Mary\'s Birthday',
           description: 'Birthday celebration at her home',
-          type: 'BIRTHDAY',
+          type: EventType.BIRTHDAY,
           eventDate: new Date('2025-06-15'),
           location: '123 Oak Street',
           familyId: demoFamily.id,
@@ -64,7 +65,7 @@ export async function POST() {
         {
           title: 'Weekly Grocery Delivery',
           description: 'Regular grocery delivery from Fresh Market',
-          type: 'FOOD_DELIVERY',
+          type: EventType.FOOD_DELIVERY,
           eventDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
           location: 'Home delivery',
           familyId: demoFamily.id,
@@ -78,7 +79,7 @@ export async function POST() {
         {
           description: 'Monthly Medication Refills',
           amount: 245.50,
-          status: 'PENDING',
+          status: CostStatus.PENDING,
           dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
           splitType: 'EQUAL',
           familyId: demoFamily.id,
@@ -86,7 +87,7 @@ export async function POST() {
         {
           description: 'Home Care Assistant (20 hours)',
           amount: 600.00,
-          status: 'PAID',
+          status: CostStatus.PAID,
           paidDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
           splitType: 'EQUAL',
           familyId: demoFamily.id,
@@ -94,7 +95,7 @@ export async function POST() {
         {
           description: 'Emergency Medical Alert System',
           amount: 89.99,
-          status: 'PENDING',
+          status: CostStatus.PENDING,
           dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
           splitType: 'EQUAL',
           familyId: demoFamily.id,
