@@ -158,9 +158,31 @@ export default async function Dashboard() {
           <div className={styles.emptyState}>
             <h2>No families yet</h2>
             <p>Create your first family group to start coordinating care</p>
-            <Link href="/family/create" className={styles.primaryBtn}>
-              Create Family Group
-            </Link>
+            {user.email === 'demo@careshare.app' ? (
+              <>
+                <p className={styles.demoNote}>It looks like demo data wasn't set up. Click below to initialize:</p>
+                <button 
+                  onClick={async () => {
+                    try {
+                      const res = await fetch('/api/auth/demo', { method: 'POST' })
+                      if (res.ok) {
+                        window.location.reload()
+                      }
+                    } catch (error) {
+                      console.error('Error initializing demo:', error)
+                      alert('Failed to initialize demo data')
+                    }
+                  }}
+                  className={styles.primaryBtn}
+                >
+                  Initialize Demo Data
+                </button>
+              </>
+            ) : (
+              <Link href="/family/create" className={styles.primaryBtn}>
+                Create Family Group
+              </Link>
+            )}
           </div>
         ) : (
           <div className={styles.dashboard}>
