@@ -178,10 +178,16 @@
   opacity: 0.6;
 }
 
-.deleteBtn {
+.taskCardActions {
   position: absolute;
   top: 1rem;
   right: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.editTaskBtn,
+.deleteBtn {
   background: transparent;
   border: none;
   color: #6c757d;
@@ -194,12 +200,19 @@
   justify-content: center;
 }
 
+.editTaskBtn:hover {
+  background: #eff6ff;
+  color: #6366f1;
+  transform: scale(1.1);
+}
+
 .deleteBtn:hover {
   background: #fee2e2;
   color: #dc2626;
   transform: scale(1.1);
 }
 
+.editTaskBtn:active,
 .deleteBtn:active {
   transform: scale(0.95);
 }

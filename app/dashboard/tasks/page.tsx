@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Navigation from '@/app/components/Navigation'
 import LeftNavigation from '@/app/components/LeftNavigation'
-import { Search, Trash2, UserPlus, X } from 'lucide-react'
+import { Search, Trash2, UserPlus, X, Edit } from 'lucide-react'
 import styles from './page.module.css'
 
 type Task = {
@@ -80,7 +80,7 @@ const sampleTasks: Task[] = [
 
 export default function TasksPage() {
   const router = useRouter()
-  const [tasks, setTasks] = useState<Task[]>(sampleTasks)
+  const [tasks, setTasks] = useState<Task[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [filterCategory, setFilterCategory] = useState('all')
   const [showCompleted, setShowCompleted] = useState(false)
@@ -89,6 +89,7 @@ export default function TasksPage() {
   const [selectedFamily, setSelectedFamily] = useState<string>('')
   const [selectedMembers, setSelectedMembers] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
+  const [editingTask, setEditingTask] = useState<Task | null>(null)
   const [newTask, setNewTask] = useState({
     title: '',
     description: '',
@@ -127,6 +128,35 @@ export default function TasksPage() {
     }
     fetchFamilies()
   }, [])
+
+  // Fetch tasks when family changes
+  useEffect(() => {
+    if (!selectedFamily) return
+    fetchTasks()
+  }, [selectedFamily])
+
+  async function fetchTasks() {
+    try {
+      const res = await fetch(`/api/families/${selectedFamily}/tasks`)
+      if (res.ok) {
+        const data = await res.json()
+        // Convert database format to display format
+        const formattedTasks = data.map((t: any) => ({
+          id: t.id,
+          title: t.title,
+          description: t.description || '',
+          category: 'General', // You can add category field to Task model if needed
+          priority: t.priority,
+          assignedTo: t.assignedUser?.name || t.assignedUser?.email || '',
+          dueDate: t.dueDate ? new Date(t.dueDate).toLocaleString() : '',
+          completed: t.status === 'COMPLETED'
+        }))
+        setTasks(formattedTasks)
+      }
+    } catch (error) {
+      console.error('Error fetching tasks:', error)
+    }
+  }
 
   const categories = ['all', 'Medication', 'Healthcare', 'Shopping', 'Home Maintenance']
 
@@ -195,29 +225,71 @@ export default function TasksPage() {
       .join(', ')
   }
 
-  const handleAddTask = (e: React.FormEvent) => {
+  const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault()
-    const task: Task = {
-      id: Date.now().toString(),
-      title: newTask.title,
-      description: newTask.description,
-      category: newTask.category,
-      priority: newTask.priority,
-      assignedTo: selectedMembers.join(','), // Store as comma-separated IDs
-      dueDate: newTask.dueDate,
-      completed: false,
+    
+    if (!selectedFamily) {
+      alert('Please select a family first')
+      return
     }
-    setTasks([task, ...tasks])
-    setShowAddTask(false)
-    setSelectedMembers([])
+
+    try {
+      const taskData = {
+        title: newTask.title,
+        description: newTask.description,
+        priority: newTask.priority,
+        assignedTo: selectedMembers.length > 0 ? selectedMembers[0] : null, // First selected member
+        dueDate: newTask.dueDate || null
+      }
+
+      const url = editingTask
+        ? `/api/tasks/${editingTask.id}`
+        : `/api/families/${selectedFamily}/tasks`
+      
+      const method = editingTask ? 'PATCH' : 'POST'
+
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(taskData)
+      })
+
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error.error || 'Failed to save task')
+      }
+
+      // Refresh tasks list
+      await fetchTasks()
+      
+      setShowAddTask(false)
+      setEditingTask(null)
+      setSelectedMembers([])
+      setNewTask({
+        title: '',
+        description: '',
+        category: 'Medication',
+        priority: 'MEDIUM',
+        assignedTo: '',
+        dueDate: '',
+      })
+    } catch (error) {
+      console.error('Error saving task:', error)
+      alert(error instanceof Error ? error.message : 'Failed to save task')
+    }
+  }
+
+  const handleEditTask = (task: Task) => {
+    setEditingTask(task)
     setNewTask({
-      title: '',
-      description: '',
-      category: 'Medication',
-      priority: 'MEDIUM',
-      assignedTo: '',
-      dueDate: '',
+      title: task.title,
+      description: task.description,
+      category: task.category,
+      priority: task.priority,
+      assignedTo: task.assignedTo,
+      dueDate: task.dueDate ? new Date(task.dueDate).toISOString().slice(0, 16) : '',
     })
+    setShowAddTask(true)
   }
 
   return (
@@ -272,12 +344,12 @@ export default function TasksPage() {
             </div>
           </div>
 
-          {/* Add Task Modal */}
+            {/* Add/Edit Task Modal */}
           {showAddTask && (
             <div className={styles.modal} onClick={() => setShowAddTask(false)}>
               <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
                 <div className={styles.modalHeader}>
-                  <h2>Add New Task</h2>
+                  <h2>{editingTask ? 'Edit Task' : 'Add New Task'}</h2>
                   <button className={styles.closeBtn} onClick={() => setShowAddTask(false)}>✕</button>
                 </div>
                 
@@ -458,13 +530,22 @@ export default function TasksPage() {
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => deleteTask(task.id)}
-                    className={styles.deleteBtn}
-                    title="Delete task"
-                  >
-                    <Trash2 size={18} />
-                  </button>
+                  <div className={styles.taskCardActions}>
+                    <button
+                      onClick={() => handleEditTask(task)}
+                      className={styles.editTaskBtn}
+                      title="Edit task"
+                    >
+                      <Edit size={18} />
+                    </button>
+                    <button
+                      onClick={() => deleteTask(task.id)}
+                      className={styles.deleteBtn}
+                      title="Delete task"
+                    >
+                      <Trash2 size={18} />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
