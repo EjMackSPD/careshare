@@ -186,6 +186,11 @@
   gap: 1.5rem;
 }
 
+.serviceCardLink {
+  text-decoration: none;
+  display: block;
+}
+
 .serviceCard {
   background: white;
   padding: 1.75rem;
@@ -200,6 +205,11 @@
   transform: translateY(-2px);
 }
 
+.serviceCardLink .serviceCard:hover {
+  background: #f0f7ff;
+  cursor: pointer;
+}
+
 .serviceCard h3 {
   font-size: 1.05rem;
   font-weight: 600;
@@ -211,6 +221,20 @@
   color: #6c757d;
   font-size: 0.9rem;
   margin: 0;
+}
+
+.viewLink {
+  display: inline-block;
+  margin-top: 1rem;
+  color: #6366f1;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.serviceCardLink:hover .viewLink {
+  color: #4f46e5;
+  text-decoration: underline;
 }
 
 @media (max-width: 1024px) {

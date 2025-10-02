@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import Navigation from '@/app/components/Navigation'
 import LeftNavigation from '@/app/components/LeftNavigation'
 import { Info } from 'lucide-react'
@@ -10,6 +11,7 @@ type Service = {
   id: string
   title: string
   description: string
+  link?: string
 }
 
 const recommendedServices: Service[] = [
@@ -21,7 +23,8 @@ const recommendedServices: Service[] = [
   {
     id: '2',
     title: 'Medication Management',
-    description: 'Daily reminders'
+    description: 'Daily reminders',
+    link: '/dashboard/medications'
   },
   {
     id: '3',
@@ -102,10 +105,20 @@ export default function CarePlanPage() {
             <h2>Recommended Services</h2>
             <div className={styles.servicesGrid}>
               {recommendedServices.map((service) => (
-                <div key={service.id} className={styles.serviceCard}>
-                  <h3>{service.title}</h3>
-                  <p>{service.description}</p>
-                </div>
+                service.link ? (
+                  <Link key={service.id} href={service.link} className={styles.serviceCardLink}>
+                    <div className={styles.serviceCard}>
+                      <h3>{service.title}</h3>
+                      <p>{service.description}</p>
+                      <span className={styles.viewLink}>View & Manage →</span>
+                    </div>
+                  </Link>
+                ) : (
+                  <div key={service.id} className={styles.serviceCard}>
+                    <h3>{service.title}</h3>
+                    <p>{service.description}</p>
+                  </div>
+                )
               ))}
             </div>
           </div>
