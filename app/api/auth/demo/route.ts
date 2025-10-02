@@ -8,6 +8,13 @@ export async function POST() {
     // Check if demo user exists, create if not
     let demoUser = await prisma.user.findUnique({
       where: { email: 'demo@careshare.app' },
+      include: {
+        familyMembers: {
+          include: {
+            family: true
+          }
+        }
+      }
     })
 
     if (!demoUser) {
@@ -21,7 +28,21 @@ export async function POST() {
           password: hashedPassword,
           role: 'FAMILY_MEMBER',
         },
+        include: {
+          familyMembers: {
+            include: {
+              family: true
+            }
+          }
+        }
       })
+    }
+
+    // Check if demo user has a family, if not create one with sample data
+    const hasFamily = demoUser.familyMembers && demoUser.familyMembers.length > 0
+
+    if (!hasFamily) {
+      console.log('Creating demo family and sample data...')
 
       // Create additional family members
       const sarahUser = await prisma.user.create({
@@ -335,6 +356,8 @@ export async function POST() {
       console.log('  - Life Stories: 3')
       console.log('  - Medications: 3')
       console.log('  - Notes: 4')
+    } else {
+      console.log('✓ Demo user already has family setup')
     }
 
     return NextResponse.json({
