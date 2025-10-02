@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
+import Navigation from '@/app/components/Navigation'
 import styles from './page.module.css'
 
 export default async function FamiliesPage() {
@@ -37,14 +38,7 @@ export default async function FamiliesPage() {
 
   return (
     <div className={styles.container}>
-      <nav className={styles.nav}>
-        <Link href="/dashboard" className={styles.logo}>CareShare</Link>
-        <div className={styles.navLinks}>
-          <Link href="/dashboard">Dashboard</Link>
-          <Link href="/family">My Families</Link>
-          <Link href="/api/auth/signout">Sign out</Link>
-        </div>
-      </nav>
+      <Navigation showAuthLinks={true} />
 
       <main className={styles.main}>
         <div className={styles.header}>

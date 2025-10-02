@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Navigation from '@/app/components/Navigation'
 import styles from './page.module.css'
 
 export default function CreateFamily() {
@@ -49,10 +50,7 @@ export default function CreateFamily() {
 
   return (
     <div className={styles.container}>
-      <nav className={styles.nav}>
-        <Link href="/dashboard" className={styles.logo}>CareShare</Link>
-        <Link href="/dashboard" className={styles.backLink}>← Back to Dashboard</Link>
-      </nav>
+      <Navigation backLink={{ href: '/dashboard', label: 'Back to Dashboard' }} />
 
       <main className={styles.main}>
         <div className={styles.formContainer}>

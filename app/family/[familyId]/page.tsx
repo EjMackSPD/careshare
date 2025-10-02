@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
+import Navigation from '@/app/components/Navigation'
 import styles from './page.module.css'
 
 type Family = {
@@ -129,18 +129,7 @@ export default function FamilyDetail() {
 
   return (
     <div className={styles.container}>
-      <nav className={styles.nav}>
-        <Link href="/" className={styles.logo}>
-          <Image 
-            src="/careshare-logo.png" 
-            alt="CareShare Logo" 
-            width={180} 
-            height={68}
-            priority
-          />
-        </Link>
-        <Link href="/dashboard" className={styles.backLink}>← Back to Dashboard</Link>
-      </nav>
+      <Navigation backLink={{ href: '/dashboard', label: 'Back to Dashboard' }} />
 
       <main className={styles.main}>
         <div className={styles.header}>

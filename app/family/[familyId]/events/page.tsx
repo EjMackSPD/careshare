@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
+import Navigation from '@/app/components/Navigation'
 import styles from './page.module.css'
 
 type Event = {
@@ -73,10 +74,7 @@ export default function FamilyEvents() {
 
   return (
     <div className={styles.container}>
-      <nav className={styles.nav}>
-        <Link href="/dashboard" className={styles.logo}>CareShare</Link>
-        <Link href={`/family/${familyId}`} className={styles.backLink}>← Back to Family</Link>
-      </nav>
+      <Navigation backLink={{ href: `/family/${familyId}`, label: 'Back to Family' }} />
 
       <main className={styles.main}>
         <div className={styles.header}>
