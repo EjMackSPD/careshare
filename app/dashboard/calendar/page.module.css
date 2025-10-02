@@ -74,7 +74,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .calendarHeader h2 {
@@ -88,6 +88,34 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+/* Legend */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  padding: 1rem 0;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.legendDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.legendItem span {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #495057;
 }
 
 .navBtn {
@@ -150,22 +178,47 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 0.35rem;
   border-radius: 0.5rem;
   cursor: pointer;
   position: relative;
   transition: all 0.2s;
   font-size: 0.95rem;
   color: #212529;
+  padding: 0.5rem 0.25rem;
 }
 
 .day:hover {
   background: #f0f7ff;
+  transform: scale(1.05);
+}
+
+.dayNumber {
+  font-size: 0.95rem;
+  z-index: 1;
+}
+
+.day.hasEvents {
+  background: linear-gradient(135deg, #f0f7ff 0%, #e0f2fe 100%);
+  font-weight: 700;
+  border: 2px solid #bfdbfe;
+}
+
+.day.hasEvents:hover {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border-color: #93c5fd;
+  transform: scale(1.08);
 }
 
 .day.selected {
   background: #6366f1;
   color: white;
   font-weight: 600;
+  border: 2px solid #6366f1;
+}
+
+.day.selected.hasEvents {
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
 }
 
 .day.today {
@@ -173,17 +226,37 @@
   font-weight: 600;
 }
 
+.day.today.hasEvents {
+  background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+}
+
+.eventIndicators {
+  display: flex;
+  gap: 3px;
+  z-index: 1;
+}
+
 .eventDot {
-  width: 4px;
-  height: 4px;
-  background: #6366f1;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  position: absolute;
-  bottom: 6px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
 }
 
 .day.selected .eventDot {
-  background: white;
+  opacity: 0.9;
 }
 
 /* Events Sidebar */
@@ -251,23 +324,36 @@
 }
 
 .eventCard {
-  padding: 1rem;
-  background: #f8f9fa;
+  padding: 1.25rem;
+  background: white;
   border-radius: 0.75rem;
-  border-left: 3px solid #6366f1;
+  border-left: 4px solid #6366f1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s;
+}
+
+.eventCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateX(6px);
+}
+
+.eventCardHeader {
+  margin-bottom: 0.75rem;
+}
+
+.eventTypeBadge {
+  display: inline-block;
+  padding: 0.35rem 0.85rem;
+  color: white;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
 .eventCard h4 {
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 600;
   color: #212529;
-  margin: 0 0 0.5rem 0;
-}
-
-.eventType {
-  color: #6366f1;
-  font-size: 0.85rem;
-  font-weight: 500;
   margin: 0 0 0.5rem 0;
 }
 

@@ -74,6 +74,7 @@ model User {
   orderedFood     FoodOrder[] @relation("OrderedFood")
   messages        Message[]
   lifeStories     LifeStory[]
+  medications     Medication[]
 
   @@index([email])
 }
@@ -105,6 +106,7 @@ model Family {
   foodOrders    FoodOrder[]
   messages      Message[]
   lifeStories   LifeStory[]
+  medications   Medication[]
 
   @@index([createdBy])
 }
@@ -386,4 +388,43 @@ model LifeStory {
   @@index([userId])
   @@index([category])
   @@index([createdAt])
+}
+
+// Medication management
+enum MedicationFrequency {
+  ONCE_DAILY
+  TWICE_DAILY
+  THREE_TIMES_DAILY
+  FOUR_TIMES_DAILY
+  AS_NEEDED
+  WEEKLY
+  MONTHLY
+  OTHER
+}
+
+model Medication {
+  id           String               @id @default(cuid())
+  familyId     String
+  userId       String               // Person who added the medication
+  name         String
+  dosage       String
+  frequency    MedicationFrequency
+  timeOfDay    String?              // e.g., "8:00 AM, 8:00 PM"
+  instructions String?              @db.Text
+  prescribedBy String?              // Doctor name
+  startDate    DateTime
+  endDate      DateTime?
+  refillDate   DateTime?
+  pharmacy     String?
+  notes        String?              @db.Text
+  active       Boolean              @default(true)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([familyId])
+  @@index([userId])
+  @@index([active])
 }

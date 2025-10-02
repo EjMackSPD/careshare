@@ -28,8 +28,37 @@ const sampleEvents: Event[] = [
     date: new Date(2025, 9, 10),
     type: 'Medication',
     description: 'Pick up monthly prescriptions'
+  },
+  {
+    id: '3',
+    title: 'Family Dinner',
+    date: new Date(2025, 9, 10),
+    type: 'Social',
+    description: 'Dinner at Italian restaurant'
+  },
+  {
+    id: '4',
+    title: 'Grocery Shopping',
+    date: new Date(2025, 9, 15),
+    type: 'Shopping',
+    description: 'Weekly groceries'
+  },
+  {
+    id: '5',
+    title: 'Physical Therapy',
+    date: new Date(2025, 9, 20),
+    type: 'Healthcare',
+    description: 'PT session at wellness center'
   }
 ]
+
+const eventTypeColors: { [key: string]: string } = {
+  Healthcare: '#3b82f6',    // Blue
+  Medication: '#ef4444',    // Red
+  Social: '#10b981',        // Green
+  Shopping: '#f59e0b',      // Amber
+  Other: '#8b5cf6'          // Purple
+}
 
 export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date(2025, 9, 2)) // October 2, 2025
@@ -86,6 +115,12 @@ export default function CalendarPage() {
 
   const hasEvents = (date: Date) => {
     return getEventsForDate(date).length > 0
+  }
+
+  const getEventTypesForDate = (date: Date) => {
+    const dateEvents = getEventsForDate(date)
+    const uniqueTypes = [...new Set(dateEvents.map(e => e.type))]
+    return uniqueTypes
   }
 
   const handleDateClick = (day: number) => {
@@ -153,6 +188,16 @@ export default function CalendarPage() {
                 </div>
               </div>
 
+              {/* Event Type Legend */}
+              <div className={styles.legend}>
+                {Object.entries(eventTypeColors).map(([type, color]) => (
+                  <div key={type} className={styles.legendItem}>
+                    <div className={styles.legendDot} style={{ backgroundColor: color }}></div>
+                    <span>{type}</span>
+                  </div>
+                ))}
+              </div>
+
               <div className={styles.calendar}>
                 <div className={styles.weekDays}>
                   {daysOfWeek.map((day, i) => (
@@ -171,15 +216,27 @@ export default function CalendarPage() {
                     const isSelected = isSameDay(date, selectedDate)
                     const isTodayDate = isToday(date)
                     const hasEvent = hasEvents(date)
+                    const eventTypes = getEventTypesForDate(date)
 
                     return (
                       <div
                         key={day}
-                        className={`${styles.day} ${isSelected ? styles.selected : ''} ${isTodayDate ? styles.today : ''}`}
+                        className={`${styles.day} ${isSelected ? styles.selected : ''} ${isTodayDate ? styles.today : ''} ${hasEvent ? styles.hasEvents : ''}`}
                         onClick={() => handleDateClick(day)}
                       >
-                        <span>{day}</span>
-                        {hasEvent && <div className={styles.eventDot}></div>}
+                        <span className={styles.dayNumber}>{day}</span>
+                        {hasEvent && (
+                          <div className={styles.eventIndicators}>
+                            {eventTypes.map((type) => (
+                              <div
+                                key={type}
+                                className={styles.eventDot}
+                                style={{ backgroundColor: eventTypeColors[type] }}
+                                title={type}
+                              ></div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )
                   })}
@@ -205,9 +262,13 @@ export default function CalendarPage() {
                 ) : (
                   <div className={styles.eventsList}>
                     {selectedEvents.map((event) => (
-                      <div key={event.id} className={styles.eventCard}>
+                      <div key={event.id} className={styles.eventCard} style={{ borderLeftColor: eventTypeColors[event.type] }}>
+                        <div className={styles.eventCardHeader}>
+                          <div className={styles.eventTypeBadge} style={{ backgroundColor: eventTypeColors[event.type] }}>
+                            {event.type}
+                          </div>
+                        </div>
                         <h4>{event.title}</h4>
-                        <p className={styles.eventType}>{event.type}</p>
                         {event.description && <p className={styles.eventDescription}>{event.description}</p>}
                       </div>
                     ))}
