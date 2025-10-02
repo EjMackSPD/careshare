@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import styles from './page.module.css'
 
 export default function Signup() {
@@ -67,7 +68,15 @@ export default function Signup() {
     <div className={styles.container}>
       <div className={styles.signupBox}>
         <div className={styles.header}>
-          <Link href="/" className={styles.logo}>CareShare</Link>
+          <Link href="/" className={styles.logo}>
+            <Image 
+              src="/careshare-logo.png" 
+              alt="CareShare Logo" 
+              width={180} 
+              height={68}
+              priority
+            />
+          </Link>
           <h1>Create your account</h1>
           <p>Start coordinating care with your family</p>
         </div>
