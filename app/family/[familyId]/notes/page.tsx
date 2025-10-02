@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Navigation from '@/app/components/Navigation'
-import { Plus, Calendar, User } from 'lucide-react'
+import LeftNavigation from '@/app/components/LeftNavigation'
+import { Plus, Calendar, User, Search, ChevronLeft, ChevronRight } from 'lucide-react'
 import styles from './page.module.css'
 
 type Note = {
@@ -27,6 +28,8 @@ export default function NotesPage() {
   const [loading, setLoading] = useState(true)
   const [showAddNote, setShowAddNote] = useState(false)
   const [filterCategory, setFilterCategory] = useState('all')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
   const [newNote, setNewNote] = useState({
     title: '',
     content: '',
@@ -34,6 +37,7 @@ export default function NotesPage() {
   })
 
   const categories = ['all', 'health', 'care', 'observation', 'general']
+  const notesPerPage = 10
 
   useEffect(() => {
     fetchNotes()
@@ -75,53 +79,90 @@ export default function NotesPage() {
     }
   }
 
-  const filteredNotes = notes.filter(note => 
-    filterCategory === 'all' || note.category === filterCategory
-  )
+  const filteredNotes = notes.filter(note => {
+    const matchesCategory = filterCategory === 'all' || note.category === filterCategory
+    const matchesSearch = 
+      note.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      note.user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      note.user.email.toLowerCase().includes(searchQuery.toLowerCase())
+    return matchesCategory && matchesSearch
+  })
+
+  const totalPages = Math.ceil(filteredNotes.length / notesPerPage)
+  const startIndex = (currentPage - 1) * notesPerPage
+  const endIndex = startIndex + notesPerPage
+  const paginatedNotes = filteredNotes.slice(startIndex, endIndex)
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [filterCategory, searchQuery])
 
   return (
     <div className={styles.container}>
       <Navigation showAuthLinks={true} />
       
-      <main className={styles.main}>
-        <div className={styles.pageHeader}>
-          <div>
-            <h1>Care Notes</h1>
-            <p className={styles.subtitle}>Track observations, health updates, and important information</p>
-          </div>
-          <button className={styles.addBtn} onClick={() => setShowAddNote(true)}>
-            <Plus size={20} />
-            Add Note
-          </button>
-        </div>
-
-        {/* Category Filter */}
-        <div className={styles.filters}>
-          {categories.map(cat => (
-            <button
-              key={cat}
-              className={`${styles.filterBtn} ${filterCategory === cat ? styles.activeFilter : ''}`}
-              onClick={() => setFilterCategory(cat)}
-            >
-              {cat.charAt(0).toUpperCase() + cat.slice(1)}
-            </button>
-          ))}
-        </div>
-
-        {/* Notes List */}
-        {loading ? (
-          <div className={styles.loading}>Loading notes...</div>
-        ) : filteredNotes.length === 0 ? (
-          <div className={styles.emptyState}>
-            <p>No notes found. Start adding care notes to track important information.</p>
-            <button className={styles.emptyAddBtn} onClick={() => setShowAddNote(true)}>
+      <div className={styles.layout}>
+        <LeftNavigation />
+        <main className={styles.main}>
+          <div className={styles.pageHeader}>
+            <div>
+              <h1>Care Notes</h1>
+              <p className={styles.subtitle}>Track observations, health updates, and important information</p>
+            </div>
+            <button className={styles.addBtn} onClick={() => setShowAddNote(true)}>
               <Plus size={20} />
-              Add First Note
+              Add Note
             </button>
           </div>
-        ) : (
-          <div className={styles.notesList}>
-            {filteredNotes.map(note => (
+
+          {/* Search Bar */}
+          <div className={styles.searchBar}>
+            <Search size={20} className={styles.searchIcon} />
+            <input
+              type="text"
+              placeholder="Search notes by title, content, or author..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
+          {/* Category Filter */}
+          <div className={styles.filters}>
+            {categories.map(cat => (
+              <button
+                key={cat}
+                className={`${styles.filterBtn} ${filterCategory === cat ? styles.activeFilter : ''}`}
+                onClick={() => setFilterCategory(cat)}
+              >
+                {cat.charAt(0).toUpperCase() + cat.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          {/* Results Count */}
+          {filteredNotes.length > 0 && (
+            <div className={styles.resultsCount}>
+              Showing {startIndex + 1}-{Math.min(endIndex, filteredNotes.length)} of {filteredNotes.length} notes
+            </div>
+          )}
+
+          {/* Notes List */}
+          {loading ? (
+            <div className={styles.loading}>Loading notes...</div>
+          ) : filteredNotes.length === 0 ? (
+            <div className={styles.emptyState}>
+              <p>No notes found. Start adding care notes to track important information.</p>
+              <button className={styles.emptyAddBtn} onClick={() => setShowAddNote(true)}>
+                <Plus size={20} />
+                Add First Note
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className={styles.notesList}>
+                {paginatedNotes.map(note => (
               <div key={note.id} className={styles.noteCard}>
                 {note.title && <h3>{note.title}</h3>}
                 <p className={styles.noteContent}>{note.content}</p>
@@ -141,11 +182,47 @@ export default function NotesPage() {
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
+                ))}
+              </div>
 
-        {/* Add Note Modal */}
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className={styles.pagination}>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className={styles.paginationBtn}
+                  >
+                    <ChevronLeft size={18} />
+                    Previous
+                  </button>
+                  
+                  <div className={styles.pageNumbers}>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`${styles.pageNumber} ${currentPage === page ? styles.activePage : ''}`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className={styles.paginationBtn}
+                  >
+                    Next
+                    <ChevronRight size={18} />
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Add Note Modal */}
         {showAddNote && (
           <div className={styles.modal} onClick={() => setShowAddNote(false)}>
             <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
@@ -197,7 +274,8 @@ export default function NotesPage() {
             </div>
           </div>
         )}
-      </main>
+        </main>
+      </div>
     </div>
   )
 }

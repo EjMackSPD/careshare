@@ -4,11 +4,18 @@
   padding-top: 81px;
 }
 
+.layout {
+  display: flex;
+  min-height: calc(100vh - 81px);
+}
+
 .main {
-  max-width: 1200px;
+  flex: 1;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 3rem 2rem;
-  margin-left: 0;
+  width: 100%;
+  margin-left: 260px;
 }
 
 .pageHeader {
@@ -51,6 +58,36 @@
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
+/* Search Bar */
+.searchBar {
+  position: relative;
+  margin-bottom: 1.5rem;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+}
+
+.searchBar input {
+  width: 100%;
+  padding: 0.85rem 1rem 0.85rem 3rem;
+  border: 1px solid #e9ecef;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  background: white;
+  transition: all 0.2s;
+}
+
+.searchBar input:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
 /* Filters */
 .filters {
   display: flex;
@@ -80,6 +117,14 @@
   background: #6366f1;
   color: white;
   border-color: #6366f1;
+}
+
+/* Results Count */
+.resultsCount {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
 }
 
 /* Notes List */
@@ -274,6 +319,73 @@
   background: #4f46e5;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 3rem;
+  padding: 2rem 0;
+}
+
+.paginationBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  color: #495057;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.paginationBtn:hover:not(:disabled) {
+  background: #6366f1;
+  color: white;
+  border-color: #6366f1;
+}
+
+.paginationBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pageNumbers {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pageNumber {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  color: #495057;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pageNumber:hover {
+  background: #f0f7ff;
+  border-color: #6366f1;
+  color: #6366f1;
+}
+
+.pageNumber.activePage {
+  background: #6366f1;
+  color: white;
+  border-color: #6366f1;
 }
 
 @media (max-width: 768px) {
