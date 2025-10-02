@@ -135,6 +135,191 @@
   gap: 1rem;
 }
 
+.splitTypeButtons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.splitTypeBtn {
+  flex: 1;
+  min-width: 120px;
+  padding: 0.75rem 1rem;
+  border: 2px solid #dee2e6;
+  background: white;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.splitTypeBtn:hover {
+  border-color: #2563eb;
+  background: #f0f7ff;
+}
+
+.splitTypeBtn.active {
+  border-color: #2563eb;
+  background: #2563eb;
+  color: white;
+}
+
+.splitsSection {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  margin-top: 1rem;
+}
+
+.splitsSection h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 1rem;
+}
+
+.splitRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: white;
+  border-radius: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.memberName {
+  font-weight: 500;
+  color: #212529;
+}
+
+.splitInput {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.splitInput input {
+  width: 100px;
+  padding: 0.5rem;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  text-align: right;
+}
+
+.splitUnit {
+  font-weight: 600;
+  color: #6c757d;
+  min-width: 20px;
+}
+
+.splitCalculated {
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.splitTotal {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  margin-top: 1rem;
+  border-top: 2px solid #dee2e6;
+  font-size: 1.1rem;
+}
+
+.splitTotal .valid {
+  color: #065f46;
+}
+
+.splitTotal .invalid {
+  color: #991b1b;
+}
+
+.equalSplitPreview {
+  background: #f0f7ff;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  text-align: center;
+  color: #1e40af;
+}
+
+.splitBadge {
+  display: inline-block;
+  background: #e0f2fe;
+  color: #075985;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  margin-left: 0.5rem;
+}
+
+.splitsBreakdown {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.splitsBreakdown h4 {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #6c757d;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+}
+
+.splitsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.splitItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 0.5rem;
+}
+
+.splitMember {
+  font-size: 0.95rem;
+  color: #495057;
+}
+
+.splitDetails {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.splitAmount {
+  font-weight: 600;
+  color: #2563eb;
+}
+
+.splitStatus {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 0.75rem;
+}
+
+.splitStatus.paid {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.splitStatus.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
 .submitBtn {
   background: #2563eb;
   color: white;
@@ -144,6 +329,8 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  width: 100%;
+  margin-top: 1rem;
 }
 
 .submitBtn:hover {
