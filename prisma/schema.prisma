@@ -72,6 +72,7 @@ model User {
   assignedTasks   Task[]     @relation("AssignedTasks")
   orderedGifts    GiftOrder[] @relation("OrderedGifts")
   orderedFood     FoodOrder[] @relation("OrderedFood")
+  messages        Message[]
 
   @@index([email])
 }
@@ -101,6 +102,7 @@ model Family {
   resources     Resource[]
   giftOrders    GiftOrder[]
   foodOrders    FoodOrder[]
+  messages      Message[]
 
   @@index([createdBy])
 }
@@ -323,4 +325,21 @@ model FoodOrder {
   @@index([familyId])
   @@index([status])
   @@index([scheduledFor])
+}
+
+// Family messages/communication
+model Message {
+  id        String   @id @default(cuid())
+  familyId  String
+  userId    String
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([familyId])
+  @@index([userId])
+  @@index([createdAt])
 }
