@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
+import Navigation from '@/app/components/Navigation'
 import styles from './page.module.css'
 
 type Member = {
