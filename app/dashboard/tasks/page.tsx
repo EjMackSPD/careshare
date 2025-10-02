@@ -14,6 +14,7 @@ type Task = {
   category: string
   priority: 'HIGH' | 'MEDIUM' | 'LOW'
   assignedTo: string
+  assignedToName?: string
   dueDate: string
   completed: boolean
 }
@@ -145,9 +146,10 @@ export default function TasksPage() {
           id: t.id,
           title: t.title,
           description: t.description || '',
-          category: 'General', // You can add category field to Task model if needed
+          category: 'General',
           priority: t.priority,
-          assignedTo: t.assignedUser?.name || t.assignedUser?.email || '',
+          assignedTo: t.assignedTo || '', // Store the user ID for editing
+          assignedToName: t.assignedUser?.name || t.assignedUser?.email || '', // For display
           dueDate: t.dueDate ? new Date(t.dueDate).toLocaleString() : '',
           completed: t.status === 'COMPLETED'
         }))
@@ -238,8 +240,9 @@ export default function TasksPage() {
         title: newTask.title,
         description: newTask.description,
         priority: newTask.priority,
-        assignedTo: selectedMembers.length > 0 ? selectedMembers[0] : null, // First selected member
-        dueDate: newTask.dueDate || null
+        assignedTo: selectedMembers.length > 0 ? selectedMembers[0] : null, // Use first member for database
+        dueDate: newTask.dueDate || null,
+        status: editingTask ? undefined : 'TODO' // Don't override status when editing
       }
 
       const url = editingTask
@@ -281,6 +284,11 @@ export default function TasksPage() {
 
   const handleEditTask = (task: Task) => {
     setEditingTask(task)
+    
+    // Parse assigned members from assignedTo field (comma-separated IDs)
+    const assignedIds = task.assignedTo ? task.assignedTo.split(',').filter(id => id.trim()) : []
+    setSelectedMembers(assignedIds)
+    
     setNewTask({
       title: task.title,
       description: task.description,
@@ -524,8 +532,8 @@ export default function TasksPage() {
                       <span className={`${styles.priorityBadge} ${getPriorityColor(task.priority)}`}>
                         {task.priority.charAt(0) + task.priority.slice(1).toLowerCase()} Priority
                       </span>
-                      {task.assignedTo && (
-                        <span className={styles.assignedBadge}>Assigned to: {task.assignedTo}</span>
+                      {task.assignedToName && (
+                        <span className={styles.assignedBadge}>Assigned to: {task.assignedToName}</span>
                       )}
                     </div>
                   </div>
