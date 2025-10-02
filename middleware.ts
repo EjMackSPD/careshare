@@ -4,7 +4,7 @@ import { NextResponse } from "next/server"
 export default auth((req) => {
   const token = req.auth
   const isLoggedIn = !!token
-  const isAdmin = token?.role === "ADMIN"
+  const isAdmin = (token as any)?.user?.role === "ADMIN"
   const isAdminRoute = req.nextUrl.pathname.startsWith("/admin")
   const isProtectedRoute = 
     req.nextUrl.pathname.startsWith("/dashboard") ||
