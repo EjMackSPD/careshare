@@ -43,6 +43,16 @@ export async function PATCH(
       )
     }
 
+    // Parse assignedMembers from body
+    const assignedMembers = body.assignedMembers 
+      ? (Array.isArray(body.assignedMembers) ? body.assignedMembers : body.assignedMembers.split(',').filter((id: string) => id.trim()))
+      : []
+
+    // Delete existing assignments
+    await prisma.taskAssignment.deleteMany({
+      where: { taskId }
+    })
+
     // Update task
     const updated = await prisma.task.update({
       where: { id: taskId },
@@ -51,16 +61,24 @@ export async function PATCH(
         description: body.description || null,
         priority: body.priority as TaskPriority,
         status: body.status as TaskStatus,
-        assignedTo: body.assignedTo || null,
         dueDate: body.dueDate ? new Date(body.dueDate) : null,
-        completedAt: body.status === 'COMPLETED' ? new Date() : null
+        completedAt: body.status === 'COMPLETED' ? new Date() : null,
+        assignments: {
+          create: assignedMembers.map((userId: string) => ({
+            userId: userId.trim()
+          }))
+        }
       },
       include: {
-        assignedUser: {
-          select: {
-            id: true,
-            name: true,
-            email: true
+        assignments: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true
+              }
+            }
           }
         }
       }

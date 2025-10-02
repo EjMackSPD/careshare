@@ -29,15 +29,19 @@ export async function GET(
       )
     }
 
-    // Fetch tasks with assigned user info
+    // Fetch tasks with all assigned users
     const tasks = await prisma.task.findMany({
       where: { familyId },
       include: {
-        assignedUser: {
-          select: {
-            id: true,
-            name: true,
-            email: true
+        assignments: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true
+              }
+            }
           }
         }
       },
@@ -88,6 +92,11 @@ export async function POST(
       )
     }
 
+    // Parse assignedMembers from body (comma-separated IDs or array)
+    const assignedMembers = body.assignedMembers 
+      ? (Array.isArray(body.assignedMembers) ? body.assignedMembers : body.assignedMembers.split(',').filter((id: string) => id.trim()))
+      : []
+
     // Create task
     const task = await prisma.task.create({
       data: {
@@ -96,15 +105,23 @@ export async function POST(
         description: body.description || null,
         priority: (body.priority as TaskPriority) || TaskPriority.MEDIUM,
         status: TaskStatus.TODO,
-        assignedTo: body.assignedTo || null,
-        dueDate: body.dueDate ? new Date(body.dueDate) : null
+        dueDate: body.dueDate ? new Date(body.dueDate) : null,
+        assignments: {
+          create: assignedMembers.map((userId: string) => ({
+            userId: userId.trim()
+          }))
+        }
       },
       include: {
-        assignedUser: {
-          select: {
-            id: true,
-            name: true,
-            email: true
+        assignments: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true
+              }
+            }
           }
         }
       }

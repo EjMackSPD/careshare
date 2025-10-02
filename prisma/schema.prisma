@@ -70,6 +70,7 @@ model User {
   costSplits      CostSplit[]
   adminFamilies   AdminFamily[]
   assignedTasks   Task[]     @relation("AssignedTasks")
+  taskAssignments TaskAssignment[]
   orderedGifts    GiftOrder[] @relation("OrderedGifts")
   orderedFood     FoodOrder[] @relation("OrderedFood")
   messages        Message[]
@@ -246,18 +247,34 @@ model Task {
   description String?
   priority    TaskPriority @default(MEDIUM)
   status      TaskStatus   @default(TODO)
-  assignedTo  String?
+  assignedTo  String?      // Deprecated - kept for backward compatibility
   dueDate     DateTime?
   completedAt DateTime?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
-  family       Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  assignedUser User?  @relation("AssignedTasks", fields: [assignedTo], references: [id])
+  family       Family           @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  assignedUser User?            @relation("AssignedTasks", fields: [assignedTo], references: [id])
+  assignments  TaskAssignment[] // New: Multiple assignees
 
   @@index([familyId])
   @@index([assignedTo])
   @@index([status])
+}
+
+// Task assignments - Many-to-many relationship between Tasks and Users
+model TaskAssignment {
+  id        String   @id @default(cuid())
+  taskId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([taskId, userId])
+  @@index([taskId])
+  @@index([userId])
 }
 
 // Care Plan activities

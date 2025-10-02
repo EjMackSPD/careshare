@@ -149,8 +149,8 @@ export default function TasksPage() {
           description: t.description || '',
           category: 'General',
           priority: t.priority,
-          assignedTo: t.assignedTo || '', // Store comma-separated user IDs for editing
-          assignedToName: getAssignedMemberNames(t.assignedTo), // For display
+          assignedTo: t.assignments?.map((a: any) => a.userId).join(',') || '', // Store user IDs for editing
+          assignedToName: t.assignments?.map((a: any) => a.user.name || a.user.email).join(', ') || '', // For display
           dueDate: t.dueDate ? new Date(t.dueDate).toLocaleString() : '',
           completed: t.status === 'COMPLETED'
         }))
@@ -161,16 +161,6 @@ export default function TasksPage() {
     } finally {
       setLoading(false)
     }
-  }
-
-  const getAssignedMemberNames = (assignedTo: string | null): string => {
-    if (!assignedTo) return ''
-    const userIds = assignedTo.split(',').filter(id => id.trim())
-    const names = userIds.map(userId => {
-      const member = familyMembers.find(m => m.userId === userId)
-      return member?.user.name || member?.user.email || ''
-    }).filter(name => name)
-    return names.join(', ')
   }
 
   const categories = ['all', 'Medication', 'Healthcare', 'Shopping', 'Home Maintenance']
@@ -253,7 +243,7 @@ export default function TasksPage() {
         title: newTask.title,
         description: newTask.description,
         priority: newTask.priority,
-        assignedTo: selectedMembers.length > 0 ? selectedMembers[0] : null, // Database stores single user ID
+        assignedMembers: selectedMembers, // Send array of all selected member IDs
         dueDate: newTask.dueDate || null,
         status: editingTask ? undefined : 'TODO' // Don't override status when editing
       }
