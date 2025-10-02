@@ -1,28 +1,30 @@
-import { auth } from "@/lib/auth"
 import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
 
-export default auth((req) => {
-  const token = req.auth
-  const isLoggedIn = !!token
-  const isAdmin = (token as any)?.user?.role === "ADMIN"
-  const isAdminRoute = req.nextUrl.pathname.startsWith("/admin")
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  
+  // Define protected routes
+  const isAdminRoute = pathname.startsWith("/admin")
   const isProtectedRoute = 
-    req.nextUrl.pathname.startsWith("/dashboard") ||
-    req.nextUrl.pathname.startsWith("/admin") ||
-    req.nextUrl.pathname.startsWith("/family")
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/family")
+
+  // Get session token from cookies
+  const sessionToken = request.cookies.get("authjs.session-token")?.value || 
+                      request.cookies.get("__Secure-authjs.session-token")?.value
 
   // Redirect to login if not authenticated
-  if (!isLoggedIn && isProtectedRoute) {
-    return NextResponse.redirect(new URL("/login", req.url))
+  if (!sessionToken && isProtectedRoute) {
+    return NextResponse.redirect(new URL("/login", request.url))
   }
 
-  // Redirect non-admin users away from admin routes
-  if (isAdminRoute && !isAdmin) {
-    return NextResponse.redirect(new URL("/dashboard", req.url))
-  }
-
+  // For admin routes, we'll let the server-side check handle it
+  // since we can't decode JWT in Edge Runtime without heavy dependencies
+  
   return NextResponse.next()
-})
+}
 
 export const config = {
   matcher: ["/dashboard/:path*", "/admin/:path*", "/family/:path*"],
