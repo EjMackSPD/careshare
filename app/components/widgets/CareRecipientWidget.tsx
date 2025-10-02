@@ -68,18 +68,24 @@ export default function CareRecipientWidget({
     }
 
     try {
+      console.log('Attempting to save note for familyId:', familyId)
+      
       const res = await fetch(`/api/families/${familyId}/notes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: newNote, category: 'general' })
       })
 
+      console.log('Note save response:', { status: res.status, ok: res.ok })
+
       if (!res.ok) {
         const error = await res.json()
+        console.error('Note save error response:', error)
         throw new Error(error.error || 'Failed to save note')
       }
 
       const createdNote = await res.json()
+      console.log('Note created successfully:', createdNote)
       setNotes([createdNote, ...notes.slice(0, 1)])
       setNewNote('')
       setShowAddNote(false)
