@@ -62,12 +62,13 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts      Account[]
-  sessions      Session[]
-  familyMembers FamilyMember[]
+  accounts        Account[]
+  sessions        Session[]
+  familyMembers   FamilyMember[]
   createdFamilies Family[]   @relation("FamilyCreator")
-  costs         Cost[]
-  adminFamilies AdminFamily[]
+  costs           Cost[]
+  costSplits      CostSplit[]
+  adminFamilies   AdminFamily[]
 
   @@index([email])
 }
@@ -78,6 +79,11 @@ model Family {
   name        String
   description String?
   elderName   String?  // Name of the elderly person being cared for
+  elderPhone  String?  // Contact phone number
+  elderAddress String? // Physical address
+  elderBirthday DateTime? // Birthday for reminders
+  emergencyContact String? // Emergency contact info
+  medicalNotes String?  // Medical notes/allergies
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   createdBy   String
@@ -148,16 +154,37 @@ model Cost {
   status      CostStatus @default(PENDING)
   dueDate     DateTime?
   paidDate    DateTime?
-  assignedTo  String?    // User assigned to pay this cost
+  assignedTo  String?    // User assigned to pay this cost (deprecated - use splits)
+  splitType   String     @default("EQUAL") // EQUAL, CUSTOM, SINGLE
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  family       Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  assignedUser User?  @relation(fields: [assignedTo], references: [id])
+  family       Family     @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  assignedUser User?      @relation(fields: [assignedTo], references: [id])
+  splits       CostSplit[]
 
   @@index([familyId])
   @@index([status])
   @@index([assignedTo])
+}
+
+// Individual cost splits for each family member
+model CostSplit {
+  id        String     @id @default(cuid())
+  costId    String
+  userId    String
+  amount    Float
+  status    CostStatus @default(PENDING)
+  paidDate  DateTime?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  cost Cost @relation(fields: [costId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([costId])
+  @@index([userId])
+  @@index([status])
 }
 
 // Admin-Family relationship (for care providers managing multiple families)
