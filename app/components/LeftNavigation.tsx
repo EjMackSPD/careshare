@@ -24,7 +24,7 @@ const menuItems = [
   { href: '/dashboard/finances', label: 'Finances', icon: Wallet },
   { href: '/dashboard/care-plan', label: 'Care Plan', icon: Heart },
   { href: '/dashboard/resources', label: 'Resources', icon: BookOpen },
-  { href: '/family', label: 'Family', icon: Users },
+  { href: '/dashboard/family-collaboration', label: 'Family', icon: Users },
   { href: '/dashboard/gifts', label: 'Gift Marketplace', icon: Gift },
   { href: '/dashboard/food', label: 'Food Delivery', icon: UtensilsCrossed },
   { href: '/dashboard/legacy', label: 'Live Forever', icon: Infinity },
