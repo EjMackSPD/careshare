@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Navigation from '@/app/components/Navigation'
 import LeftNavigation from '@/app/components/LeftNavigation'
-import { Search } from 'lucide-react'
+import { Search, Trash2 } from 'lucide-react'
 import styles from './page.module.css'
 
 type Task = {
@@ -89,6 +89,28 @@ export default function TasksPage() {
     setTasks(tasks.map(task => 
       task.id === id ? { ...task, completed: !task.completed } : task
     ))
+  }
+
+  const deleteTask = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this task?')) {
+      return
+    }
+
+    try {
+      const res = await fetch(`/api/tasks/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (!res.ok) {
+        throw new Error('Failed to delete task')
+      }
+
+      // Remove task from local state
+      setTasks(tasks.filter(task => task.id !== id))
+    } catch (error) {
+      console.error('Error deleting task:', error)
+      alert('Failed to delete task. Please try again.')
+    }
   }
 
   const getPriorityColor = (priority: string) => {
@@ -302,6 +324,14 @@ export default function TasksPage() {
                       )}
                     </div>
                   </div>
+
+                  <button
+                    onClick={() => deleteTask(task.id)}
+                    className={styles.deleteBtn}
+                    title="Delete task"
+                  >
+                    <Trash2 size={18} />
+                  </button>
                 </div>
               ))}
             </div>

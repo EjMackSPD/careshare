@@ -166,6 +166,7 @@
   border-radius: 0.75rem;
   transition: all 0.2s;
   background: white;
+  position: relative;
 }
 
 .taskCard:hover {
@@ -175,6 +176,32 @@
 
 .taskCard.completed {
   opacity: 0.6;
+}
+
+.deleteBtn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: transparent;
+  border: none;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.deleteBtn:hover {
+  background: #fee2e2;
+  color: #dc2626;
+  transform: scale(1.1);
+}
+
+.deleteBtn:active {
+  transform: scale(0.95);
 }
 
 .taskCard.completed .taskContent h3 {
