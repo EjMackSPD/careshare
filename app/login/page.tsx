@@ -40,8 +40,28 @@ export default function Login() {
     }
   }
 
-  const handleDemoMode = () => {
-    router.push('/demo')
+  const handleDemoMode = async () => {
+    setLoading(true)
+    try {
+      // Sign in with demo account
+      const result = await signIn('credentials', {
+        email: 'demo@careshare.app',
+        password: 'demo123',
+        redirect: false,
+      })
+
+      if (result?.error) {
+        // If demo user doesn't exist, redirect to regular demo page
+        router.push('/demo')
+      } else {
+        // Successfully logged in as demo user
+        router.push('/dashboard')
+        router.refresh()
+      }
+    } catch (error) {
+      router.push('/demo')
+    }
+    setLoading(false)
   }
 
   return (

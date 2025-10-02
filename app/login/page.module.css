@@ -18,6 +18,7 @@
   display: inline-block;
   margin-bottom: 3rem;
   transition: opacity 0.2s;
+  filter: brightness(0) invert(1);
 }
 
 .logoLink:hover {
