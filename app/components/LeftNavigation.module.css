@@ -2,10 +2,11 @@
   width: 260px;
   background: white;
   border-right: 1px solid #e9ecef;
-  height: calc(100vh - 80px);
+  height: calc(100vh - 81px);
   position: sticky;
-  top: 80px;
+  top: 81px;
   overflow-y: auto;
+  flex-shrink: 0;
 }
 
 .nav {
