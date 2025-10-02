@@ -1,0 +1,385 @@
+.container {
+  min-height: 100vh;
+  background: #f8f9fa;
+  padding-top: 81px;
+}
+
+.layout {
+  display: flex;
+  min-height: calc(100vh - 81px);
+}
+
+.main {
+  flex: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  width: 100%;
+  margin-left: 260px;
+}
+
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.pageHeader h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #212529;
+  margin: 0 0 0.5rem 0;
+}
+
+.subtitle {
+  color: #6c757d;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.headerButtons {
+  display: flex;
+  gap: 1rem;
+}
+
+.addExpenseBtn {
+  background: #6366f1;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.addExpenseBtn:hover {
+  background: #4f46e5;
+  transform: translateY(-2px);
+}
+
+.addBillBtn {
+  background: white;
+  color: #495057;
+  padding: 0.75rem 1.5rem;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.addBillBtn:hover {
+  background: #f8f9fa;
+  border-color: #adb5bd;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.tab {
+  background: none;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+  color: #6c757d;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+}
+
+.tab:hover {
+  color: #212529;
+}
+
+.tab.activeTab {
+  color: #6366f1;
+  border-bottom-color: #6366f1;
+  font-weight: 600;
+}
+
+/* Budget Overview */
+.budgetOverview {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.budgetOverview h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #212529;
+  margin: 0 0 1.5rem 0;
+}
+
+.budgetCards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.budgetCard {
+  text-align: left;
+}
+
+.budgetLabel {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin: 0 0 0.5rem 0;
+}
+
+.budgetAmount {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #212529;
+  margin: 0;
+}
+
+.progressSection {
+  margin-top: 2rem;
+}
+
+.progressLabels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.spentLabel {
+  font-weight: 600;
+  color: #212529;
+}
+
+.progressBar {
+  height: 12px;
+  background: #e9ecef;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #4f46e5);
+  transition: width 1s ease-out;
+  border-radius: 1rem;
+}
+
+/* Charts Grid */
+.chartsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.chartCard {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chartCard h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #212529;
+  margin: 0 0 1.5rem 0;
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.legendDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.legendItem span {
+  flex: 1;
+  color: #495057;
+}
+
+.legendItem strong {
+  color: #212529;
+}
+
+/* Bottom Grid */
+.bottomGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+}
+
+.billsCard,
+.contributionsCard {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.billsCard h3,
+.contributionsCard h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #212529;
+  margin: 0 0 1.5rem 0;
+}
+
+/* Bills List */
+.billsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.billItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 0.75rem;
+}
+
+.billInfo h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #212529;
+  margin: 0 0 0.25rem 0;
+}
+
+.billInfo p {
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin: 0;
+}
+
+.billAmount {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #212529;
+}
+
+/* Contributions List */
+.contributionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.contributionItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.memberInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.memberAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.memberName {
+  font-weight: 600;
+  color: #212529;
+}
+
+.contributionDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.contributionBar {
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.contributionFill {
+  height: 100%;
+  transition: width 1s ease-out;
+  border-radius: 1rem;
+}
+
+.contributionAmount {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.contributionAmount span:first-child {
+  color: #212529;
+  font-weight: 600;
+}
+
+.percentage {
+  color: #6c757d;
+}
+
+@media (max-width: 1200px) {
+  .chartsGrid,
+  .bottomGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .budgetCards {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .headerButtons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .addExpenseBtn,
+  .addBillBtn {
+    width: 100%;
+  }
+
+  .tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+}
+
