@@ -66,6 +66,14 @@ export default function TasksPage() {
   const [filterCategory, setFilterCategory] = useState('all')
   const [showCompleted, setShowCompleted] = useState(false)
   const [showAddTask, setShowAddTask] = useState(false)
+  const [newTask, setNewTask] = useState({
+    title: '',
+    description: '',
+    category: 'Medication',
+    priority: 'MEDIUM' as 'HIGH' | 'MEDIUM' | 'LOW',
+    assignedTo: '',
+    dueDate: '',
+  })
 
   const categories = ['all', 'Medication', 'Healthcare', 'Shopping', 'Home Maintenance']
 
@@ -90,6 +98,30 @@ export default function TasksPage() {
       case 'LOW': return styles.lowPriority
       default: return ''
     }
+  }
+
+  const handleAddTask = (e: React.FormEvent) => {
+    e.preventDefault()
+    const task: Task = {
+      id: Date.now().toString(),
+      title: newTask.title,
+      description: newTask.description,
+      category: newTask.category,
+      priority: newTask.priority,
+      assignedTo: newTask.assignedTo,
+      dueDate: newTask.dueDate,
+      completed: false,
+    }
+    setTasks([task, ...tasks])
+    setShowAddTask(false)
+    setNewTask({
+      title: '',
+      description: '',
+      category: 'Medication',
+      priority: 'MEDIUM',
+      assignedTo: '',
+      dueDate: '',
+    })
   }
 
   return (
@@ -143,6 +175,100 @@ export default function TasksPage() {
               </label>
             </div>
           </div>
+
+          {/* Add Task Modal */}
+          {showAddTask && (
+            <div className={styles.modal} onClick={() => setShowAddTask(false)}>
+              <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                <div className={styles.modalHeader}>
+                  <h2>Add New Task</h2>
+                  <button className={styles.closeBtn} onClick={() => setShowAddTask(false)}>✕</button>
+                </div>
+                
+                <form onSubmit={handleAddTask} className={styles.taskForm}>
+                  <div className={styles.formGroup}>
+                    <label>Task Title *</label>
+                    <input
+                      type="text"
+                      value={newTask.title}
+                      onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+                      placeholder="e.g., Pick up prescriptions"
+                      required
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label>Description</label>
+                    <textarea
+                      value={newTask.description}
+                      onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+                      placeholder="Additional details about the task..."
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className={styles.formRow}>
+                    <div className={styles.formGroup}>
+                      <label>Category *</label>
+                      <select
+                        value={newTask.category}
+                        onChange={(e) => setNewTask({ ...newTask, category: e.target.value })}
+                        required
+                      >
+                        <option value="Medication">Medication</option>
+                        <option value="Healthcare">Healthcare</option>
+                        <option value="Shopping">Shopping</option>
+                        <option value="Home Maintenance">Home Maintenance</option>
+                      </select>
+                    </div>
+
+                    <div className={styles.formGroup}>
+                      <label>Priority *</label>
+                      <select
+                        value={newTask.priority}
+                        onChange={(e) => setNewTask({ ...newTask, priority: e.target.value as 'HIGH' | 'MEDIUM' | 'LOW' })}
+                        required
+                      >
+                        <option value="LOW">Low Priority</option>
+                        <option value="MEDIUM">Medium Priority</option>
+                        <option value="HIGH">High Priority</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className={styles.formRow}>
+                    <div className={styles.formGroup}>
+                      <label>Assigned To</label>
+                      <input
+                        type="text"
+                        value={newTask.assignedTo}
+                        onChange={(e) => setNewTask({ ...newTask, assignedTo: e.target.value })}
+                        placeholder="Family member name"
+                      />
+                    </div>
+
+                    <div className={styles.formGroup}>
+                      <label>Due Date</label>
+                      <input
+                        type="datetime-local"
+                        value={newTask.dueDate}
+                        onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className={styles.formActions}>
+                    <button type="button" onClick={() => setShowAddTask(false)} className={styles.cancelBtn}>
+                      Cancel
+                    </button>
+                    <button type="submit" className={styles.submitBtn}>
+                      Add Task
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
 
           <div className={styles.tasksSection}>
             <div className={styles.tasksSectionHeader}>
