@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/prisma'
+import { FamilyRole } from '@prisma/client'
 
 export async function PATCH(
   request: Request,
@@ -19,18 +20,18 @@ export async function PATCH(
     const { familyId } = await params
     const body = await request.json()
 
-    // Check if user is a member (organizer) of this family
+    // Check if user is a Care Manager of this family
     const member = await prisma.familyMember.findFirst({
       where: {
         familyId,
         userId: (user as any).id,
-        role: 'organizer', // Only organizers can update settings
+        role: FamilyRole.CARE_MANAGER, // Only Care Managers can update settings
       },
     })
 
     if (!member) {
       return NextResponse.json(
-        { error: 'Only organizers can update family settings' },
+        { error: 'Only Care Managers can update family settings' },
         { status: 403 }
       )
     }
