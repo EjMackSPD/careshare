@@ -363,10 +363,20 @@
   background: #f8f9fa;
   border-radius: 0.75rem;
   transition: all 0.2s;
+  border: 2px solid transparent;
 }
 
 .memberCard:hover {
   background: #e9ecef;
+}
+
+.memberCard.careManager {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-color: #f59e0b;
+}
+
+.memberCard.careManager:hover {
+  background: linear-gradient(135deg, #fde68a 0%, #fcd34d 100%);
 }
 
 .memberAvatar {
