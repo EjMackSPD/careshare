@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(
   request: Request,
-  { params }: { params: { familyId: string } }
+  { params }: { params: Promise<{ familyId: string }> }
 ) {
   try {
     const user = await getCurrentUser()
@@ -16,7 +16,7 @@ export async function GET(
       )
     }
 
-    const { familyId } = params
+    const { familyId } = await params
 
     // Check if user is member of this family
     const isMember = await prisma.familyMember.findFirst({
@@ -63,7 +63,7 @@ export async function GET(
 
 export async function POST(
   request: Request,
-  { params }: { params: { familyId: string } }
+  { params }: { params: Promise<{ familyId: string }> }
 ) {
   try {
     const user = await getCurrentUser()
@@ -75,7 +75,7 @@ export async function POST(
       )
     }
 
-    const { familyId } = params
+    const { familyId } = await params
     const body = await request.json()
     const { description, amount, status, dueDate, assignedTo } = body
 

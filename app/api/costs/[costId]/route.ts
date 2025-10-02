@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { costId: string } }
+  { params }: { params: Promise<{ costId: string }> }
 ) {
   try {
     const user = await getCurrentUser()
@@ -16,7 +16,7 @@ export async function PATCH(
       )
     }
 
-    const { costId } = params
+    const { costId } = await params
     const body = await request.json()
 
     // Verify user has access to this cost
@@ -71,7 +71,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { costId: string } }
+  { params }: { params: Promise<{ costId: string }> }
 ) {
   try {
     const user = await getCurrentUser()
@@ -83,7 +83,7 @@ export async function DELETE(
       )
     }
 
-    const { costId } = params
+    const { costId } = await params
 
     // Verify user has access to this cost
     const cost = await prisma.cost.findUnique({

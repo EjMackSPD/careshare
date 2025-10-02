@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { eventId: string } }
+  { params }: { params: Promise<{ eventId: string }> }
 ) {
   try {
     const user = await getCurrentUser()
@@ -16,7 +16,7 @@ export async function PATCH(
       )
     }
 
-    const { eventId } = params
+    const { eventId } = await params
     const body = await request.json()
 
     // Verify user has access to this event
@@ -62,7 +62,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { eventId: string } }
+  { params }: { params: Promise<{ eventId: string }> }
 ) {
   try {
     const user = await getCurrentUser()
@@ -74,7 +74,7 @@ export async function DELETE(
       )
     }
 
-    const { eventId } = params
+    const { eventId } = await params
 
     // Verify user has access to this event
     const event = await prisma.event.findUnique({
