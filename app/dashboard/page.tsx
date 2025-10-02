@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import Navigation from '../components/Navigation'
 import LeftNavigation from '../components/LeftNavigation'
+import DemoModeBanner from '../components/DemoModeBanner'
 import CareRecipientWidget from '../components/widgets/CareRecipientWidget'
 import TasksWidget from '../components/widgets/TasksWidget'
 import FinancialWidget from '../components/widgets/FinancialWidget'
@@ -55,6 +56,7 @@ export default async function Dashboard() {
   return (
     <div className={styles.container}>
       <Navigation showAuthLinks={true} />
+      <DemoModeBanner userEmail={user.email} />
       
       <div className={styles.layout}>
         <LeftNavigation />
