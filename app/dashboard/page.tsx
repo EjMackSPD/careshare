@@ -3,6 +3,7 @@ import { getCurrentUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import Navigation from '../components/Navigation'
+import LeftNavigation from '../components/LeftNavigation'
 import styles from './page.module.css'
 
 export default async function Dashboard() {
@@ -47,14 +48,73 @@ export default async function Dashboard() {
   return (
     <div className={styles.container}>
       <Navigation showAuthLinks={true} />
-
-      <main className={styles.main}>
+      
+      <div className={styles.layout}>
+        <LeftNavigation />
+        <main className={styles.main}>
         <div className={styles.header}>
-          <h1>Welcome back, {user.name || 'there'}!</h1>
+          <div>
+            <h1>Welcome back, {user.name || 'there'}!</h1>
+            <p className={styles.headerSubtitle}>Here's what's happening with your families</p>
+          </div>
           <Link href="/family/create" className={styles.createBtn}>
             + Create Family Group
           </Link>
         </div>
+
+        {families.length > 0 && (
+          <div className={styles.quickStats}>
+            <div className={styles.statCard}>
+              <h3>{families.length}</h3>
+              <p>Active Families</p>
+            </div>
+            <div className={styles.statCard}>
+              <h3>{families.reduce((sum, f) => sum + f.events.length, 0)}</h3>
+              <p>Upcoming Events</p>
+            </div>
+            <div className={styles.statCard}>
+              <h3>{families.reduce((sum, f) => sum + f.costs.length, 0)}</h3>
+              <p>Pending Costs</p>
+            </div>
+            <div className={styles.statCard}>
+              <h3>${families.reduce((sum, f) => sum + f.costs.reduce((s, c) => s + c.amount, 0), 0).toFixed(2)}</h3>
+              <p>Total Pending</p>
+            </div>
+          </div>
+        )}
+
+        {/* Quick Links */}
+        {families.length > 0 && (
+          <div className={styles.quickLinks}>
+            <h2>Quick Actions</h2>
+            <div className={styles.linksGrid}>
+              <Link href="/dashboard/tasks" className={styles.quickLink}>
+                <span className={styles.linkIcon}>✓</span>
+                <span>Manage Tasks</span>
+              </Link>
+              <Link href="/dashboard/calendar" className={styles.quickLink}>
+                <span className={styles.linkIcon}>📅</span>
+                <span>View Calendar</span>
+              </Link>
+              <Link href="/dashboard/finances" className={styles.quickLink}>
+                <span className={styles.linkIcon}>💰</span>
+                <span>Track Finances</span>
+              </Link>
+              <Link href="/dashboard/care-plan" className={styles.quickLink}>
+                <span className={styles.linkIcon}>❤️</span>
+                <span>Care Plan</span>
+              </Link>
+              <Link href="/dashboard/gifts" className={styles.quickLink}>
+                <span className={styles.linkIcon}>🎁</span>
+                <span>Send Gift</span>
+              </Link>
+              <Link href="/dashboard/food" className={styles.quickLink}>
+                <span className={styles.linkIcon}>🍽️</span>
+                <span>Order Food</span>
+              </Link>
+            </div>
+          </div>
+        )}
 
         {families.length === 0 ? (
           <div className={styles.emptyState}>
@@ -136,7 +196,8 @@ export default async function Dashboard() {
             ))}
           </div>
         )}
-      </main>
+        </main>
+      </div>
     </div>
   )
 }

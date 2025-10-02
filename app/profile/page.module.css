@@ -1,0 +1,143 @@
+.container {
+  min-height: 100vh;
+  background: #f8f9fa;
+}
+
+.layout {
+  display: flex;
+}
+
+.main {
+  flex: 1;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  width: 100%;
+}
+
+.header {
+  margin-bottom: 2rem;
+}
+
+.header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #212529;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.form {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.message {
+  padding: 1rem;
+  margin: 2rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+}
+
+.message.success {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.message.error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.section {
+  padding: 2rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.section:last-of-type {
+  border-bottom: none;
+}
+
+.section h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 1.5rem;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.formGroup:last-child {
+  margin-bottom: 0;
+}
+
+.formGroup label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #212529;
+  font-size: 0.95rem;
+}
+
+.formGroup input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.formGroup input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  padding: 2rem;
+  background: #f8f9fa;
+}
+
+.saveBtn {
+  background: #2563eb;
+  color: white;
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.saveBtn:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.saveBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+}
+

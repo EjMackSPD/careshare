@@ -3,6 +3,10 @@
   background: #f8f9fa;
 }
 
+.layout {
+  display: flex;
+}
+
 .nav {
   background: white;
   border-bottom: 1px solid #e9ecef;
@@ -43,9 +47,11 @@
 }
 
 .main {
-  max-width: 1200px;
+  flex: 1;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 3rem 2rem;
+  width: 100%;
 }
 
 .header {

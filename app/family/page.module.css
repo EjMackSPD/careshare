@@ -3,6 +3,10 @@
   background: #f8f9fa;
 }
 
+.layout {
+  display: flex;
+}
+
 .nav {
   background: white;
   border-bottom: 1px solid #e9ecef;
