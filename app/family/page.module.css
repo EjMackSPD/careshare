@@ -1,0 +1,201 @@
+.container {
+  min-height: 100vh;
+  background: #f8f9fa;
+}
+
+.nav {
+  background: white;
+  border-bottom: 1px solid #e9ecef;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.navLinks {
+  display: flex;
+  gap: 2rem;
+}
+
+.navLinks a {
+  color: #495057;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.navLinks a:hover {
+  color: #2563eb;
+}
+
+.main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.header h1 {
+  font-size: 2rem;
+  color: #212529;
+  margin: 0;
+}
+
+.createBtn {
+  background: #2563eb;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.createBtn:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.emptyState {
+  background: white;
+  border-radius: 1rem;
+  padding: 4rem 2rem;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.emptyState h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #212529;
+}
+
+.emptyState p {
+  color: #6c757d;
+  margin-bottom: 2rem;
+}
+
+.primaryBtn {
+  background: #2563eb;
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-block;
+  transition: all 0.2s;
+}
+
+.primaryBtn:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.familyGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.familyCard {
+  background: white;
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+
+.familyCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.familyCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 0.75rem;
+}
+
+.familyCard h2 {
+  font-size: 1.5rem;
+  margin: 0;
+  color: #212529;
+}
+
+.badge {
+  background: #e7f5ff;
+  color: #1971c2;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.elderName {
+  color: #6c757d;
+  margin: 0 0 1rem 0;
+  font-size: 0.9rem;
+}
+
+.description {
+  color: #495057;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.5;
+  flex-grow: 1;
+}
+
+.stats {
+  display: flex;
+  gap: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid #f8f9fa;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.statNumber {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.statLabel {
+  font-size: 0.8rem;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 768px) {
+  .familyGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
