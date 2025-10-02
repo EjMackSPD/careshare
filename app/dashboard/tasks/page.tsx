@@ -137,6 +137,7 @@ export default function TasksPage() {
   }, [selectedFamily])
 
   async function fetchTasks() {
+    setLoading(true)
     try {
       const res = await fetch(`/api/families/${selectedFamily}/tasks`)
       if (res.ok) {
@@ -157,6 +158,8 @@ export default function TasksPage() {
       }
     } catch (error) {
       console.error('Error fetching tasks:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -250,7 +253,7 @@ export default function TasksPage() {
         title: newTask.title,
         description: newTask.description,
         priority: newTask.priority,
-        assignedTo: selectedMembers.length > 0 ? selectedMembers.join(',') : null, // Save all members as comma-separated
+        assignedTo: selectedMembers.length > 0 ? selectedMembers[0] : null, // Database stores single user ID
         dueDate: newTask.dueDate || null,
         status: editingTask ? undefined : 'TODO' // Don't override status when editing
       }
@@ -261,14 +264,19 @@ export default function TasksPage() {
       
       const method = editingTask ? 'PATCH' : 'POST'
 
+      console.log('Saving task:', { url, method, taskData, selectedMembers })
+
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(taskData)
       })
 
+      console.log('Task save response:', { status: res.status, ok: res.ok })
+
       if (!res.ok) {
         const error = await res.json()
+        console.error('Task save error:', error)
         throw new Error(error.error || 'Failed to save task')
       }
 
@@ -521,8 +529,14 @@ export default function TasksPage() {
               <p className={styles.taskCount}>Showing {filteredTasks.length} of {tasks.length} tasks</p>
             </div>
 
-            <div className={styles.tasksList}>
-              {filteredTasks.map((task) => (
+            {loading ? (
+              <div className={styles.loadingState}>
+                <div className={styles.spinner}></div>
+                <p>Loading tasks...</p>
+              </div>
+            ) : (
+              <div className={styles.tasksList}>
+                {filteredTasks.map((task) => (
                 <div key={task.id} className={`${styles.taskCard} ${task.completed ? styles.completed : ''}`}>
                   <input
                     type="checkbox"
@@ -565,8 +579,9 @@ export default function TasksPage() {
                     </button>
                   </div>
                 </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </main>
       </div>
