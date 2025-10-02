@@ -56,11 +56,12 @@ export default async function Dashboard() {
   return (
     <div className={styles.container}>
       <Navigation showAuthLinks={true} />
-      <DemoModeBanner userEmail={user.email} />
       
       <div className={styles.layout}>
         <LeftNavigation />
-        <main className={styles.main}>
+        <div className={styles.mainWrapper}>
+          <DemoModeBanner userEmail={user.email} />
+          <main className={styles.main}>
         <div className={styles.header}>
           <div>
             <h1>Welcome back, {user.name || 'there'}!</h1>
@@ -235,6 +236,7 @@ export default async function Dashboard() {
           </div>
         )}
         </main>
+        </div>
       </div>
     </div>
   )
