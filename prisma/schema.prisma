@@ -112,12 +112,17 @@ model Family {
 }
 
 // Junction table for Family-User relationship
+enum FamilyRole {
+  CARE_MANAGER    // Primary family member responsible for care coordination
+  FAMILY_MEMBER   // Regular family member
+}
+
 model FamilyMember {
-  id        String   @id @default(cuid())
+  id        String     @id @default(cuid())
   familyId  String
   userId    String
-  role      String   @default("member") // member, organizer
-  joinedAt  DateTime @default(now())
+  role      FamilyRole @default(FAMILY_MEMBER)
+  joinedAt  DateTime   @default(now())
 
   family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -125,6 +130,7 @@ model FamilyMember {
   @@unique([familyId, userId])
   @@index([familyId])
   @@index([userId])
+  @@index([role])
 }
 
 // Events (birthdays, appointments, food deliveries)

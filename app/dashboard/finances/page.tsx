@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Navigation from '@/app/components/Navigation'
 import LeftNavigation from '@/app/components/LeftNavigation'
 import { BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts'
+import { X, ArrowRight, ArrowLeft } from 'lucide-react'
 import styles from './page.module.css'
 
 type Bill = {
@@ -20,6 +21,23 @@ type Contribution = {
   percentage: number
   initial: string
   color: string
+}
+
+type FamilyMember = {
+  id: string
+  userId: string
+  user: {
+    id: string
+    name: string | null
+    email: string
+  }
+}
+
+type CostAllocation = {
+  userId: string
+  name: string
+  amount: number
+  percentage: number
 }
 
 const expenseTrends = [
@@ -52,10 +70,146 @@ const familyContributions: Contribution[] = [
 export default function FinancesPage() {
   const [activeTab, setActiveTab] = useState('Overview')
   const tabs = ['Overview', 'Expenses', 'Bills', 'Family Contributions']
+  
+  // Add Bill Modal States
+  const [showAddBill, setShowAddBill] = useState(false)
+  const [billStep, setBillStep] = useState(1) // 1: Details, 2: Allocation
+  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([])
+  const [loading, setLoading] = useState(false)
+  
+  // Bill Form Data
+  const [billData, setBillData] = useState({
+    name: '',
+    amount: '',
+    dueDate: '',
+    frequency: 'One-time',
+    category: 'Medical'
+  })
+  
+  // Cost Allocation
+  const [allocationType, setAllocationType] = useState<'estate' | 'family' | 'split'>('estate')
+  const [splitType, setSplitType] = useState<'equal' | 'percentage' | 'custom'>('equal')
+  const [allocations, setAllocations] = useState<CostAllocation[]>([])
 
   const monthlyBudget = 2400.00
   const spent = 0.35
   const remaining = 2399.65
+
+  // Fetch family members
+  useEffect(() => {
+    async function fetchMembers() {
+      try {
+        const res = await fetch('/api/families')
+        if (!res.ok) return
+        const families = await res.json()
+        if (families.length > 0) {
+          const membersRes = await fetch(`/api/families/${families[0].id}/members`)
+          if (membersRes.ok) {
+            const members = await membersRes.json()
+            setFamilyMembers(members)
+            initializeAllocations(members)
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching members:', error)
+      }
+    }
+    fetchMembers()
+  }, [])
+
+  const initializeAllocations = (members: FamilyMember[]) => {
+    const total = parseFloat(billData.amount) || 0
+    const equalAmount = members.length > 0 ? total / members.length : 0
+    
+    setAllocations(
+      members.map(member => ({
+        userId: member.userId,
+        name: member.user.name || member.user.email,
+        amount: equalAmount,
+        percentage: members.length > 0 ? 100 / members.length : 0
+      }))
+    )
+  }
+
+  const handleAllocationTypeChange = (type: 'estate' | 'family' | 'split') => {
+    setAllocationType(type)
+    if (type === 'family' && familyMembers.length > 0) {
+      const total = parseFloat(billData.amount) || 0
+      const equalAmount = familyMembers.length > 0 ? total / familyMembers.length : 0
+      setAllocations(
+        familyMembers.map(member => ({
+          userId: member.userId,
+          name: member.user.name || member.user.email,
+          amount: equalAmount,
+          percentage: 100 / familyMembers.length
+        }))
+      )
+    }
+  }
+
+  const handleSplitTypeChange = (type: 'equal' | 'percentage' | 'custom') => {
+    setSplitType(type)
+    const total = parseFloat(billData.amount) || 0
+    
+    if (type === 'equal' && familyMembers.length > 0) {
+      const equalAmount = total / familyMembers.length
+      setAllocations(allocations.map(a => ({
+        ...a,
+        amount: equalAmount,
+        percentage: 100 / familyMembers.length
+      })))
+    }
+  }
+
+  const updateAllocation = (userId: string, field: 'amount' | 'percentage', value: number) => {
+    const total = parseFloat(billData.amount) || 0
+    
+    setAllocations(allocations.map(a => {
+      if (a.userId === userId) {
+        if (field === 'amount') {
+          return { ...a, amount: value, percentage: (value / total) * 100 }
+        } else {
+          return { ...a, percentage: value, amount: (value / 100) * total }
+        }
+      }
+      return a
+    }))
+  }
+
+  const getTotalAllocated = () => {
+    return allocations.reduce((sum, a) => sum + a.amount, 0)
+  }
+
+  const getTotalPercentage = () => {
+    return allocations.reduce((sum, a) => sum + a.percentage, 0)
+  }
+
+  const isAllocationValid = () => {
+    const total = parseFloat(billData.amount) || 0
+    const allocated = getTotalAllocated()
+    return Math.abs(total - allocated) < 0.01 // Allow for small rounding differences
+  }
+
+  const handleSubmitBill = async () => {
+    // TODO: Submit to API
+    console.log('Bill Data:', billData)
+    console.log('Allocation Type:', allocationType)
+    console.log('Allocations:', allocations)
+    
+    // Reset and close
+    setShowAddBill(false)
+    setBillStep(1)
+    setBillData({
+      name: '',
+      amount: '',
+      dueDate: '',
+      frequency: 'One-time',
+      category: 'Medical'
+    })
+    setAllocationType('estate')
+  }
+
+  const canProceedToStep2 = billData.name && billData.amount && billData.dueDate
 
   return (
     <div className={styles.container}>
@@ -71,9 +225,265 @@ export default function FinancesPage() {
             </div>
             <div className={styles.headerButtons}>
               <button className={styles.addExpenseBtn}>+ Add Expense</button>
-              <button className={styles.addBillBtn}>📄 Add Bill</button>
+              <button className={styles.addBillBtn} onClick={() => setShowAddBill(true)}>📄 Add Bill</button>
             </div>
           </div>
+
+          {/* Add Bill Modal */}
+          {showAddBill && (
+            <div className={styles.modal} onClick={() => setShowAddBill(false)}>
+              <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                <div className={styles.modalHeader}>
+                  <h2>{billStep === 1 ? 'Add Bill - Details' : 'Add Bill - Allocate Costs'}</h2>
+                  <button className={styles.closeBtn} onClick={() => setShowAddBill(false)}>
+                    <X size={24} />
+                  </button>
+                </div>
+
+                {/* Step Indicator */}
+                <div className={styles.stepIndicator}>
+                  <div className={`${styles.step} ${billStep >= 1 ? styles.activeStep : ''}`}>
+                    <div className={styles.stepNumber}>1</div>
+                    <span>Bill Details</span>
+                  </div>
+                  <div className={styles.stepLine}></div>
+                  <div className={`${styles.step} ${billStep >= 2 ? styles.activeStep : ''}`}>
+                    <div className={styles.stepNumber}>2</div>
+                    <span>Cost Allocation</span>
+                  </div>
+                </div>
+
+                {billStep === 1 ? (
+                  /* Step 1: Bill Details */
+                  <div className={styles.modalBody}>
+                    <div className={styles.formGroup}>
+                      <label>Bill Name *</label>
+                      <input
+                        type="text"
+                        value={billData.name}
+                        onChange={(e) => setBillData({ ...billData, name: e.target.value })}
+                        placeholder="e.g., Electric Bill, Rent, Medical Expense"
+                      />
+                    </div>
+
+                    <div className={styles.formRow}>
+                      <div className={styles.formGroup}>
+                        <label>Amount *</label>
+                        <div className={styles.amountInput}>
+                          <span className={styles.currencySymbol}>$</span>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={billData.amount}
+                            onChange={(e) => setBillData({ ...billData, amount: e.target.value })}
+                            placeholder="0.00"
+                          />
+                        </div>
+                      </div>
+
+                      <div className={styles.formGroup}>
+                        <label>Due Date *</label>
+                        <input
+                          type="date"
+                          value={billData.dueDate}
+                          onChange={(e) => setBillData({ ...billData, dueDate: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className={styles.formRow}>
+                      <div className={styles.formGroup}>
+                        <label>Frequency</label>
+                        <select
+                          value={billData.frequency}
+                          onChange={(e) => setBillData({ ...billData, frequency: e.target.value })}
+                        >
+                          <option value="One-time">One-time</option>
+                          <option value="Weekly">Weekly</option>
+                          <option value="Monthly">Monthly</option>
+                          <option value="Quarterly">Quarterly</option>
+                          <option value="Yearly">Yearly</option>
+                        </select>
+                      </div>
+
+                      <div className={styles.formGroup}>
+                        <label>Category</label>
+                        <select
+                          value={billData.category}
+                          onChange={(e) => setBillData({ ...billData, category: e.target.value })}
+                        >
+                          <option value="Medical">Medical</option>
+                          <option value="Housing">Housing</option>
+                          <option value="Groceries">Groceries</option>
+                          <option value="Utilities">Utilities</option>
+                          <option value="Transportation">Transportation</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className={styles.billSummary}>
+                      <h3>Bill Summary</h3>
+                      <div className={styles.summaryItem}>
+                        <span>Total Amount:</span>
+                        <strong>${parseFloat(billData.amount || '0').toFixed(2)}</strong>
+                      </div>
+                    </div>
+
+                    <div className={styles.modalActions}>
+                      <button 
+                        className={styles.cancelBtn}
+                        onClick={() => setShowAddBill(false)}
+                      >
+                        Cancel
+                      </button>
+                      <button 
+                        className={styles.nextBtn}
+                        onClick={() => {
+                          setBillStep(2)
+                          if (familyMembers.length > 0) {
+                            initializeAllocations(familyMembers)
+                          }
+                        }}
+                        disabled={!canProceedToStep2}
+                      >
+                        Next: Allocate Costs
+                        <ArrowRight size={18} />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  /* Step 2: Cost Allocation */
+                  <div className={styles.modalBody}>
+                    <div className={styles.allocationHeader}>
+                      <h3>Who should pay this bill?</h3>
+                      <p>Total to allocate: <strong>${parseFloat(billData.amount || '0').toFixed(2)}</strong></p>
+                    </div>
+
+                    <div className={styles.allocationTypes}>
+                      <button
+                        className={`${styles.allocationType} ${allocationType === 'estate' ? styles.activeAllocationType : ''}`}
+                        onClick={() => handleAllocationTypeChange('estate')}
+                      >
+                        <div className={styles.allocationIcon}>🏛️</div>
+                        <div>
+                          <strong>Estate/Individual</strong>
+                          <p>Paid from care recipient's funds</p>
+                        </div>
+                      </button>
+
+                      <button
+                        className={`${styles.allocationType} ${allocationType === 'family' ? styles.activeAllocationType : ''}`}
+                        onClick={() => handleAllocationTypeChange('family')}
+                      >
+                        <div className={styles.allocationIcon}>👥</div>
+                        <div>
+                          <strong>Family Members</strong>
+                          <p>Split among family members</p>
+                        </div>
+                      </button>
+                    </div>
+
+                    {allocationType === 'family' && (
+                      <div className={styles.splitOptions}>
+                        <h4>Split Method</h4>
+                        <div className={styles.splitButtons}>
+                          <button
+                            className={`${styles.splitBtn} ${splitType === 'equal' ? styles.activeSplitBtn : ''}`}
+                            onClick={() => handleSplitTypeChange('equal')}
+                          >
+                            Equal Split
+                          </button>
+                          <button
+                            className={`${styles.splitBtn} ${splitType === 'percentage' ? styles.activeSplitBtn : ''}`}
+                            onClick={() => handleSplitTypeChange('percentage')}
+                          >
+                            By Percentage
+                          </button>
+                          <button
+                            className={`${styles.splitBtn} ${splitType === 'custom' ? styles.activeSplitBtn : ''}`}
+                            onClick={() => handleSplitTypeChange('custom')}
+                          >
+                            Custom Amount
+                          </button>
+                        </div>
+
+                        <div className={styles.allocationslist}>
+                          {allocations.map((allocation) => (
+                            <div key={allocation.userId} className={styles.allocationRow}>
+                              <div className={styles.memberName}>{allocation.name}</div>
+                              <div className={styles.allocationInputs}>
+                                {splitType === 'equal' ? (
+                                  <div className={styles.allocationDisplay}>
+                                    ${allocation.amount.toFixed(2)} ({allocation.percentage.toFixed(1)}%)
+                                  </div>
+                                ) : splitType === 'percentage' ? (
+                                  <div className={styles.inputGroup}>
+                                    <input
+                                      type="number"
+                                      value={allocation.percentage}
+                                      onChange={(e) => updateAllocation(allocation.userId, 'percentage', parseFloat(e.target.value) || 0)}
+                                      className={styles.percentageInput}
+                                    />
+                                    <span>% = ${allocation.amount.toFixed(2)}</span>
+                                  </div>
+                                ) : (
+                                  <div className={styles.inputGroup}>
+                                    <span>$</span>
+                                    <input
+                                      type="number"
+                                      step="0.01"
+                                      value={allocation.amount}
+                                      onChange={(e) => updateAllocation(allocation.userId, 'amount', parseFloat(e.target.value) || 0)}
+                                      className={styles.amountInputSmall}
+                                    />
+                                    <span>({allocation.percentage.toFixed(1)}%)</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className={`${styles.allocationSummary} ${!isAllocationValid() ? styles.invalid : ''}`}>
+                          <div className={styles.summaryRow}>
+                            <span>Total Allocated:</span>
+                            <strong>${getTotalAllocated().toFixed(2)} ({getTotalPercentage().toFixed(1)}%)</strong>
+                          </div>
+                          <div className={styles.summaryRow}>
+                            <span>Remaining:</span>
+                            <strong>${(parseFloat(billData.amount) - getTotalAllocated()).toFixed(2)}</strong>
+                          </div>
+                          {!isAllocationValid() && (
+                            <div className={styles.errorMessage}>
+                              ⚠️ Total allocation must equal bill amount
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className={styles.modalActions}>
+                      <button 
+                        className={styles.backBtn}
+                        onClick={() => setBillStep(1)}
+                      >
+                        <ArrowLeft size={18} />
+                        Back
+                      </button>
+                      <button 
+                        className={styles.submitBtn}
+                        onClick={handleSubmitBill}
+                        disabled={allocationType === 'family' && !isAllocationValid()}
+                      >
+                        Add Bill
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Tabs */}
           <div className={styles.tabs}>

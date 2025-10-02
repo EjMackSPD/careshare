@@ -293,18 +293,23 @@ export default function FamilyDetail() {
               </Link>
             </div>
             <div className={styles.membersList}>
-              {family.members.map((member) => (
-                <div key={member.user.id} className={styles.memberCard}>
-                  <div className={styles.memberAvatar}>
-                    {member.user.name.charAt(0).toUpperCase()}
+              {family.members.map((member) => {
+                const isCareManager = member.role === 'CARE_MANAGER'
+                return (
+                  <div key={member.user.id} className={`${styles.memberCard} ${isCareManager ? styles.careManager : ''}`}>
+                    <div className={styles.memberAvatar}>
+                      {member.user.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className={styles.memberInfo}>
+                      <h3>{member.user.name}</h3>
+                      <p>{member.user.email}</p>
+                    </div>
+                    <span className={`${styles.memberRole} ${isCareManager ? styles.careManagerBadge : styles.familyMemberBadge}`}>
+                      {isCareManager ? '⭐ Care Manager' : 'Family Member'}
+                    </span>
                   </div>
-                  <div className={styles.memberInfo}>
-                    <h3>{member.user.name}</h3>
-                    <p>{member.user.email}</p>
-                  </div>
-                  <span className={styles.memberRole}>{member.role}</span>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </section>
         </div>
