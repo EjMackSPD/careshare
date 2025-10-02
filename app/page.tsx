@@ -20,7 +20,6 @@ export default function Home() {
           </Link>
           <div className={styles.navLinks}>
             <Link href="/features">Features</Link>
-            <Link href="/demo">Demo</Link>
             <Link href="/login">Login</Link>
             <Link href="/signup" className={styles.signupBtn}>Sign Up</Link>
           </div>
