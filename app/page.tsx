@@ -82,6 +82,27 @@ export default function Home() {
         </div>
       </section>
 
+      <section className={styles.demoCta}>
+        <div className={styles.demoContent}>
+          <div className={styles.demoText}>
+            <h2>See CareShare in Action</h2>
+            <p>Experience the platform with a fully interactive demo account. No signup required!</p>
+            <ul className={styles.demoFeatures}>
+              <li>✓ Pre-loaded with realistic caregiving scenarios</li>
+              <li>✓ Explore all features and functionality</li>
+              <li>✓ See how families coordinate care together</li>
+              <li>✓ Test task management, calendars, and finances</li>
+            </ul>
+          </div>
+          <div className={styles.demoAction}>
+            <Link href="/login" className={styles.demoBtn}>
+              🎭 Try Demo Walkthrough
+            </Link>
+            <p className={styles.demoNote}>Click "Try Demo Mode" on the login page</p>
+          </div>
+        </div>
+      </section>
+
       <section className={styles.cta}>
         <h2>Ready to get started?</h2>
         <p>Join families who are caring better, together.</p>
