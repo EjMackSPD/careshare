@@ -112,6 +112,12 @@
   margin-bottom: 2rem;
 }
 
+.demoNote {
+  color: #f59e0b !important;
+  font-weight: 600 !important;
+  margin-bottom: 1rem !important;
+}
+
 .primaryBtn {
   background: #2563eb;
   color: white;
