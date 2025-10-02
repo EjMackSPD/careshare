@@ -1,0 +1,369 @@
+.container {
+  min-height: 100vh;
+  background: #f8f9fa;
+  padding-top: 81px;
+}
+
+.layout {
+  display: flex;
+  min-height: calc(100vh - 81px);
+}
+
+.main {
+  flex: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  width: 100%;
+  margin-left: 260px;
+}
+
+.pageHeader {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.pageHeader h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #212529;
+  margin: 0;
+}
+
+/* Demo Banner */
+.demoBanner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: #fff3cd;
+  border: 1px solid #ffe69c;
+  border-radius: 0.75rem;
+  color: #856404;
+  font-weight: 500;
+  margin-bottom: 2rem;
+}
+
+/* Billing Toggle */
+.billingToggle {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 3rem;
+  background: white;
+  border-radius: 0.75rem;
+  padding: 0.5rem;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.toggleBtn {
+  position: relative;
+  padding: 0.75rem 2rem;
+  background: transparent;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  color: #6c757d;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.toggleBtn.activeToggle {
+  background: #6366f1;
+  color: white;
+}
+
+.saveBadge {
+  padding: 0.25rem 0.5rem;
+  background: #10b981;
+  color: white;
+  border-radius: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* Pricing Grid */
+.pricingGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-bottom: 4rem;
+}
+
+.pricingCard {
+  background: white;
+  border: 2px solid #e9ecef;
+  border-radius: 1rem;
+  padding: 2.5rem 2rem;
+  transition: all 0.3s;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.pricingCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.popularCard {
+  border-color: #6366f1;
+  border-width: 3px;
+}
+
+.selectedCard {
+  border-color: #10b981;
+  border-width: 3px;
+}
+
+.popularBadge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #6366f1;
+  color: white;
+  padding: 0.35rem 1rem;
+  border-radius: 2rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.pricingCard h3 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #212529;
+  margin: 0 0 0.5rem 0;
+}
+
+.planDescription {
+  color: #6c757d;
+  font-size: 0.95rem;
+  margin: 0 0 2rem 0;
+}
+
+.priceSection {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 2rem;
+}
+
+.price {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #212529;
+  line-height: 1;
+}
+
+.period {
+  font-size: 1rem;
+  color: #6c757d;
+  margin-left: 0.5rem;
+}
+
+.features {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex: 1;
+}
+
+.feature {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #495057;
+  font-size: 0.95rem;
+}
+
+.featureIcon {
+  color: #6366f1;
+  flex-shrink: 0;
+}
+
+.selectBtn,
+.selectedBtn {
+  width: 100%;
+  padding: 1rem;
+  border: none;
+  border-radius: 0.75rem;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.selectBtn {
+  background: white;
+  color: #495057;
+  border: 2px solid #e9ecef;
+}
+
+.selectBtn:hover {
+  background: #6366f1;
+  color: white;
+  border-color: #6366f1;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.selectedBtn {
+  background: #6366f1;
+  color: white;
+}
+
+/* Checkout Section */
+.checkoutSection {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 3rem;
+}
+
+.checkoutCard {
+  background: white;
+  border-radius: 1rem;
+  padding: 2.5rem 3rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+}
+
+.checkoutCard h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #212529;
+  margin: 0 0 0.5rem 0;
+}
+
+.checkoutSubtitle {
+  color: #6c757d;
+  margin: 0 0 2rem 0;
+}
+
+.totalSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 0;
+  border-top: 2px solid #e9ecef;
+  border-bottom: 2px solid #e9ecef;
+  margin-bottom: 2rem;
+}
+
+.totalLabel {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #495057;
+}
+
+.totalAmount {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #212529;
+}
+
+.subscribeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 1.25rem 2rem;
+  background: #6366f1;
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  font-weight: 700;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.subscribeBtn:hover {
+  background: #4f46e5;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+}
+
+.arrow {
+  font-size: 1.5rem;
+  transition: transform 0.2s;
+}
+
+.subscribeBtn:hover .arrow {
+  transform: translateX(5px);
+}
+
+/* Guarantee */
+.guarantee {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #d1fae5;
+  border: 1px solid #a7f3d0;
+  border-radius: 0.75rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.guaranteeIcon {
+  color: #10b981;
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+}
+
+.guarantee strong {
+  display: block;
+  color: #065f46;
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
+}
+
+.guarantee p {
+  color: #047857;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 1024px) {
+  .pricingGrid {
+    grid-template-columns: 1fr;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .pageHeader h1 {
+    font-size: 2rem;
+  }
+
+  .billingToggle {
+    width: 100%;
+  }
+
+  .toggleBtn {
+    flex: 1;
+    padding: 0.75rem 1rem;
+  }
+
+  .price {
+    font-size: 2.5rem;
+  }
+
+  .checkoutCard {
+    padding: 2rem 1.5rem;
+  }
+}
+
