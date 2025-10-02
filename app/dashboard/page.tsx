@@ -126,35 +126,6 @@ export default async function Dashboard() {
           </div>
         )}
 
-        {/* Widget Grid */}
-        <div className={styles.widgetGrid}>
-          <div className={styles.widgetLarge}>
-            <CareRecipientWidget 
-              elderName={families[0]?.elderName}
-              elderAge={families[0]?.elderBirthday ? new Date().getFullYear() - new Date(families[0].elderBirthday).getFullYear() : undefined}
-              familyId={families[0]?.id}
-            />
-          </div>
-          <div className={styles.widgetMedium}>
-            <TasksWidget />
-          </div>
-          <div className={styles.widgetMedium}>
-            <FinancialWidget />
-          </div>
-          <div className={styles.widgetMedium}>
-            <CalendarWidget />
-          </div>
-          <div className={styles.widgetMedium}>
-            <CollaborationWidget />
-          </div>
-          <div className={styles.widgetLarge}>
-            <ResourcesWidget />
-          </div>
-          <div className={styles.widgetLarge}>
-            <CarePlanWidget />
-          </div>
-        </div>
-
         {families.length === 0 ? (
           <div className={styles.emptyState}>
             <h2>No families yet</h2>
@@ -168,9 +139,39 @@ export default async function Dashboard() {
             )}
           </div>
         ) : (
-          <div className={styles.dashboard}>
-            {families.map((family) => (
-              <div key={family.id} className={styles.familySection}>
+          <>
+            {/* Widget Grid */}
+            <div className={styles.widgetGrid}>
+              <div className={styles.widgetLarge}>
+                <CareRecipientWidget 
+                  elderName={families[0]?.elderName}
+                  elderAge={families[0]?.elderBirthday ? new Date().getFullYear() - new Date(families[0].elderBirthday).getFullYear() : undefined}
+                  familyId={families[0]?.id}
+                />
+              </div>
+              <div className={styles.widgetMedium}>
+                <TasksWidget />
+              </div>
+              <div className={styles.widgetMedium}>
+                <FinancialWidget />
+              </div>
+              <div className={styles.widgetMedium}>
+                <CalendarWidget />
+              </div>
+              <div className={styles.widgetMedium}>
+                <CollaborationWidget />
+              </div>
+              <div className={styles.widgetLarge}>
+                <ResourcesWidget />
+              </div>
+              <div className={styles.widgetLarge}>
+                <CarePlanWidget />
+              </div>
+            </div>
+
+            <div className={styles.dashboard}>
+              {families.map((family) => (
+                <div key={family.id} className={styles.familySection}>
                 <div className={styles.familyHeader}>
                   <div>
                     <h2>{family.name}</h2>
@@ -237,7 +238,8 @@ export default async function Dashboard() {
                 </div>
               </div>
             ))}
-          </div>
+            </div>
+          </>
         )}
         </main>
       </div>
