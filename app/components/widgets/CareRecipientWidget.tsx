@@ -56,7 +56,16 @@ export default function CareRecipientWidget({
 
   const handleAddNote = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!newNote.trim() || !familyId) return
+    
+    if (!newNote.trim()) {
+      alert('Please enter a note')
+      return
+    }
+    
+    if (!familyId) {
+      alert('No family selected. Please create or join a family first.')
+      return
+    }
 
     try {
       const res = await fetch(`/api/families/${familyId}/notes`, {
@@ -65,14 +74,18 @@ export default function CareRecipientWidget({
         body: JSON.stringify({ content: newNote, category: 'general' })
       })
 
-      if (res.ok) {
-        const createdNote = await res.json()
-        setNotes([createdNote, ...notes.slice(0, 1)])
-        setNewNote('')
-        setShowAddNote(false)
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error.error || 'Failed to save note')
       }
+
+      const createdNote = await res.json()
+      setNotes([createdNote, ...notes.slice(0, 1)])
+      setNewNote('')
+      setShowAddNote(false)
     } catch (error) {
       console.error('Error adding note:', error)
+      alert(error instanceof Error ? error.message : 'Failed to save note. Please try again.')
     }
   }
 
