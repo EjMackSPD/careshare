@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/prisma'
+import { FamilyRole } from '@prisma/client'
 
 export async function GET() {
   try {
@@ -79,7 +80,7 @@ export async function POST(request: Request) {
         members: {
           create: {
             userId: (user as any).id,
-            role: 'organizer',
+            role: FamilyRole.CARE_MANAGER, // Creator becomes Care Manager
           },
         },
       },
