@@ -182,15 +182,20 @@
   padding: 0.5rem;
 }
 
-.calendarHeader span {
+.monthNav {
+  background: transparent;
+  border: none;
   cursor: pointer;
   color: #6c757d;
   font-size: 1.2rem;
-  user-select: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  transition: all 0.2s;
 }
 
-.calendarHeader span:hover {
+.monthNav:hover {
   color: #2563eb;
+  background: #f0f7ff;
 }
 
 .calendarGrid {
@@ -217,6 +222,7 @@
   border-radius: 0.25rem;
   cursor: pointer;
   transition: all 0.2s;
+  position: relative;
 }
 
 .calendarDate:hover:not(:empty) {
@@ -229,6 +235,25 @@
   font-weight: 700;
 }
 
+.calendarDate.hasEvents {
+  font-weight: 600;
+}
+
+.eventDot {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background: #10b981;
+  border-radius: 50%;
+}
+
+.calendarDate.today .eventDot {
+  background: white;
+}
+
 .upcomingEvents {
   margin-top: auto;
 }
@@ -238,6 +263,50 @@
   font-size: 0.9rem;
   color: #212529;
   margin-bottom: 0.75rem;
+}
+
+.eventsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.eventItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+}
+
+.eventItem:hover {
+  background: #e9ecef;
+  transform: translateX(2px);
+}
+
+.eventItem:last-child {
+  margin-bottom: 0;
+}
+
+.eventTitle {
+  font-size: 0.9rem;
+  color: #212529;
+  font-weight: 500;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.eventDate {
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-weight: 600;
+  margin-left: 1rem;
+  white-space: nowrap;
 }
 
 /* Collaboration */
