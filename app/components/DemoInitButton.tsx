@@ -4,14 +4,17 @@ export default function DemoInitButton() {
   const handleInit = async () => {
     try {
       const res = await fetch('/api/auth/demo', { method: 'POST' })
+      const data = await res.json()
+      
       if (res.ok) {
         window.location.reload()
       } else {
-        alert('Failed to initialize demo data. Please try again.')
+        console.error('Demo init error:', data)
+        alert(`Failed to initialize demo data: ${data.error || 'Unknown error'}`)
       }
     } catch (error) {
       console.error('Error initializing demo:', error)
-      alert('Failed to initialize demo data')
+      alert('Failed to initialize demo data. Check console for details.')
     }
   }
 

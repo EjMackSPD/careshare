@@ -44,33 +44,48 @@ export async function POST() {
     if (!hasFamily) {
       console.log('Creating demo family and sample data...')
 
-      // Create additional family members
-      const sarahUser = await prisma.user.create({
-        data: {
-          email: 'sarah.smith@example.com',
-          name: 'Sarah Smith',
-          password: await bcrypt.hash('demo123', 10),
-          role: 'FAMILY_MEMBER',
-        },
+      // Find or create additional family members
+      let sarahUser = await prisma.user.findUnique({
+        where: { email: 'sarah.smith@example.com' }
       })
+      if (!sarahUser) {
+        sarahUser = await prisma.user.create({
+          data: {
+            email: 'sarah.smith@example.com',
+            name: 'Sarah Smith',
+            password: await bcrypt.hash('demo123', 10),
+            role: 'FAMILY_MEMBER',
+          },
+        })
+      }
 
-      const michaelUser = await prisma.user.create({
-        data: {
-          email: 'michael.smith@example.com',
-          name: 'Michael Smith',
-          password: await bcrypt.hash('demo123', 10),
-          role: 'FAMILY_MEMBER',
-        },
+      let michaelUser = await prisma.user.findUnique({
+        where: { email: 'michael.smith@example.com' }
       })
+      if (!michaelUser) {
+        michaelUser = await prisma.user.create({
+          data: {
+            email: 'michael.smith@example.com',
+            name: 'Michael Smith',
+            password: await bcrypt.hash('demo123', 10),
+            role: 'FAMILY_MEMBER',
+          },
+        })
+      }
 
-      const emilyUser = await prisma.user.create({
-        data: {
-          email: 'emily.smith@example.com',
-          name: 'Emily Smith',
-          password: await bcrypt.hash('demo123', 10),
-          role: 'FAMILY_MEMBER',
-        },
+      let emilyUser = await prisma.user.findUnique({
+        where: { email: 'emily.smith@example.com' }
       })
+      if (!emilyUser) {
+        emilyUser = await prisma.user.create({
+          data: {
+            email: 'emily.smith@example.com',
+            name: 'Emily Smith',
+            password: await bcrypt.hash('demo123', 10),
+            role: 'FAMILY_MEMBER',
+          },
+        })
+      }
 
       // Create demo family with all members
       const demoFamily = await prisma.family.create({
