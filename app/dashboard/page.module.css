@@ -345,7 +345,7 @@
   .widgetMedium {
     grid-column: span 12;
   }
-}
+
   .cards {
     grid-template-columns: 1fr;
   }
