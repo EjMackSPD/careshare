@@ -348,12 +348,39 @@
   margin-bottom: 1.5rem;
 }
 
+.labelWithLink {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
 .formGroup label {
   display: block;
   font-weight: 600;
-  margin-bottom: 0.5rem;
   color: #212529;
   font-size: 0.95rem;
+  margin: 0;
+}
+
+.addMemberLink {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: none;
+  border: none;
+  color: #6366f1;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0.35rem 0.65rem;
+  border-radius: 0.35rem;
+}
+
+.addMemberLink:hover {
+  background: #f0f7ff;
+  color: #4f46e5;
 }
 
 .formGroup input,
@@ -374,6 +401,119 @@
   outline: none;
   border-color: #6366f1;
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* Member Selector */
+.loadingText {
+  padding: 1rem;
+  text-align: center;
+  color: #6c757d;
+  font-style: italic;
+}
+
+.noMembers {
+  padding: 1rem;
+  text-align: center;
+  background: #f8f9fa;
+  border-radius: 0.5rem;
+}
+
+.noMembers p {
+  color: #6c757d;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.memberSelector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 0.5rem;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  background: #f8f9fa;
+}
+
+.memberOption {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.memberOption:hover {
+  border-color: #6366f1;
+  background: #f0f7ff;
+}
+
+.memberOption.selected {
+  background: #eff6ff;
+  border-color: #6366f1;
+}
+
+.memberCheckbox {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.memberOption span {
+  flex: 1;
+  font-size: 0.95rem;
+  color: #212529;
+}
+
+.selectedMembers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 0.5rem;
+}
+
+.selectedLabel {
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.85rem;
+}
+
+.selectedTag {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.65rem;
+  background: #6366f1;
+  color: white;
+  border-radius: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.removeTag {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+}
+
+.removeTag:hover {
+  opacity: 0.7;
 }
 
 .formRow {

@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Navigation from '@/app/components/Navigation'
 import LeftNavigation from '@/app/components/LeftNavigation'
-import { Search, Trash2 } from 'lucide-react'
+import { Search, Trash2, UserPlus, X } from 'lucide-react'
 import styles from './page.module.css'
 
 type Task = {
@@ -15,6 +16,23 @@ type Task = {
   assignedTo: string
   dueDate: string
   completed: boolean
+}
+
+type FamilyMember = {
+  id: string
+  userId: string
+  user: {
+    id: string
+    name: string | null
+    email: string
+  }
+}
+
+type Family = {
+  id: string
+  name: string
+  elderName: string | null
+  members: FamilyMember[]
 }
 
 const sampleTasks: Task[] = [
@@ -61,11 +79,16 @@ const sampleTasks: Task[] = [
 ]
 
 export default function TasksPage() {
+  const router = useRouter()
   const [tasks, setTasks] = useState<Task[]>(sampleTasks)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterCategory, setFilterCategory] = useState('all')
   const [showCompleted, setShowCompleted] = useState(false)
   const [showAddTask, setShowAddTask] = useState(false)
+  const [families, setFamilies] = useState<Family[]>([])
+  const [selectedFamily, setSelectedFamily] = useState<string>('')
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([])
+  const [loading, setLoading] = useState(true)
   const [newTask, setNewTask] = useState({
     title: '',
     description: '',
@@ -74,6 +97,36 @@ export default function TasksPage() {
     assignedTo: '',
     dueDate: '',
   })
+
+  // Fetch families with members
+  useEffect(() => {
+    async function fetchFamilies() {
+      try {
+        const res = await fetch('/api/families')
+        if (!res.ok) throw new Error('Failed to fetch families')
+        const data = await res.json()
+        
+        // Fetch members for each family
+        const familiesWithMembers = await Promise.all(
+          data.map(async (family: any) => {
+            const membersRes = await fetch(`/api/families/${family.id}/members`)
+            const members = membersRes.ok ? await membersRes.json() : []
+            return { ...family, members }
+          })
+        )
+        
+        setFamilies(familiesWithMembers)
+        if (familiesWithMembers.length > 0) {
+          setSelectedFamily(familiesWithMembers[0].id)
+        }
+      } catch (error) {
+        console.error('Error fetching families:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchFamilies()
+  }, [])
 
   const categories = ['all', 'Medication', 'Healthcare', 'Shopping', 'Home Maintenance']
 
@@ -122,6 +175,26 @@ export default function TasksPage() {
     }
   }
 
+  const currentFamily = families.find(f => f.id === selectedFamily)
+  const familyMembers = currentFamily?.members || []
+
+  const toggleMemberSelection = (userId: string) => {
+    setSelectedMembers(prev => 
+      prev.includes(userId)
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    )
+  }
+
+  const getSelectedMemberNames = () => {
+    return selectedMembers
+      .map(userId => {
+        const member = familyMembers.find(m => m.userId === userId)
+        return member?.user.name || member?.user.email || 'Unknown'
+      })
+      .join(', ')
+  }
+
   const handleAddTask = (e: React.FormEvent) => {
     e.preventDefault()
     const task: Task = {
@@ -130,12 +203,13 @@ export default function TasksPage() {
       description: newTask.description,
       category: newTask.category,
       priority: newTask.priority,
-      assignedTo: newTask.assignedTo,
+      assignedTo: selectedMembers.join(','), // Store as comma-separated IDs
       dueDate: newTask.dueDate,
       completed: false,
     }
     setTasks([task, ...tasks])
     setShowAddTask(false)
+    setSelectedMembers([])
     setNewTask({
       title: '',
       description: '',
@@ -258,25 +332,84 @@ export default function TasksPage() {
                     </div>
                   </div>
 
-                  <div className={styles.formRow}>
-                    <div className={styles.formGroup}>
-                      <label>Assigned To</label>
-                      <input
-                        type="text"
-                        value={newTask.assignedTo}
-                        onChange={(e) => setNewTask({ ...newTask, assignedTo: e.target.value })}
-                        placeholder="Family member name"
-                      />
+                  <div className={styles.formGroup}>
+                    <div className={styles.labelWithLink}>
+                      <label>Assign To Family Members</label>
+                      <button
+                        type="button"
+                        className={styles.addMemberLink}
+                        onClick={() => {
+                          setShowAddTask(false)
+                          router.push(`/family/${selectedFamily}/members`)
+                        }}
+                      >
+                        <UserPlus size={14} />
+                        Add Member
+                      </button>
                     </div>
+                    
+                    {loading ? (
+                      <div className={styles.loadingText}>Loading family members...</div>
+                    ) : familyMembers.length === 0 ? (
+                      <div className={styles.noMembers}>
+                        <p>No family members found. Add members to assign tasks.</p>
+                      </div>
+                    ) : (
+                      <div className={styles.memberSelector}>
+                        {familyMembers.map((member) => {
+                          const isSelected = selectedMembers.includes(member.userId)
+                          const displayName = member.user.name || member.user.email
+                          
+                          return (
+                            <div
+                              key={member.userId}
+                              className={`${styles.memberOption} ${isSelected ? styles.selected : ''}`}
+                              onClick={() => toggleMemberSelection(member.userId)}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => {}}
+                                className={styles.memberCheckbox}
+                              />
+                              <span>{displayName}</span>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                    
+                    {selectedMembers.length > 0 && (
+                      <div className={styles.selectedMembers}>
+                        <span className={styles.selectedLabel}>Selected:</span>
+                        {selectedMembers.map(userId => {
+                          const member = familyMembers.find(m => m.userId === userId)
+                          const displayName = member?.user.name || member?.user.email || 'Unknown'
+                          
+                          return (
+                            <span key={userId} className={styles.selectedTag}>
+                              {displayName}
+                              <button
+                                type="button"
+                                onClick={() => toggleMemberSelection(userId)}
+                                className={styles.removeTag}
+                              >
+                                <X size={14} />
+                              </button>
+                            </span>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
 
-                    <div className={styles.formGroup}>
-                      <label>Due Date</label>
-                      <input
-                        type="datetime-local"
-                        value={newTask.dueDate}
-                        onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
-                      />
-                    </div>
+                  <div className={styles.formGroup}>
+                    <label>Due Date</label>
+                    <input
+                      type="datetime-local"
+                      value={newTask.dueDate}
+                      onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
+                    />
                   </div>
 
                   <div className={styles.formActions}>
