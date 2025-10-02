@@ -73,6 +73,7 @@ model User {
   orderedGifts    GiftOrder[] @relation("OrderedGifts")
   orderedFood     FoodOrder[] @relation("OrderedFood")
   messages        Message[]
+  lifeStories     LifeStory[]
 
   @@index([email])
 }
@@ -103,6 +104,7 @@ model Family {
   giftOrders    GiftOrder[]
   foodOrders    FoodOrder[]
   messages      Message[]
+  lifeStories   LifeStory[]
 
   @@index([createdBy])
 }
@@ -341,5 +343,47 @@ model Message {
 
   @@index([familyId])
   @@index([userId])
+  @@index([createdAt])
+}
+
+// Life stories and memories
+enum StoryCategory {
+  CHILDHOOD
+  FAMILY
+  CAREER
+  LIFE_WISDOM
+  MILESTONE
+  STORY
+  JOURNAL
+}
+
+enum ContentType {
+  TEXT
+  PHOTO
+  AUDIO
+  VIDEO
+  DOCUMENT
+}
+
+model LifeStory {
+  id          String        @id @default(cuid())
+  familyId    String
+  userId      String
+  title       String
+  content     String        @db.Text
+  category    StoryCategory
+  contentType ContentType   @default(TEXT)
+  year        Int?
+  tags        String?       // Comma-separated tags
+  visibility  String        @default("family") // family, private, public
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([familyId])
+  @@index([userId])
+  @@index([category])
   @@index([createdAt])
 }
