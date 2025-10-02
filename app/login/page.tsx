@@ -42,8 +42,21 @@ export default function Login() {
 
   const handleDemoMode = async () => {
     setLoading(true)
+    setError('')
+    
     try {
-      // Sign in with demo account
+      // First, ensure demo user and data exist
+      const setupResponse = await fetch('/api/auth/demo', {
+        method: 'POST',
+      })
+
+      if (!setupResponse.ok) {
+        setError('Failed to set up demo mode')
+        setLoading(false)
+        return
+      }
+
+      // Now sign in with demo account
       const result = await signIn('credentials', {
         email: 'demo@careshare.app',
         password: 'demo123',
@@ -51,17 +64,18 @@ export default function Login() {
       })
 
       if (result?.error) {
-        // If demo user doesn't exist, redirect to regular demo page
-        router.push('/demo')
-      } else {
-        // Successfully logged in as demo user
-        router.push('/dashboard')
-        router.refresh()
+        setError('Demo mode login failed. Please try again.')
+        setLoading(false)
+        return
       }
+
+      // Successfully logged in as demo user
+      router.push('/dashboard')
+      router.refresh()
     } catch (error) {
-      router.push('/demo')
+      setError('Something went wrong with demo mode')
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   return (
