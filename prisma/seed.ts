@@ -1,4 +1,4 @@
-import { PrismaClient, EventType, CostStatus } from '@prisma/client'
+import { PrismaClient, EventType, CostStatus, FamilyRole } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
@@ -40,7 +40,7 @@ async function main() {
       members: {
         create: {
           userId: demoUser.id,
-          role: 'organizer',
+          role: FamilyRole.CARE_MANAGER,
         },
       },
     },
