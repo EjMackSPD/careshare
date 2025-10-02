@@ -81,7 +81,7 @@ export default function NotesPage() {
 
   return (
     <div className={styles.container}>
-      <Navigation showAuthLinks={true} backLink={`/family/${familyId}`} />
+      <Navigation showAuthLinks={true} />
       
       <main className={styles.main}>
         <div className={styles.pageHeader}>
