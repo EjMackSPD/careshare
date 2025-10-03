@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Navigation from '@/app/components/Navigation'
 import LeftNavigation from '@/app/components/LeftNavigation'
+import Footer from '@/app/components/Footer'
 import { Plus, Book, Heart, Briefcase, Lightbulb, Calendar, BookOpen, PenTool, Image, Video, Mic, FileText } from 'lucide-react'
 import styles from './page.module.css'
 
@@ -391,9 +392,10 @@ export default function LiveForeverPage() {
                 </button>
               </div>
             </form>
-          </div>
         </div>
+      </div>
       )}
+      <Footer />
     </div>
   )
 }

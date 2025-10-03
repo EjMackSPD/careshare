@@ -266,6 +266,7 @@ export default function GiftMarketplacePage() {
           </section>
         </main>
       </div>
+      <Footer />
     </div>
   )
 }

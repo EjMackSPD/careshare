@@ -575,6 +575,7 @@ export default function TasksPage() {
           </div>
         </main>
       </div>
+      <Footer />
     </div>
   )
 }

@@ -407,6 +407,7 @@ export default function CarePlanPage() {
           )}
         </main>
       </div>
+      <Footer />
     </div>
   )
 }

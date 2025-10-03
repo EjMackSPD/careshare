@@ -359,6 +359,7 @@ export default function CalendarPage() {
           )}
         </main>
       </div>
+      <Footer />
     </div>
   )
 }
