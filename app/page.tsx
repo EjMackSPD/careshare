@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import styles from './page.module.css'
 import ImageCarousel from './components/ImageCarousel'
+import Footer from './components/Footer'
 import { Wallet, CalendarDays, Users, Building2 } from 'lucide-react'
 
 export default function Home() {
@@ -110,26 +111,7 @@ export default function Home() {
         </Link>
       </section>
 
-      <footer className={styles.footer}>
-        <div className={styles.footerContent}>
-          <div>
-            <Image 
-              src="/careshare-logo.png" 
-              alt="CareShare Logo" 
-              width={180} 
-              height={68}
-              className={styles.footerLogo}
-            />
-            <p>Coordinating care for those who matter most</p>
-          </div>
-          <div>
-            <Link href="/admin">Care Provider Portal</Link>
-          </div>
-        </div>
-        <div className={styles.footerBottom}>
-          <p>&copy; 2025 CareShare. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer />
     </main>
   )
 }
