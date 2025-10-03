@@ -612,6 +612,286 @@
   background: #c82333;
 }
 
+/* Expenses Tab */
+.expensesTable {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 2rem;
+}
+
+.expensesTable h3 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #212529;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table thead {
+  background: #f8f9fa;
+}
+
+.table th {
+  text-align: left;
+  padding: 1rem;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.table td {
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+  color: #212529;
+}
+
+.table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.statusBadge {
+  background: #10b981;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Bills Tab */
+.billsSection {
+  margin-top: 2rem;
+}
+
+.billsHeader {
+  margin-bottom: 2rem;
+}
+
+.billsHeader h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #212529;
+  margin: 0 0 0.5rem 0;
+}
+
+.billsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.billCard {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+}
+
+.billCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.billCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.billCardHeader h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #212529;
+  margin: 0;
+}
+
+.billBadge {
+  background: #e0f2fe;
+  color: #0369a1;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.billCardBody {
+  margin-bottom: 1.5rem;
+}
+
+.billCardAmount {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #6366f1;
+  margin-bottom: 0.5rem;
+}
+
+.billCardDue {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.billCardActions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.payBtn,
+.editBtn {
+  flex: 1;
+  padding: 0.625rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.payBtn {
+  background: #10b981;
+  color: white;
+}
+
+.payBtn:hover {
+  background: #059669;
+}
+
+.editBtn {
+  background: #f8f9fa;
+  color: #495057;
+  border: 1px solid #dee2e6;
+}
+
+.editBtn:hover {
+  background: #e9ecef;
+}
+
+/* Family Contributions Tab */
+.contributionsSection {
+  margin-top: 2rem;
+}
+
+.contributionsHeader {
+  margin-bottom: 2rem;
+}
+
+.contributionsHeader h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #212529;
+  margin: 0 0 0.5rem 0;
+}
+
+.contributionsSummary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.summaryCard {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.summaryLabel {
+  color: #6c757d;
+  font-size: 0.95rem;
+  margin: 0 0 0.75rem 0;
+}
+
+.summaryAmount {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #6366f1;
+  margin: 0;
+}
+
+.contributionsDetailList {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.contributionDetailCard {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.contributionCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.memberRole {
+  color: #6c757d;
+  font-size: 0.85rem;
+  margin: 0.25rem 0 0 0;
+}
+
+.contributionCardAmount {
+  text-align: right;
+}
+
+.contributionCardAmount h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #212529;
+  margin: 0 0 0.25rem 0;
+}
+
+.contributionCardFooter {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.viewHistoryBtn,
+.adjustBtn {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.viewHistoryBtn {
+  background: #f8f9fa;
+  color: #495057;
+  border: 1px solid #dee2e6;
+}
+
+.viewHistoryBtn:hover {
+  background: #e9ecef;
+}
+
+.adjustBtn {
+  background: #6366f1;
+  color: white;
+}
+
+.adjustBtn:hover {
+  background: #4f46e5;
+}
+
 /* Cost Allocation Step */
 .allocationHeader {
   margin-bottom: 2rem;

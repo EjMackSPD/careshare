@@ -615,128 +615,260 @@ export default function FinancesPage() {
             ))}
           </div>
 
-          {/* Monthly Budget Overview */}
-          <div className={styles.budgetOverview}>
-            <h2>Monthly Budget Overview</h2>
-            <div className={styles.budgetCards}>
-              <div className={styles.budgetCard}>
-                <p className={styles.budgetLabel}>Monthly Budget</p>
-                <h3 className={styles.budgetAmount}>${monthlyBudget.toFixed(2)}</h3>
-              </div>
-              <div className={styles.budgetCard}>
-                <p className={styles.budgetLabel}>Spent This Month</p>
-                <h3 className={styles.budgetAmount}>${spent.toFixed(2)}</h3>
-              </div>
-              <div className={styles.budgetCard}>
-                <p className={styles.budgetLabel}>Remaining</p>
-                <h3 className={styles.budgetAmount} style={{color: '#10b981'}}>${remaining.toFixed(2)}</h3>
-              </div>
-            </div>
+          {/* Overview Tab */}
+          {activeTab === 'Overview' && (
+            <>
+              {/* Monthly Budget Overview */}
+              <div className={styles.budgetOverview}>
+                <h2>Monthly Budget Overview</h2>
+                <div className={styles.budgetCards}>
+                  <div className={styles.budgetCard}>
+                    <p className={styles.budgetLabel}>Monthly Budget</p>
+                    <h3 className={styles.budgetAmount}>${monthlyBudget.toFixed(2)}</h3>
+                  </div>
+                  <div className={styles.budgetCard}>
+                    <p className={styles.budgetLabel}>Spent This Month</p>
+                    <h3 className={styles.budgetAmount}>${spent.toFixed(2)}</h3>
+                  </div>
+                  <div className={styles.budgetCard}>
+                    <p className={styles.budgetLabel}>Remaining</p>
+                    <h3 className={styles.budgetAmount} style={{color: '#10b981'}}>${remaining.toFixed(2)}</h3>
+                  </div>
+                </div>
 
-            <div className={styles.progressSection}>
-              <div className={styles.progressLabels}>
-                <span>0%</span>
-                <span className={styles.spentLabel}>0% spent</span>
-                <span>100%</span>
+                <div className={styles.progressSection}>
+                  <div className={styles.progressLabels}>
+                    <span>0%</span>
+                    <span className={styles.spentLabel}>0% spent</span>
+                    <span>100%</span>
+                  </div>
+                  <div className={styles.progressBar}>
+                    <div className={styles.progressFill} style={{width: `${(spent / monthlyBudget) * 100}%`}}></div>
+                  </div>
+                </div>
               </div>
-              <div className={styles.progressBar}>
-                <div className={styles.progressFill} style={{width: `${(spent / monthlyBudget) * 100}%`}}></div>
-              </div>
-            </div>
-          </div>
 
-          {/* Charts Section */}
-          <div className={styles.chartsGrid}>
-            <div className={styles.chartCard}>
-              <h3>Expense Trends</h3>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={expenseTrends}>
-                  <XAxis dataKey="month" stroke="#6c757d" />
-                  <YAxis stroke="#6c757d" />
-                  <Tooltip />
-                  <Bar dataKey="amount" fill="#6366f1" radius={[8, 8, 0, 0]} animationDuration={1000} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+              {/* Charts Section */}
+              <div className={styles.chartsGrid}>
+                <div className={styles.chartCard}>
+                  <h3>Expense Trends</h3>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <BarChart data={expenseTrends}>
+                      <XAxis dataKey="month" stroke="#6c757d" />
+                      <YAxis stroke="#6c757d" />
+                      <Tooltip />
+                      <Bar dataKey="amount" fill="#6366f1" radius={[8, 8, 0, 0]} animationDuration={1000} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
 
-            <div className={styles.chartCard}>
-              <h3>Expense Breakdown</h3>
-              <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
-                  <Pie
-                    data={expenseBreakdown}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={90}
-                    paddingAngle={5}
-                    dataKey="value"
-                    animationBegin={0}
-                    animationDuration={800}
-                  >
-                    {expenseBreakdown.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
+                <div className={styles.chartCard}>
+                  <h3>Expense Breakdown</h3>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <PieChart>
+                      <Pie
+                        data={expenseBreakdown}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={90}
+                        paddingAngle={5}
+                        dataKey="value"
+                        animationBegin={0}
+                        animationDuration={800}
+                      >
+                        {expenseBreakdown.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className={styles.legend}>
+                    {expenseBreakdown.map((item) => (
+                      <div key={item.name} className={styles.legendItem}>
+                        <div className={styles.legendDot} style={{background: item.color}}></div>
+                        <span>{item.name}</span>
+                        <strong>${item.value.toFixed(2)} ({item.percentage}%)</strong>
+                      </div>
                     ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-              <div className={styles.legend}>
-                {expenseBreakdown.map((item) => (
-                  <div key={item.name} className={styles.legendItem}>
-                    <div className={styles.legendDot} style={{background: item.color}}></div>
-                    <span>{item.name}</span>
-                    <strong>${item.value.toFixed(2)} ({item.percentage}%)</strong>
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
-          </div>
 
-          {/* Bottom Section */}
-          <div className={styles.bottomGrid}>
-            {/* Upcoming Bills */}
-            <div className={styles.billsCard}>
-              <h3>Upcoming Bills</h3>
-              <div className={styles.billsList}>
+              {/* Bottom Section */}
+              <div className={styles.bottomGrid}>
+                {/* Upcoming Bills */}
+                <div className={styles.billsCard}>
+                  <h3>Upcoming Bills</h3>
+                  <div className={styles.billsList}>
+                    {upcomingBills.map((bill) => (
+                      <div key={bill.id} className={styles.billItem}>
+                        <div className={styles.billInfo}>
+                          <h4>{bill.name}</h4>
+                          <p>Due: {bill.dueDate} • {bill.frequency}</p>
+                        </div>
+                        <div className={styles.billAmount}>${bill.amount.toFixed(2)}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Family Contributions */}
+                <div className={styles.contributionsCard}>
+                  <h3>Family Contributions</h3>
+                  <div className={styles.contributionsList}>
+                    {familyContributions.map((member) => (
+                      <div key={member.name} className={styles.contributionItem}>
+                        <div className={styles.memberInfo}>
+                          <div className={styles.memberAvatar} style={{background: member.color}}>
+                            {member.initial}
+                          </div>
+                          <span className={styles.memberName}>{member.name}</span>
+                        </div>
+                        <div className={styles.contributionDetails}>
+                          <div className={styles.contributionBar}>
+                            <div className={styles.contributionFill} style={{width: `${member.percentage}%`, background: member.color}}></div>
+                          </div>
+                          <div className={styles.contributionAmount}>
+                            <span>${member.amount.toFixed(2)}</span>
+                            <span className={styles.percentage}>{member.percentage}%</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Expenses Tab */}
+          {activeTab === 'Expenses' && (
+            <>
+              <div className={styles.chartCard}>
+                <h3>Expense Trends (Last 6 Months)</h3>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={expenseTrends}>
+                    <XAxis dataKey="month" stroke="#6c757d" />
+                    <YAxis stroke="#6c757d" />
+                    <Tooltip />
+                    <Bar dataKey="amount" fill="#6366f1" radius={[8, 8, 0, 0]} animationDuration={1000} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              <div className={styles.expensesTable}>
+                <h3>Expense Breakdown by Category</h3>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>Category</th>
+                      <th>Amount</th>
+                      <th>Percentage</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {expenseBreakdown.map((expense) => (
+                      <tr key={expense.name}>
+                        <td>
+                          <div style={{display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                            <div className={styles.legendDot} style={{background: expense.color}}></div>
+                            {expense.name}
+                          </div>
+                        </td>
+                        <td>${expense.value.toFixed(2)}</td>
+                        <td>{expense.percentage}%</td>
+                        <td><span className={styles.statusBadge}>Tracked</span></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+
+          {/* Bills Tab */}
+          {activeTab === 'Bills' && (
+            <div className={styles.billsSection}>
+              <div className={styles.billsHeader}>
+                <h3>All Bills</h3>
+                <p className={styles.subtitle}>Manage recurring and one-time bills</p>
+              </div>
+              
+              <div className={styles.billsGrid}>
                 {upcomingBills.map((bill) => (
-                  <div key={bill.id} className={styles.billItem}>
-                    <div className={styles.billInfo}>
+                  <div key={bill.id} className={styles.billCard}>
+                    <div className={styles.billCardHeader}>
                       <h4>{bill.name}</h4>
-                      <p>Due: {bill.dueDate} • {bill.frequency}</p>
+                      <span className={styles.billBadge}>{bill.frequency}</span>
                     </div>
-                    <div className={styles.billAmount}>${bill.amount.toFixed(2)}</div>
+                    <div className={styles.billCardBody}>
+                      <div className={styles.billCardAmount}>${bill.amount.toFixed(2)}</div>
+                      <p className={styles.billCardDue}>Due: {bill.dueDate}</p>
+                    </div>
+                    <div className={styles.billCardActions}>
+                      <button className={styles.payBtn}>Mark as Paid</button>
+                      <button className={styles.editBtn}>Edit</button>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
+          )}
 
-            {/* Family Contributions */}
-            <div className={styles.contributionsCard}>
-              <h3>Family Contributions</h3>
-              <div className={styles.contributionsList}>
+          {/* Family Contributions Tab */}
+          {activeTab === 'Family Contributions' && (
+            <div className={styles.contributionsSection}>
+              <div className={styles.contributionsHeader}>
+                <h3>Family Contributions Overview</h3>
+                <p className={styles.subtitle}>Track how care costs are shared among family members</p>
+              </div>
+
+              <div className={styles.contributionsSummary}>
+                <div className={styles.summaryCard}>
+                  <p className={styles.summaryLabel}>Total Family Contributions</p>
+                  <h3 className={styles.summaryAmount}>
+                    ${familyContributions.reduce((sum, m) => sum + m.amount, 0).toFixed(2)}
+                  </h3>
+                </div>
+                <div className={styles.summaryCard}>
+                  <p className={styles.summaryLabel}>Active Contributors</p>
+                  <h3 className={styles.summaryAmount}>{familyContributions.filter(m => m.amount > 0).length}</h3>
+                </div>
+              </div>
+
+              <div className={styles.contributionsDetailList}>
                 {familyContributions.map((member) => (
-                  <div key={member.name} className={styles.contributionItem}>
-                    <div className={styles.memberInfo}>
-                      <div className={styles.memberAvatar} style={{background: member.color}}>
-                        {member.initial}
+                  <div key={member.name} className={styles.contributionDetailCard}>
+                    <div className={styles.contributionCardHeader}>
+                      <div className={styles.memberInfo}>
+                        <div className={styles.memberAvatar} style={{background: member.color}}>
+                          {member.initial}
+                        </div>
+                        <div>
+                          <h4 className={styles.memberName}>{member.name}</h4>
+                          <p className={styles.memberRole}>Family Member</p>
+                        </div>
                       </div>
-                      <span className={styles.memberName}>{member.name}</span>
-                    </div>
-                    <div className={styles.contributionDetails}>
-                      <div className={styles.contributionBar}>
-                        <div className={styles.contributionFill} style={{width: `${member.percentage}%`, background: member.color}}></div>
-                      </div>
-                      <div className={styles.contributionAmount}>
-                        <span>${member.amount.toFixed(2)}</span>
+                      <div className={styles.contributionCardAmount}>
+                        <h3>${member.amount.toFixed(2)}</h3>
                         <span className={styles.percentage}>{member.percentage}%</span>
                       </div>
                     </div>
+                    <div className={styles.contributionBar}>
+                      <div className={styles.contributionFill} style={{width: `${member.percentage}%`, background: member.color}}></div>
+                    </div>
+                    <div className={styles.contributionCardFooter}>
+                      <button className={styles.viewHistoryBtn}>View History</button>
+                      <button className={styles.adjustBtn}>Adjust Split</button>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
-          </div>
+          )}
         </main>
       </div>
     </div>
