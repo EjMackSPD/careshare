@@ -77,7 +77,7 @@ export async function POST(
 
     const { familyId } = await params
     const body = await request.json()
-    const { description, amount, status, dueDate, assignedTo } = body
+    const { description, amount, status, dueDate, assignedTo, receiptUrl, fileName } = body
 
     if (!description || !amount) {
       return NextResponse.json(
@@ -109,6 +109,8 @@ export async function POST(
         status: status || 'PENDING',
         dueDate: dueDate ? new Date(dueDate) : null,
         assignedTo,
+        receiptUrl: receiptUrl || null,
+        fileName: fileName || null,
       },
       include: {
         assignedUser: {
