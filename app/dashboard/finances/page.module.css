@@ -542,6 +542,76 @@
   color: #6366f1;
 }
 
+.receiptLink {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.receiptLink:hover {
+  text-decoration: underline;
+}
+
+/* File Upload */
+.fileUpload {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 0.5rem;
+  border: 2px dashed #dee2e6;
+}
+
+.fileInput {
+  display: none;
+}
+
+.fileLabel {
+  background: #2563eb;
+  color: white;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-block;
+}
+
+.fileLabel:hover {
+  background: #1d4ed8;
+}
+
+.fileLabel:active {
+  transform: scale(0.98);
+}
+
+.fileHint {
+  color: #6c757d;
+  font-size: 0.85rem;
+  flex: 1;
+  min-width: 200px;
+}
+
+.removeFileBtn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.removeFileBtn:hover {
+  background: #c82333;
+}
+
 /* Cost Allocation Step */
 .allocationHeader {
   margin-bottom: 2rem;

@@ -179,6 +179,8 @@ model Cost {
   paidDate    DateTime?
   assignedTo  String?    // User assigned to pay this cost (deprecated - use splits)
   splitType   String     @default("EQUAL") // EQUAL, CUSTOM, SINGLE
+  receiptUrl  String?    // URL/path to receipt/bill file
+  fileName    String?    // Original file name
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 

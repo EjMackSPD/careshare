@@ -86,6 +86,13 @@ export default function FinancesPage() {
     category: 'Medical'
   })
   
+  // File upload
+  const [uploadedFile, setUploadedFile] = useState<{
+    url: string
+    fileName: string
+  } | null>(null)
+  const [uploading, setUploading] = useState(false)
+  
   // Cost Allocation
   const [allocationType, setAllocationType] = useState<'estate' | 'family' | 'split'>('estate')
   const [splitType, setSplitType] = useState<'equal' | 'percentage' | 'custom'>('equal')
@@ -94,6 +101,39 @@ export default function FinancesPage() {
   const monthlyBudget = 2400.00
   const spent = 0.35
   const remaining = 2399.65
+
+  // File upload handler
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploading(true)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      })
+
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error.error || 'Upload failed')
+      }
+
+      const data = await res.json()
+      setUploadedFile({
+        url: data.url,
+        fileName: data.fileName
+      })
+    } catch (error) {
+      console.error('Error uploading file:', error)
+      alert(error instanceof Error ? error.message : 'Failed to upload file')
+    } finally {
+      setUploading(false)
+    }
+  }
 
   // Fetch family members
   useEffect(() => {
@@ -322,12 +362,52 @@ export default function FinancesPage() {
                       </div>
                     </div>
 
+                    <div className={styles.formGroup}>
+                      <label>Receipt/Bill (Optional)</label>
+                      <div className={styles.fileUpload}>
+                        <input
+                          type="file"
+                          id="receipt-upload"
+                          accept="image/*,.pdf"
+                          onChange={handleFileUpload}
+                          disabled={uploading}
+                          className={styles.fileInput}
+                        />
+                        <label htmlFor="receipt-upload" className={styles.fileLabel}>
+                          {uploading ? 'Uploading...' : uploadedFile ? 'Change File' : 'Choose File'}
+                        </label>
+                        <span className={styles.fileHint}>
+                          {uploadedFile 
+                            ? uploadedFile.fileName 
+                            : 'Upload receipt, bill, or invoice (PDF, JPG, PNG - Max 10MB)'
+                          }
+                        </span>
+                        {uploadedFile && (
+                          <button
+                            type="button"
+                            onClick={() => setUploadedFile(null)}
+                            className={styles.removeFileBtn}
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
                     <div className={styles.billSummary}>
                       <h3>Bill Summary</h3>
                       <div className={styles.summaryItem}>
                         <span>Total Amount:</span>
                         <strong>${parseFloat(billData.amount || '0').toFixed(2)}</strong>
                       </div>
+                      {uploadedFile && (
+                        <div className={styles.summaryItem}>
+                          <span>Receipt:</span>
+                          <a href={uploadedFile.url} target="_blank" rel="noopener noreferrer" className={styles.receiptLink}>
+                            View Uploaded Receipt
+                          </a>
+                        </div>
+                      )}
                     </div>
 
                     <div className={styles.modalActions}>
