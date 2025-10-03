@@ -3,9 +3,9 @@
   background: white;
   border-right: 1px solid #e9ecef;
   position: fixed;
-  top: 81px;
+  top: 126px;
   left: 0;
-  height: calc(100vh - 81px);
+  height: calc(100vh - 126px);
   overflow-y: auto;
   z-index: 50;
 }
@@ -57,7 +57,7 @@
 .menuButton {
   display: none;
   position: fixed;
-  top: 25px;
+  top: 70px;
   right: 1rem;
   z-index: 150;
   background: #2563eb;
