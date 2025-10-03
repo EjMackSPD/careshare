@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Navigation from '@/app/components/Navigation'
+import LeftNavigation from '@/app/components/LeftNavigation'
 import styles from './page.module.css'
 
 type Family = {
@@ -129,9 +130,11 @@ export default function FamilyDetail() {
 
   return (
     <div className={styles.container}>
-      <Navigation backLink={{ href: '/dashboard', label: 'Back to Dashboard' }} />
+      <Navigation showAuthLinks={true} />
 
-      <main className={styles.main}>
+      <div className={styles.layout}>
+        <LeftNavigation />
+        <main className={styles.main}>
         <div className={styles.header}>
           <div className={styles.headerContent}>
             <div>
@@ -314,6 +317,7 @@ export default function FamilyDetail() {
           </section>
         </div>
       </main>
+      </div>
     </div>
   )
 }
