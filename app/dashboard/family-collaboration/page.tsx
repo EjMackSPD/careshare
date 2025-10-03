@@ -109,8 +109,12 @@ export default function FamilyCollaborationPage() {
         const res = await fetch('/api/families')
         if (!res.ok) throw new Error('Failed to fetch families')
         const families = await res.json()
-        if (families.families && families.families.length > 0) {
-          const family = families.families[0]
+        
+        // API returns array directly
+        const familiesArray = Array.isArray(families) ? families : []
+        
+        if (familiesArray.length > 0) {
+          const family = familiesArray[0]
           setFamilyId(family.id)
           
           // Fetch family members
@@ -118,14 +122,14 @@ export default function FamilyCollaborationPage() {
           if (membersRes.ok) {
             const membersData = await membersRes.json()
             setFamilyMembers(membersData)
-          }
-
-          // Fetch tasks
-          const tasksRes = await fetch(`/api/families/${family.id}/tasks`)
-          if (tasksRes.ok) {
-            const tasksData = await tasksRes.json()
-            setTasks(tasksData)
-            calculateTaskDistribution(tasksData, membersData)
+            
+            // Fetch tasks
+            const tasksRes = await fetch(`/api/families/${family.id}/tasks`)
+            if (tasksRes.ok) {
+              const tasksData = await tasksRes.json()
+              setTasks(tasksData)
+              calculateTaskDistribution(tasksData, membersData)
+            }
           }
         }
       } catch (error) {
