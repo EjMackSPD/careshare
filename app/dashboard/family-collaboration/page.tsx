@@ -95,8 +95,8 @@ export default function FamilyCollaborationPage() {
   const [familyId, setFamilyId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
-  const [initialLoad, setInitialLoad] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const previousMessageCountRef = useRef(0)
 
   // Fetch user's first family
   useEffect(() => {
@@ -126,11 +126,6 @@ export default function FamilyCollaborationPage() {
         const data = await res.json()
         setMessages(data)
         setLoading(false)
-        
-        // Mark initial load as complete
-        if (initialLoad) {
-          setInitialLoad(false)
-        }
       } catch (error) {
         console.error('Error fetching messages:', error)
         setLoading(false)
@@ -145,12 +140,13 @@ export default function FamilyCollaborationPage() {
     return () => clearInterval(interval)
   }, [familyId])
 
-  // Scroll to bottom when messages change (but not on initial load)
+  // Scroll to bottom only when message count increases (new message added)
   useEffect(() => {
-    if (!initialLoad && messages.length > 0) {
+    if (messages.length > previousMessageCountRef.current && previousMessageCountRef.current > 0) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
-  }, [messages])
+    previousMessageCountRef.current = messages.length
+  }, [messages.length])
 
   const handleSendMessage = async () => {
     if (!message.trim() || !familyId || sending) return
