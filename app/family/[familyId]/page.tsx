@@ -299,7 +299,11 @@ export default function FamilyDetail() {
               {family.members.map((member) => {
                 const isCareManager = member.role === 'CARE_MANAGER'
                 return (
-                  <div key={member.user.id} className={`${styles.memberCard} ${isCareManager ? styles.careManager : ''}`}>
+                  <Link 
+                    key={member.user.id} 
+                    href={`/family/${familyId}/members/${member.user.id}`}
+                    className={`${styles.memberCard} ${isCareManager ? styles.careManager : ''}`}
+                  >
                     <div className={styles.memberAvatar}>
                       {member.user.name.charAt(0).toUpperCase()}
                     </div>
@@ -310,7 +314,7 @@ export default function FamilyDetail() {
                     <span className={`${styles.memberRole} ${isCareManager ? styles.careManagerBadge : styles.familyMemberBadge}`}>
                       {isCareManager ? '⭐ Care Manager' : 'Family Member'}
                     </span>
-                  </div>
+                  </Link>
                 )
               })}
             </div>

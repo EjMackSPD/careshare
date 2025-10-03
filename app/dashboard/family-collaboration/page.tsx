@@ -93,20 +93,29 @@ export default function FamilyCollaborationPage() {
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<MessageType[]>([])
   const [familyId, setFamilyId] = useState<string | null>(null)
+  const [familyMembers, setFamilyMembers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const previousMessageCountRef = useRef(0)
 
-  // Fetch user's first family
+  // Fetch user's first family and members
   useEffect(() => {
     async function fetchFamily() {
       try {
         const res = await fetch('/api/families')
         if (!res.ok) throw new Error('Failed to fetch families')
         const families = await res.json()
-        if (families.length > 0) {
-          setFamilyId(families[0].id)
+        if (families.families && families.families.length > 0) {
+          const family = families.families[0]
+          setFamilyId(family.id)
+          
+          // Fetch family members
+          const membersRes = await fetch(`/api/families/${family.id}/members`)
+          if (membersRes.ok) {
+            const membersData = await membersRes.json()
+            setFamilyMembers(membersData)
+          }
         }
       } catch (error) {
         console.error('Error fetching families:', error)
@@ -197,23 +206,28 @@ export default function FamilyCollaborationPage() {
               <p className={styles.cardSubtitle}>People helping with Martha Johnson's care</p>
               
               <div className={styles.teamList}>
-                {teamMembers.map((member) => (
-                  <div key={member.id} className={styles.teamMember}>
-                    <div className={styles.avatar} style={{ background: member.color }}>
-                      {member.initials}
-                    </div>
-                    <div className={styles.memberInfo}>
-                      <div className={styles.memberName}>{member.name}</div>
-                      <div className={styles.memberStatus}>
-                        <span className={styles.statusDot}></span>
-                        Active now
+                {familyMembers.map((member) => {
+                  const memberColor = getAvatarColor(member.userId)
+                  const initials = (member.user.name || member.user.email).charAt(0).toUpperCase()
+                  
+                  return (
+                    <Link 
+                      key={member.id} 
+                      href={`/family/${familyId}/members/${member.userId}`}
+                      className={styles.teamMember}
+                    >
+                      <div className={styles.avatar} style={{ background: memberColor }}>
+                        {initials}
                       </div>
-                    </div>
-                    <button className={styles.menuBtn}>
-                      <MoreVertical size={18} />
-                    </button>
-                  </div>
-                ))}
+                      <div className={styles.memberInfo}>
+                        <div className={styles.memberName}>{member.user.name || member.user.email}</div>
+                        <div className={styles.memberRole}>
+                          {member.role === 'CARE_MANAGER' ? '⭐ Care Manager' : 'Family Member'}
+                        </div>
+                      </div>
+                    </Link>
+                  )
+                })}
               </div>
 
               <button className={styles.inviteMemberBtn}>
