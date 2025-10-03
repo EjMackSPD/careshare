@@ -26,26 +26,41 @@ export default function CalendarWidget() {
     try {
       // Fetch all families
       const familiesRes = await fetch('/api/families')
-      if (!familiesRes.ok) return
+      if (!familiesRes.ok) {
+        console.log('CalendarWidget - Failed to fetch families:', familiesRes.status)
+        return
+      }
 
       const familiesData = await familiesRes.json()
-      if (!familiesData.families || familiesData.families.length === 0) return
+      console.log('CalendarWidget - Families data:', familiesData)
+      
+      // API returns array directly, not wrapped in object
+      const families = Array.isArray(familiesData) ? familiesData : []
+      
+      if (families.length === 0) {
+        console.log('CalendarWidget - No families found')
+        return
+      }
+
+      console.log('CalendarWidget - Found families:', families.length)
 
       // Fetch events from all families
       const allEvents: Event[] = []
-      for (const family of familiesData.families) {
+      for (const family of families) {
+        console.log('CalendarWidget - Fetching events for family:', family.id)
         const eventsRes = await fetch(`/api/families/${family.id}/events`)
         if (eventsRes.ok) {
           const eventsData = await eventsRes.json()
+          console.log(`CalendarWidget - Family ${family.id} events:`, eventsData.length)
           allEvents.push(...eventsData)
         }
       }
 
-      console.log('CalendarWidget - Fetched events:', allEvents.length)
-      console.log('CalendarWidget - Sample event:', allEvents[0])
+      console.log('CalendarWidget - Total events fetched:', allEvents.length)
+      console.log('CalendarWidget - Sample events:', allEvents.slice(0, 3))
       setEvents(allEvents)
     } catch (error) {
-      console.error('Error fetching events:', error)
+      console.error('CalendarWidget - Error fetching events:', error)
     } finally {
       setLoading(false)
     }
