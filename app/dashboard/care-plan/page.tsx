@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import Navigation from '@/app/components/Navigation'
 import LeftNavigation from '@/app/components/LeftNavigation'
+import Footer from '@/app/components/Footer'
 import { Info } from 'lucide-react'
 import styles from './page.module.css'
 

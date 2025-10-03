@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Navigation from '@/app/components/Navigation'
 import LeftNavigation from '@/app/components/LeftNavigation'
+import Footer from '@/app/components/Footer'
 import { ChevronLeft, ChevronRight, CalendarIcon } from 'lucide-react'
 import styles from './page.module.css'
 
