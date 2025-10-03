@@ -2,14 +2,6 @@
   background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
   color: #cbd5e1;
   margin-top: auto;
-  margin-left: 0;
-}
-
-/* When footer appears on pages with left navigation */
-@media (min-width: 969px) {
-  body:has(.sidebar) .footer {
-    margin-left: 260px;
-  }
 }
 
 .footerContent {

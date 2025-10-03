@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Footer from './components/Footer'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -106,10 +105,7 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-          <div style={{ flex: 1 }}>{children}</div>
-        </div>
-        <Footer />
+        {children}
       </body>
     </html>
   )

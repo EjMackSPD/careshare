@@ -6,6 +6,7 @@ import Navigation from '../components/Navigation'
 import LeftNavigation from '../components/LeftNavigation'
 import DemoModeBanner from '../components/DemoModeBanner'
 import DemoInitButton from '../components/DemoInitButton'
+import FooterWithSidebar from '../components/FooterWithSidebar'
 import CareRecipientWidget from '../components/widgets/CareRecipientWidget'
 import TasksWidget from '../components/widgets/TasksWidget'
 import FinancialWidget from '../components/widgets/FinancialWidget'
@@ -243,6 +244,7 @@ export default async function Dashboard() {
         )}
         </main>
       </div>
+      <FooterWithSidebar />
     </div>
   )
 }
