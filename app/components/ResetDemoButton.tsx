@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import styles from './DemoInitButton.module.css'
 
 export default function ResetDemoButton() {
   const [loading, setLoading] = useState(false)
@@ -36,9 +35,23 @@ export default function ResetDemoButton() {
     }
   }
 
+  const buttonStyles = {
+    background: 'white',
+    color: '#d97706',
+    border: 'none',
+    padding: '0.625rem 1.25rem',
+    borderRadius: '0.5rem',
+    fontSize: '0.9rem',
+    fontWeight: 600,
+    cursor: loading ? 'not-allowed' : 'pointer',
+    transition: 'all 0.2s',
+    opacity: loading ? 0.7 : 1,
+    whiteSpace: 'nowrap' as const
+  }
+
   return (
-    <button onClick={handleReset} disabled={loading} className={styles.button}>
-      {loading ? '🔄 Resetting Demo Data...' : '🔄 Reset Demo Data'}
+    <button onClick={handleReset} disabled={loading} style={buttonStyles}>
+      {loading ? '🔄 Resetting...' : '🔄 Reset Demo Data'}
     </button>
   )
 }
