@@ -5,6 +5,7 @@ import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import Footer from '@/app/components/Footer'
 import styles from './page.module.css'
 
 export default function Login() {
@@ -197,6 +198,7 @@ export default function Login() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }

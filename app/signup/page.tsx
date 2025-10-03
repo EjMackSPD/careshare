@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
+import Footer from '@/app/components/Footer'
 import styles from './page.module.css'
 
 export default function Signup() {
@@ -153,6 +154,7 @@ export default function Signup() {
           </p>
         </div>
       </div>
+      <Footer />
     </div>
   )
 }
