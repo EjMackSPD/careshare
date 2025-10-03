@@ -231,22 +231,60 @@ export default function FinancesPage() {
   }
 
   const handleSubmitBill = async () => {
-    // TODO: Submit to API
-    console.log('Bill Data:', billData)
-    console.log('Allocation Type:', allocationType)
-    console.log('Allocations:', allocations)
-    
-    // Reset and close
-    setShowAddBill(false)
-    setBillStep(1)
-    setBillData({
-      name: '',
-      amount: '',
-      dueDate: '',
-      frequency: 'One-time',
-      category: 'Medical'
-    })
-    setAllocationType('estate')
+    setLoading(true)
+    try {
+      // Get first family (for demo purposes)
+      const familiesRes = await fetch('/api/families')
+      if (!familiesRes.ok) throw new Error('Failed to fetch families')
+      const familiesData = await familiesRes.json()
+      
+      if (!familiesData.families || familiesData.families.length === 0) {
+        throw new Error('No family found')
+      }
+      
+      const familyId = familiesData.families[0].id
+      
+      // Create cost
+      const costData = {
+        description: billData.name,
+        amount: parseFloat(billData.amount),
+        dueDate: billData.dueDate ? new Date(billData.dueDate).toISOString() : null,
+        status: 'PENDING',
+        receiptUrl: uploadedFile?.url || null,
+        fileName: uploadedFile?.fileName || null
+      }
+      
+      const costRes = await fetch(`/api/families/${familyId}/costs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(costData)
+      })
+      
+      if (!costRes.ok) {
+        const error = await costRes.json()
+        throw new Error(error.error || 'Failed to create cost')
+      }
+      
+      // Success - close modal and reset
+      setShowAddBill(false)
+      setBillStep(1)
+      setBillData({
+        name: '',
+        amount: '',
+        dueDate: '',
+        frequency: 'One-time',
+        category: 'Medical'
+      })
+      setAllocationType('estate')
+      setUploadedFile(null)
+      
+      alert('Bill added successfully!')
+    } catch (error) {
+      console.error('Error submitting bill:', error)
+      alert(error instanceof Error ? error.message : 'Failed to add bill')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const canProceedToStep2 = billData.name && billData.amount && billData.dueDate
