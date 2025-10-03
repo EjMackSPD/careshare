@@ -63,11 +63,16 @@ export default function CalendarWidget() {
     })
   }
 
-  // Get upcoming events (next 5 events)
-  const upcomingEvents = events
-    .filter(event => new Date(event.eventDate) >= today)
-    .sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime())
-    .slice(0, 5)
+  // Get upcoming events (next 5 events or events for selected date)
+  const upcomingEvents = selectedDate
+    ? events.filter(event => {
+        const eventDate = new Date(event.eventDate)
+        return eventDate.toDateString() === selectedDate.toDateString()
+      })
+    : events
+        .filter(event => new Date(event.eventDate) >= today)
+        .sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime())
+        .slice(0, 5)
 
   const navigateMonth = (direction: 'prev' | 'next') => {
     setCurrentMonth(prev => {
@@ -91,6 +96,12 @@ export default function CalendarWidget() {
     setShowMonthPicker(false)
   }
 
+  const resetToToday = () => {
+    const now = new Date()
+    setCurrentMonth(now)
+    setSelectedDate(now)
+  }
+
   const generateYearRange = () => {
     const currentYear = new Date().getFullYear()
     return Array.from({ length: 10 }, (_, i) => currentYear - 2 + i)
@@ -104,16 +115,21 @@ export default function CalendarWidget() {
       </div>
       
       <div className={styles.widgetContent}>
-        <div className={styles.calendarHeader}>
-          <button onClick={() => navigateMonth('prev')} className={styles.monthNav}>←</button>
-          <strong 
-            onClick={() => setShowMonthPicker(!showMonthPicker)} 
-            className={styles.monthYearBtn}
-            title="Click to select month/year"
-          >
-            {monthName}
-          </strong>
-          <button onClick={() => navigateMonth('next')} className={styles.monthNav}>→</button>
+        <div className={styles.calendarHeaderWrapper}>
+          <div className={styles.calendarHeader}>
+            <button onClick={() => navigateMonth('prev')} className={styles.monthNav}>←</button>
+            <strong 
+              onClick={() => setShowMonthPicker(!showMonthPicker)} 
+              className={styles.monthYearBtn}
+              title="Click to select month/year"
+            >
+              {monthName}
+            </strong>
+            <button onClick={() => navigateMonth('next')} className={styles.monthNav}>→</button>
+          </div>
+          <button onClick={resetToToday} className={styles.todayBtn} title="Jump to today">
+            Today
+          </button>
         </div>
 
         {showMonthPicker && (
@@ -180,11 +196,29 @@ export default function CalendarWidget() {
         </div>
 
         <div className={styles.upcomingEvents}>
-          <strong>Upcoming Events</strong>
+          <div className={styles.eventsHeader}>
+            <strong>
+              {selectedDate 
+                ? `Events for ${selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+                : 'Upcoming Events'
+              }
+            </strong>
+            {selectedDate && (
+              <button 
+                onClick={() => setSelectedDate(null)} 
+                className={styles.clearSelectionBtn}
+                title="Clear selection"
+              >
+                ✕
+              </button>
+            )}
+          </div>
           {loading ? (
             <p className={styles.emptyText}>Loading...</p>
           ) : upcomingEvents.length === 0 ? (
-            <p className={styles.emptyText}>No upcoming events.</p>
+            <p className={styles.emptyText}>
+              {selectedDate ? 'No events on this date.' : 'No upcoming events.'}
+            </p>
           ) : (
             <ul className={styles.eventsList}>
               {upcomingEvents.map(event => (
