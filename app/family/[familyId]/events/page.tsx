@@ -77,8 +77,10 @@ export default function FamilyEvents() {
   return (
     <div className={styles.container}>
       <Navigation backLink={{ href: `/family/${familyId}`, label: 'Back to Family' }} />
-
-      <main className={styles.main}>
+      
+      <div className={styles.layout}>
+        <LeftNavigation />
+        <main className={styles.main}>
         <div className={styles.header}>
           <h1>Events & Appointments</h1>
           <button onClick={() => setShowForm(!showForm)} className={styles.addBtn}>

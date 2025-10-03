@@ -79,8 +79,10 @@ export default function FamilyMembers() {
   return (
     <div className={styles.container}>
       <Navigation backLink={{ href: `/family/${familyId}`, label: 'Back to Family' }} />
-
-      <main className={styles.main}>
+      
+      <div className={styles.layout}>
+        <LeftNavigation />
+        <main className={styles.main}>
         <div className={styles.header}>
           <div>
             <h1>Family Members</h1>
