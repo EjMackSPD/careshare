@@ -138,6 +138,8 @@ export default function FamilyMembers() {
         </div>
       </main>
     </div>
+    <Footer />
+  </div>
   )
 }
 

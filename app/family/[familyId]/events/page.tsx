@@ -173,6 +173,8 @@ export default function FamilyEvents() {
         )}
       </main>
     </div>
+    <Footer />
+  </div>
   )
 }
 
