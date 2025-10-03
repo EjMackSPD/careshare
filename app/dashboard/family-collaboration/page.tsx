@@ -94,6 +94,9 @@ export default function FamilyCollaborationPage() {
   const [messages, setMessages] = useState<MessageType[]>([])
   const [familyId, setFamilyId] = useState<string | null>(null)
   const [familyMembers, setFamilyMembers] = useState<any[]>([])
+  const [tasks, setTasks] = useState<any[]>([])
+  const [taskDistribution, setTaskDistribution] = useState<any[]>([])
+  const [showRebalance, setShowRebalance] = useState(false)
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -116,6 +119,14 @@ export default function FamilyCollaborationPage() {
             const membersData = await membersRes.json()
             setFamilyMembers(membersData)
           }
+
+          // Fetch tasks
+          const tasksRes = await fetch(`/api/families/${family.id}/tasks`)
+          if (tasksRes.ok) {
+            const tasksData = await tasksRes.json()
+            setTasks(tasksData)
+            calculateTaskDistribution(tasksData, membersData)
+          }
         }
       } catch (error) {
         console.error('Error fetching families:', error)
@@ -123,6 +134,72 @@ export default function FamilyCollaborationPage() {
     }
     fetchFamily()
   }, [])
+
+  const calculateTaskDistribution = (tasksData: any[], membersData: any[]) => {
+    // Count tasks per member
+    const memberTaskCounts: { [key: string]: number } = {}
+    const totalTasks = tasksData.filter(t => t.status !== 'COMPLETED').length
+
+    if (totalTasks === 0) {
+      setTaskDistribution([])
+      return
+    }
+
+    tasksData.forEach(task => {
+      if (task.status === 'COMPLETED') return
+      
+      task.assignments?.forEach((assignment: any) => {
+        memberTaskCounts[assignment.userId] = (memberTaskCounts[assignment.userId] || 0) + 1
+      })
+    })
+
+    const distribution = membersData.map((member, index) => {
+      const taskCount = memberTaskCounts[member.userId] || 0
+      const percentage = totalTasks > 0 ? (taskCount / totalTasks) * 100 : 0
+      const color = getAvatarColor(member.userId)
+
+      return {
+        userId: member.userId,
+        name: member.user.name || member.user.email,
+        taskCount,
+        percentage: Math.round(percentage),
+        color
+      }
+    }).sort((a, b) => b.taskCount - a.taskCount)
+
+    setTaskDistribution(distribution)
+  }
+
+  const handleReassignTask = async (taskId: string, newUserId: string) => {
+    try {
+      const res = await fetch(`/api/tasks/${taskId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          assignedMembers: [newUserId],
+          title: tasks.find(t => t.id === taskId)?.title,
+          description: tasks.find(t => t.id === taskId)?.description,
+          priority: tasks.find(t => t.id === taskId)?.priority,
+          status: tasks.find(t => t.id === taskId)?.status
+        })
+      })
+
+      if (!res.ok) throw new Error('Failed to reassign task')
+
+      // Refresh tasks
+      if (familyId) {
+        const tasksRes = await fetch(`/api/families/${familyId}/tasks`)
+        if (tasksRes.ok) {
+          const tasksData = await tasksRes.json()
+          setTasks(tasksData)
+          calculateTaskDistribution(tasksData, familyMembers)
+        }
+      }
+    } catch (error) {
+      console.error('Error reassigning task:', error)
+      alert('Failed to reassign task')
+    }
+  }
 
   // Fetch messages when familyId is available
   useEffect(() => {
@@ -301,27 +378,38 @@ export default function FamilyCollaborationPage() {
           {/* Task Distribution */}
           <div className={styles.card}>
             <h2>Task Distribution</h2>
-            <p className={styles.cardSubtitle}>Current workload distribution</p>
+            <p className={styles.cardSubtitle}>Active task workload across family members</p>
             
             <div className={styles.taskBars}>
-              {taskDistribution.map((person) => (
-                <div key={person.name} className={styles.taskRow}>
-                  <div className={styles.taskName}>{person.name}</div>
-                  <div className={styles.taskBarContainer}>
-                    <div 
-                      className={styles.taskBar}
-                      style={{ 
-                        width: `${person.percentage}%`,
-                        background: person.color
-                      }}
-                    ></div>
+              {taskDistribution.length === 0 ? (
+                <p className={styles.emptyText}>No active tasks to distribute</p>
+              ) : (
+                taskDistribution.map((person) => (
+                  <div key={person.userId} className={styles.taskRow}>
+                    <div className={styles.taskName}>
+                      {person.name}
+                      <span className={styles.taskCount}>({person.taskCount} tasks)</span>
+                    </div>
+                    <div className={styles.taskBarContainer}>
+                      <div 
+                        className={styles.taskBar}
+                        style={{ 
+                          width: `${person.percentage}%`,
+                          background: person.color
+                        }}
+                      ></div>
+                    </div>
+                    <div className={styles.taskPercentage}>{person.percentage}%</div>
                   </div>
-                  <div className={styles.taskPercentage}>{person.percentage}%</div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
 
-            <button className={styles.rebalanceBtn}>Rebalance Tasks</button>
+            {tasks.filter(t => t.status !== 'COMPLETED').length > 0 && (
+              <button className={styles.rebalanceBtn} onClick={() => setShowRebalance(true)}>
+                Rebalance Tasks
+              </button>
+            )}
           </div>
 
           {/* Upcoming Family Events */}
@@ -415,6 +503,64 @@ export default function FamilyCollaborationPage() {
               </div>
             </div>
           </div>
+
+          {/* Rebalance Tasks Modal */}
+          {showRebalance && (
+            <div className={styles.modal} onClick={() => setShowRebalance(false)}>
+              <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                <div className={styles.modalHeader}>
+                  <h2>Rebalance Tasks</h2>
+                  <p>Quickly reassign tasks to balance workload across family members</p>
+                </div>
+
+                <div className={styles.rebalanceList}>
+                  {tasks.filter(t => t.status !== 'COMPLETED').map((task) => {
+                    const currentAssignee = task.assignments?.[0]
+                    const assignedName = currentAssignee 
+                      ? familyMembers.find(m => m.userId === currentAssignee.userId)?.user.name || currentAssignee.user.name
+                      : 'Unassigned'
+
+                    return (
+                      <div key={task.id} className={styles.rebalanceItem}>
+                        <div className={styles.taskInfo}>
+                          <h4>{task.title}</h4>
+                          <p className={styles.taskMeta}>
+                            <span className={`${styles.priorityBadge} ${styles[`priority${task.priority}`]}`}>
+                              {task.priority}
+                            </span>
+                            {task.dueDate && (
+                              <span>Due: {new Date(task.dueDate).toLocaleDateString()}</span>
+                            )}
+                          </p>
+                        </div>
+                        <div className={styles.reassignControl}>
+                          <label>Assign to:</label>
+                          <select
+                            value={currentAssignee?.userId || ''}
+                            onChange={(e) => handleReassignTask(task.id, e.target.value)}
+                            className={styles.memberSelect}
+                          >
+                            <option value="">Unassigned</option>
+                            {familyMembers.map(member => (
+                              <option key={member.userId} value={member.userId}>
+                                {member.user.name || member.user.email}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+
+                <div className={styles.modalActions}>
+                  <button className={styles.doneBtn} onClick={() => setShowRebalance(false)}>
+                    Done
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </div>
     </div>
