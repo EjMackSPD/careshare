@@ -25,10 +25,19 @@ a {
 
 /* Mobile: Remove left margin from main content areas with sidebar */
 @media (max-width: 968px) {
-  [class*="main"],
-  [class*="content"] {
+  /* Target the layout containers that have left margin for sidebar */
+  [class*="layout"] > [class*="main"],
+  [class*="layout"] > [class*="content"],
+  [class*="content"][style*="margin-left"],
+  div[style*="margin-left: 260px"] {
     margin-left: 0 !important;
     padding-left: 1rem !important;
     padding-right: 1rem !important;
+  }
+  
+  /* Ensure footer and banner don't have left margin on mobile */
+  [class*="banner"] {
+    margin-left: 0 !important;
+    width: 100% !important;
   }
 }
