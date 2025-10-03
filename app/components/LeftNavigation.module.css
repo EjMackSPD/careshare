@@ -46,8 +46,8 @@
 .menuButton {
   display: none;
   position: fixed;
-  top: 95px;
-  left: 1rem;
+  top: 25px;
+  right: 1rem;
   z-index: 150;
   background: #2563eb;
   color: white;
