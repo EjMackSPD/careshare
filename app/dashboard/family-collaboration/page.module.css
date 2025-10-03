@@ -101,11 +101,15 @@
   padding: 1rem;
   background: #f8f9fa;
   border-radius: 0.75rem;
+  text-decoration: none;
+  color: inherit;
   transition: all 0.2s;
+  cursor: pointer;
 }
 
 .teamMember:hover {
   background: #e9ecef;
+  transform: translateX(2px);
 }
 
 .avatar {
