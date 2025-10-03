@@ -41,6 +41,8 @@ export default function CalendarWidget() {
         }
       }
 
+      console.log('CalendarWidget - Fetched events:', allEvents.length)
+      console.log('CalendarWidget - Sample event:', allEvents[0])
       setEvents(allEvents)
     } catch (error) {
       console.error('Error fetching events:', error)
@@ -56,10 +58,18 @@ export default function CalendarWidget() {
 
   // Get events for a specific date
   const getEventsForDate = (day: number) => {
-    const dateStr = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day).toDateString()
+    const targetDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day)
+    const targetYear = targetDate.getFullYear()
+    const targetMonth = targetDate.getMonth()
+    const targetDay = targetDate.getDate()
+    
     return events.filter(event => {
-      const eventDate = new Date(event.eventDate).toDateString()
-      return eventDate === dateStr
+      const eventDate = new Date(event.eventDate)
+      return (
+        eventDate.getFullYear() === targetYear &&
+        eventDate.getMonth() === targetMonth &&
+        eventDate.getDate() === targetDay
+      )
     })
   }
 
@@ -67,7 +77,11 @@ export default function CalendarWidget() {
   const upcomingEvents = selectedDate
     ? events.filter(event => {
         const eventDate = new Date(event.eventDate)
-        return eventDate.toDateString() === selectedDate.toDateString()
+        return (
+          eventDate.getFullYear() === selectedDate.getFullYear() &&
+          eventDate.getMonth() === selectedDate.getMonth() &&
+          eventDate.getDate() === selectedDate.getDate()
+        )
       })
     : events
         .filter(event => new Date(event.eventDate) >= today)
@@ -88,6 +102,8 @@ export default function CalendarWidget() {
 
   const handleDateClick = (day: number) => {
     const clickedDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day)
+    console.log('CalendarWidget - Date clicked:', clickedDate.toLocaleDateString())
+    console.log('CalendarWidget - Events for this date:', getEventsForDate(day))
     setSelectedDate(clickedDate)
   }
 
