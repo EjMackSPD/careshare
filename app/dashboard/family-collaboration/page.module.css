@@ -347,10 +347,19 @@
 }
 
 .taskName {
-  width: 80px;
+  width: 120px;
   font-weight: 500;
   color: #495057;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.taskCount {
+  font-weight: 400;
+  color: #6c757d;
+  font-size: 0.75rem;
 }
 
 .taskBarContainer {
