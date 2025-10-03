@@ -57,6 +57,12 @@
   color: #2563eb;
 }
 
+@media (max-width: 968px) {
+  .navLinks {
+    display: none;
+  }
+}
+
 @media (max-width: 768px) {
   .nav {
     flex-direction: column;

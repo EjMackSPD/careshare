@@ -17,7 +17,9 @@ import {
   Infinity,
   CreditCard,
   Menu,
-  X
+  X,
+  UserCircle,
+  LogOut
 } from 'lucide-react'
 import styles from './LeftNavigation.module.css'
 
@@ -34,6 +36,11 @@ const menuItems = [
   { href: '/dashboard/food', label: 'Food Delivery', icon: UtensilsCrossed },
   { href: '/dashboard/legacy', label: 'Live Forever', icon: Infinity },
   { href: '/dashboard/subscription', label: 'Subscription', icon: CreditCard },
+]
+
+const accountMenuItems = [
+  { href: '/profile', label: 'My Profile', icon: UserCircle },
+  { href: '/api/auth/signout', label: 'Sign Out', icon: LogOut },
 ]
 
 export default function LeftNavigation() {
@@ -82,6 +89,27 @@ export default function LeftNavigation() {
               </Link>
             )
           })}
+          
+          {/* Mobile-only account items */}
+          <div className={styles.mobileAccountSection}>
+            <div className={styles.divider}></div>
+            {accountMenuItems.map((item) => {
+              const Icon = item.icon
+              const isActive = pathname === item.href
+              
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`${styles.navItem} ${isActive ? styles.active : ''}`}
+                  onClick={closeMenu}
+                >
+                  <Icon size={20} strokeWidth={2} />
+                  <span>{item.label}</span>
+                </Link>
+              )
+            })}
+          </div>
         </nav>
       </aside>
     </>
