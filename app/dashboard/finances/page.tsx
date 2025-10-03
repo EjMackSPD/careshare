@@ -302,7 +302,6 @@ export default function FinancesPage() {
               <p className={styles.subtitle}>Manage expenses, bills, and budgeting for care</p>
             </div>
             <div className={styles.headerButtons}>
-              <button className={styles.addExpenseBtn}>+ Add Expense</button>
               <button className={styles.addBillBtn} onClick={() => setShowAddBill(true)}>📄 Add Bill</button>
             </div>
           </div>
