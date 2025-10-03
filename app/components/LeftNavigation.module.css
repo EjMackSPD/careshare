@@ -5,7 +5,8 @@
   position: fixed;
   top: 81px;
   left: 0;
-  height: calc(100vh - 81px);
+  height: calc(100vh - 81px - 200px);
+  max-height: calc(100vh - 81px - 200px);
   overflow-y: auto;
   z-index: 100;
 }

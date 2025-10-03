@@ -244,7 +244,7 @@ export default async function Dashboard() {
         )}
         </main>
       </div>
-      <FooterWithSidebar />
+      <Footer />
     </div>
   )
 }

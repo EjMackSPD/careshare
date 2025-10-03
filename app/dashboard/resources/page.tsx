@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Navigation from '@/app/components/Navigation'
 import LeftNavigation from '@/app/components/LeftNavigation'
-import FooterWithSidebar from '@/app/components/FooterWithSidebar'
+import Footer from '@/app/components/Footer'
 import { Search, ExternalLink, Phone, MapPin, Utensils, Bus, Home as HomeIcon, Loader2 } from 'lucide-react'
 import styles from './page.module.css'
 

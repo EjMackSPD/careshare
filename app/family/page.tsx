@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import Navigation from '@/app/components/Navigation'
 import LeftNavigation from '@/app/components/LeftNavigation'
-import FooterWithSidebar from '@/app/components/FooterWithSidebar'
+import Footer from '@/app/components/Footer'
 import styles from './page.module.css'
 
 export default async function FamiliesPage() {
@@ -100,7 +100,7 @@ export default async function FamiliesPage() {
         )}
         </main>
       </div>
-      <FooterWithSidebar />
+      <Footer />
     </div>
   )
 }

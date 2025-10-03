@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Navigation from '@/app/components/Navigation'
 import LeftNavigation from '@/app/components/LeftNavigation'
-import FooterWithSidebar from '@/app/components/FooterWithSidebar'
+import Footer from '@/app/components/Footer'
 import { UserPlus, MoreVertical, Send, Calendar, Mail, Phone } from 'lucide-react'
 import styles from './page.module.css'
 
