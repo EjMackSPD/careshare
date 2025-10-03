@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import Navigation from '@/app/components/Navigation'
 import LeftNavigation from '@/app/components/LeftNavigation'
-import { Mail, Phone, Calendar, User } from 'lucide-react'
+import { Mail, Phone, Calendar, User, Info } from 'lucide-react'
 import styles from './page.module.css'
 
 type Member = {
