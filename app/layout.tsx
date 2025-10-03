@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Footer from './components/Footer'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -104,7 +105,12 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body>{children}</body>
+      <body>
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+          <div style={{ flex: 1 }}>{children}</div>
+          <Footer />
+        </div>
+      </body>
     </html>
   )
 }
