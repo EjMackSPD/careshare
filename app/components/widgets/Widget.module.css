@@ -380,18 +380,21 @@
 }
 
 .calendarDate.hasEvents {
-  font-weight: 600;
+  font-weight: 700;
+  background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+  border: 1px solid #10b981;
 }
 
 .eventDot {
   position: absolute;
-  bottom: 2px;
+  bottom: 3px;
   left: 50%;
   transform: translateX(-50%);
-  width: 4px;
-  height: 4px;
+  width: 6px;
+  height: 6px;
   background: #10b981;
   border-radius: 50%;
+  box-shadow: 0 0 4px rgba(16, 185, 129, 0.5);
 }
 
 .calendarDate.today .eventDot {
