@@ -135,6 +135,12 @@
   margin-bottom: 0.25rem;
 }
 
+.memberRole {
+  color: #6c757d;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
 .memberStatus {
   display: flex;
   align-items: center;
