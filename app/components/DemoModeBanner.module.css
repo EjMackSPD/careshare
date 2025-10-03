@@ -8,6 +8,8 @@
   box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
   animation: slideDown 0.3s ease-out;
   width: 100%;
+  margin-left: 260px;
+  width: calc(100% - 260px);
 }
 
 @keyframes slideDown {
@@ -63,6 +65,8 @@
 @media (max-width: 968px) {
   .banner {
     padding: 1rem;
+    margin-left: 0;
+    width: 100%;
   }
 
   .content {
