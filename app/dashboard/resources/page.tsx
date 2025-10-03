@@ -23,6 +23,8 @@ export default function ResourcesPage() {
   const [resources, setResources] = useState<Resource[]>([])
   const [loading, setLoading] = useState(true)
   const [familyId, setFamilyId] = useState<string | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage] = useState(12)
 
   const categories = ['All Resources', 'Healthcare', 'Nutrition', 'Social', 'Transportation', 'Housing', 'Legal', 'Financial']
 
@@ -80,6 +82,17 @@ export default function ResourcesPage() {
     
     return matchesSearch && matchesCategory
   })
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredResources.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedResources = filteredResources.slice(startIndex, endIndex)
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, activeCategory])
 
   // Group featured resources (first 3)
   const featuredResources = filteredResources.slice(0, 3)
@@ -179,8 +192,13 @@ export default function ResourcesPage() {
                       <p>Try adjusting your search or category filter</p>
                     </div>
                   ) : (
-                    <div className={styles.resourcesList}>
-                      {filteredResources.map((resource) => (
+                    <>
+                      <div className={styles.resultsInfo}>
+                        Showing {startIndex + 1}-{Math.min(endIndex, filteredResources.length)} of {filteredResources.length} resources
+                        {totalPages > 1 && ` (Page ${currentPage} of ${totalPages})`}
+                      </div>
+                      <div className={styles.resourcesList}>
+                        {paginatedResources.map((resource) => (
                         <Link
                           key={resource.id}
                           href={`/dashboard/resources/${resource.id}`}
@@ -201,8 +219,30 @@ export default function ResourcesPage() {
                             View Details →
                           </div>
                         </Link>
-                      ))}
-                    </div>
+                        ))}
+                      </div>
+                      {totalPages > 1 && (
+                        <div className={styles.pagination}>
+                          <button
+                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                            disabled={currentPage === 1}
+                            className={styles.paginationBtn}
+                          >
+                            ← Previous
+                          </button>
+                          <span className={styles.paginationInfo}>
+                            Page {currentPage} of {totalPages}
+                          </span>
+                          <button
+                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                            disabled={currentPage === totalPages}
+                            className={styles.paginationBtn}
+                          >
+                            Next →
+                          </button>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </section>
