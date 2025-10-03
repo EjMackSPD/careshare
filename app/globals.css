@@ -22,3 +22,13 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+/* Mobile: Remove left margin from main content areas with sidebar */
+@media (max-width: 968px) {
+  [class*="main"],
+  [class*="content"] {
+    margin-left: 0 !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+}
