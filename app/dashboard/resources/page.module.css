@@ -467,6 +467,76 @@
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
+/* Results Info */
+.resultsInfo {
+  padding: 0.875rem 1.25rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 0.75rem;
+  text-align: center;
+  color: #495057;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  border: 1px solid #dee2e6;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 3rem;
+  padding: 2rem 0 1rem 0;
+}
+
+.paginationBtn {
+  padding: 0.875rem 2rem;
+  background: white;
+  color: #2563eb;
+  border: 2px solid #2563eb;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  min-width: 120px;
+}
+
+.paginationBtn:hover:not(:disabled) {
+  background: #2563eb;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.paginationBtn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.paginationBtn:disabled {
+  background: #f8f9fa;
+  color: #adb5bd;
+  border-color: #dee2e6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+.paginationInfo {
+  color: #212529;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 0.5rem 1.5rem;
+  background: white;
+  border-radius: 0.5rem;
+  border: 1px solid #e9ecef;
+  min-width: 140px;
+  text-align: center;
+}
+
 @media (max-width: 768px) {
   .featuredGrid {
     grid-template-columns: 1fr;
@@ -485,6 +555,31 @@
   .categoryTabs {
     overflow-x: auto;
     flex-wrap: nowrap;
+  }
+
+  .resultsInfo {
+    font-size: 0.85rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .pagination {
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    padding: 1.5rem 0;
+  }
+
+  .paginationBtn {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.875rem;
+    min-width: 100px;
+  }
+
+  .paginationInfo {
+    font-size: 0.9rem;
+    min-width: 120px;
+    order: -1;
+    width: 100%;
+    margin-bottom: 0.5rem;
   }
 }
 
