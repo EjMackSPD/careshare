@@ -32,22 +32,35 @@ export default function ResourcesPage() {
     try {
       // Get user's first family
       const familiesRes = await fetch('/api/families')
-      if (!familiesRes.ok) return
+      if (!familiesRes.ok) {
+        console.log('ResourcesPage - Failed to fetch families:', familiesRes.status)
+        return
+      }
       
       const familiesData = await familiesRes.json()
-      if (!familiesData.families || familiesData.families.length === 0) return
+      console.log('ResourcesPage - Families data:', familiesData)
       
-      const family = familiesData.families[0]
+      // API returns array directly, not wrapped in object
+      const families = Array.isArray(familiesData) ? familiesData : []
+      
+      if (families.length === 0) {
+        console.log('ResourcesPage - No families found')
+        return
+      }
+      
+      const family = families[0]
       setFamilyId(family.id)
+      console.log('ResourcesPage - Using family:', family.id)
       
       // Fetch resources
       const resourcesRes = await fetch(`/api/families/${family.id}/resources`)
       if (resourcesRes.ok) {
         const resourcesData = await resourcesRes.json()
+        console.log('ResourcesPage - Resources fetched:', resourcesData.length)
         setResources(resourcesData)
       }
     } catch (error) {
-      console.error('Error fetching resources:', error)
+      console.error('ResourcesPage - Error fetching resources:', error)
     } finally {
       setLoading(false)
     }
