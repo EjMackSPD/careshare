@@ -220,6 +220,230 @@ export async function POST() {
     })
 
     console.log('✓ Sample messages created')
+
+    // Create comprehensive sample resources
+    await prisma.resource.createMany({
+      data: [
+        // Healthcare Resources
+        {
+          familyId: demoFamily.id,
+          title: 'Medicare Benefits Guide',
+          description: 'Comprehensive guide to understanding Medicare coverage, enrollment periods, and benefits for seniors.',
+          category: 'Healthcare',
+          url: 'https://www.medicare.gov'
+        },
+        {
+          familyId: demoFamily.id,
+          title: 'Local Home Health Care Agency',
+          description: 'Professional in-home care services including nursing, therapy, and personal care assistance.',
+          category: 'Healthcare',
+          url: 'https://www.aarp.org/caregiving'
+        },
+        {
+          familyId: demoFamily.id,
+          title: 'Medication Management Services',
+          description: 'Help with organizing medications, setting up pill boxes, and coordinating with pharmacies.',
+          category: 'Healthcare',
+          url: 'https://www.medicare.gov/drug-coverage-part-d'
+        },
+        {
+          familyId: demoFamily.id,
+          title: 'Telehealth Services for Seniors',
+          description: 'Virtual doctor visits and medical consultations from the comfort of home.',
+          category: 'Healthcare',
+          url: 'https://www.medicare.gov/coverage/telehealth'
+        },
+        {
+          familyId: demoFamily.id,
+          title: 'Memory Care Support Group',
+          description: 'Weekly support group for families dealing with dementia and Alzheimer\'s disease.',
+          category: 'Healthcare',
+          url: 'https://www.alz.org'
+        },
+
+        // Nutrition Resources
+        {
+          familyId: demoFamily.id,
+          title: 'Meals on Wheels America',
+          description: 'Nutritious meal delivery service for homebound seniors across the United States.',
+          category: 'Nutrition',
+          url: 'https://www.mealsonwheelsamerica.org'
+        },
+        {
+          familyId: demoFamily.id,
+          title: 'Senior Grocery Delivery Services',
+          description: 'Local grocery stores offering delivery and shopping assistance for elderly residents.',
+          category: 'Nutrition',
+          url: 'https://www.instacart.com'
+        },
+        {
+          familyId: demoFamily.id,
+          title: 'Nutrition Counseling for Seniors',
+          description: 'Registered dietitians specializing in senior nutrition and dietary planning.',
+          category: 'Nutrition',
+          url: 'https://www.eatright.org'
+        },
+        {
+          familyId: demoFamily.id,
+          title: 'Diabetic Meal Planning Guide',
+          description: 'Resources for managing diabetes through proper nutrition and meal planning.',
+          category: 'Nutrition',
+          url: 'https://www.diabetes.org'
+        },
+
+        // Social Resources
+        {
+          familyId: demoFamily.id,
+          title: 'Community Senior Center Programs',
+          description: 'Social activities, exercise classes, and community events for active seniors.',
+          category: 'Social',
+          url: 'https://www.ncoa.org'
+        },
+        {
+          familyId: demoFamily.id,
+          title: 'Senior Companionship Services',
+          description: 'Professional companions providing social interaction and light assistance.',
+          category: 'Social',
+          url: 'https://www.visitingangels.com'
+        },
+        {
+          familyId: demoFamily.id,
+          title: 'Online Senior Social Networks',
+          description: 'Digital communities connecting seniors with similar interests and hobbies.',
+          category: 'Social',
+          url: 'https://www.stitch.net'
+        },
+        {
+          familyId: demoFamily.id,
+          title: 'Volunteer Visitor Programs',
+          description: 'Local volunteers providing regular visits and social support to isolated seniors.',
+          category: 'Social',
+          url: 'https://www.mealsonwheelsamerica.org/get-involved/volunteer'
+        },
+
+        // Transportation Resources
+        {
+          familyId: demoFamily.id,
+          title: 'Senior Transportation Services',
+          description: 'Door-to-door transportation for medical appointments, shopping, and social activities.',
+          category: 'Transportation',
+          url: 'https://www.eldercare.acl.gov'
+        },
+        {
+          familyId: demoFamily.id,
+          title: 'Paratransit Services',
+          description: 'Accessible transportation options for seniors with mobility challenges.',
+          category: 'Transportation',
+          url: 'https://www.transit.dot.gov'
+        },
+        {
+          familyId: demoFamily.id,
+          title: 'Volunteer Driver Programs',
+          description: 'Community volunteers providing free or low-cost rides to medical appointments.',
+          category: 'Transportation',
+          url: 'https://www.iancompanions.org'
+        },
+
+        // Housing Resources
+        {
+          familyId: demoFamily.id,
+          title: 'Assisted Living Facility Finder',
+          description: 'Search and compare assisted living communities in your area.',
+          category: 'Housing',
+          url: 'https://www.caring.com'
+        },
+        {
+          familyId: demoFamily.id,
+          title: 'Home Modification Grants',
+          description: 'Financial assistance programs for making homes safer and more accessible.',
+          category: 'Housing',
+          url: 'https://www.hud.gov'
+        },
+        {
+          familyId: demoFamily.id,
+          title: 'Senior Housing Options Guide',
+          description: 'Comprehensive guide to independent living, assisted living, and memory care options.',
+          category: 'Housing',
+          url: 'https://www.seniorliving.org'
+        },
+        {
+          familyId: demoFamily.id,
+          title: 'Emergency Home Repair Services',
+          description: 'Programs providing emergency home repairs for low-income seniors.',
+          category: 'Housing',
+          url: 'https://www.rebuildingtogether.org'
+        },
+
+        // Legal Resources
+        {
+          familyId: demoFamily.id,
+          title: 'Legal Aid for Seniors',
+          description: 'Free or low-cost legal assistance for seniors on issues like estate planning and benefits.',
+          category: 'Legal',
+          url: 'https://www.justiceinaging.org'
+        },
+        {
+          familyId: demoFamily.id,
+          title: 'Power of Attorney Information',
+          description: 'Resources for understanding and setting up healthcare and financial powers of attorney.',
+          category: 'Legal',
+          url: 'https://www.nolo.com'
+        },
+        {
+          familyId: demoFamily.id,
+          title: 'Elder Law Attorneys Directory',
+          description: 'Find qualified elder law attorneys in your area specializing in senior legal issues.',
+          category: 'Legal',
+          url: 'https://www.naela.org'
+        },
+        {
+          familyId: demoFamily.id,
+          title: 'Living Will and Advance Directives',
+          description: 'Templates and guidance for creating living wills and healthcare directives.',
+          category: 'Legal',
+          url: 'https://www.caringinfo.org'
+        },
+
+        // Financial Resources
+        {
+          familyId: demoFamily.id,
+          title: 'Social Security Benefits Calculator',
+          description: 'Estimate retirement, disability, and survivor benefits.',
+          category: 'Financial',
+          url: 'https://www.ssa.gov'
+        },
+        {
+          familyId: demoFamily.id,
+          title: 'Medicaid Eligibility Guide',
+          description: 'Information on Medicaid eligibility, application process, and long-term care coverage.',
+          category: 'Financial',
+          url: 'https://www.medicaid.gov'
+        },
+        {
+          familyId: demoFamily.id,
+          title: 'Prescription Drug Assistance Programs',
+          description: 'Programs helping seniors afford necessary medications when insurance isn\'t enough.',
+          category: 'Financial',
+          url: 'https://www.needymeds.org'
+        },
+        {
+          familyId: demoFamily.id,
+          title: 'Senior Financial Counseling',
+          description: 'Free financial counseling services for seniors managing budgets and debt.',
+          category: 'Financial',
+          url: 'https://www.ncoa.org/economic-security/benefits'
+        },
+        {
+          familyId: demoFamily.id,
+          title: 'Veterans Benefits for Seniors',
+          description: 'Information on VA benefits, pension programs, and healthcare for veteran seniors.',
+          category: 'Financial',
+          url: 'https://www.va.gov'
+        }
+      ]
+    })
+
+    console.log('✓ Sample resources created (30 resources)')
     console.log('✅ Demo data reset complete!')
 
     return NextResponse.json({ 

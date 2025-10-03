@@ -1,84 +1,81 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Navigation from '@/app/components/Navigation'
 import LeftNavigation from '@/app/components/LeftNavigation'
 import { Search, ExternalLink, Phone, MapPin, Utensils, Bus, Home as HomeIcon } from 'lucide-react'
 import styles from './page.module.css'
 
-type FeaturedResource = {
+type Resource = {
   id: string
-  name: string
-  description: string
-  icon: string
-  color: string
-  link: string
-}
-
-type LocalResource = {
-  id: string
-  name: string
+  title: string
+  description: string | null
   category: string
-  distance?: string
-  phone: string
+  url: string | null
+  fileUrl: string | null
 }
-
-const featuredResources: FeaturedResource[] = [
-  {
-    id: '1',
-    name: 'Meals on Wheels',
-    description: 'Meal delivery service for seniors who have difficulty shopping for or preparing meals.',
-    icon: '🍽️',
-    color: '#f97316',
-    link: '#'
-  },
-  {
-    id: '2',
-    name: 'Senior Transportation Services',
-    description: 'Door-to-door transportation for medical appointments and essential errands.',
-    icon: '🚐',
-    color: '#3b82f6',
-    link: '#'
-  },
-  {
-    id: '3',
-    name: 'Eldercare Locator',
-    description: 'A nationwide service that connects older Americans and their caregivers with local support resources.',
-    icon: '📍',
-    color: '#a855f7',
-    link: '#'
-  }
-]
-
-const localResources: LocalResource[] = [
-  {
-    id: '1',
-    name: 'Community Senior Center',
-    category: 'Social',
-    distance: '3.1 miles away',
-    phone: '(555) 123-4567'
-  },
-  {
-    id: '2',
-    name: 'Home Health Care Agency',
-    category: 'Healthcare',
-    distance: '3.4 miles away',
-    phone: '(555) 987-6543'
-  },
-  {
-    id: '3',
-    name: 'Senior Grocery Delivery',
-    category: 'Nutrition',
-    distance: 'Service Area',
-    phone: '(555) 456-7890'
-  }
-]
 
 export default function ResourcesPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [activeCategory, setActiveCategory] = useState('All Resources')
+  const [resources, setResources] = useState<Resource[]>([])
+  const [loading, setLoading] = useState(true)
+  const [familyId, setFamilyId] = useState<string | null>(null)
 
-  const categories = ['All Resources', 'Nutrition', 'Social', 'Fitness', 'Healthcare', 'Transportation', 'Housing']
+  const categories = ['All Resources', 'Healthcare', 'Nutrition', 'Social', 'Transportation', 'Housing', 'Legal', 'Financial']
+
+  useEffect(() => {
+    fetchResources()
+  }, [])
+
+  const fetchResources = async () => {
+    try {
+      // Get user's first family
+      const familiesRes = await fetch('/api/families')
+      if (!familiesRes.ok) return
+      
+      const familiesData = await familiesRes.json()
+      if (!familiesData.families || familiesData.families.length === 0) return
+      
+      const family = familiesData.families[0]
+      setFamilyId(family.id)
+      
+      // Fetch resources
+      const resourcesRes = await fetch(`/api/families/${family.id}/resources`)
+      if (resourcesRes.ok) {
+        const resourcesData = await resourcesRes.json()
+        setResources(resourcesData)
+      }
+    } catch (error) {
+      console.error('Error fetching resources:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Filter resources based on search and category
+  const filteredResources = resources.filter(resource => {
+    const matchesSearch = searchQuery === '' || 
+      resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      resource.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      resource.category.toLowerCase().includes(searchQuery.toLowerCase())
+    
+    const matchesCategory = activeCategory === 'All Resources' || 
+      resource.category.toLowerCase() === activeCategory.toLowerCase()
+    
+    return matchesSearch && matchesCategory
+  })
+
+  // Group featured resources (first 3)
+  const featuredResources = filteredResources.slice(0, 3)
+  
+  // Group by category for directory
+  const resourcesByCategory = filteredResources.reduce((acc, resource) => {
+    const cat = resource.category
+    if (!acc[cat]) acc[cat] = []
+    acc[cat].push(resource)
+    return acc
+  }, {} as Record<string, Resource[]>)
 
   return (
     <div className={styles.container}>
@@ -105,74 +102,97 @@ export default function ResourcesPage() {
             />
           </div>
 
-          {/* Featured Resources */}
-          <section className={styles.section}>
-            <h2>Featured Resources</h2>
-            <div className={styles.featuredGrid}>
-              {featuredResources.map((resource) => (
-                <div key={resource.id} className={styles.featuredCard}>
-                  <div className={styles.resourceIcon} style={{ background: resource.color }}>
-                    {resource.icon}
-                  </div>
-                  <h3>{resource.name}</h3>
-                  <p>{resource.description}</p>
-                  <a href={resource.link} className={styles.learnMore}>
-                    Learn More <ExternalLink size={14} />
-                  </a>
-                </div>
-              ))}
+          {loading ? (
+            <div className={styles.loading}>
+              <div className={styles.spinner}></div>
+              <p>Loading resources...</p>
             </div>
-          </section>
+          ) : (
+            <>
+              {/* Featured Resources */}
+              {featuredResources.length > 0 && (
+                <section className={styles.section}>
+                  <h2>Featured Resources</h2>
+                  <div className={styles.featuredGrid}>
+                    {featuredResources.map((resource, index) => {
+                      const colors = ['#f97316', '#3b82f6', '#a855f7']
+                      const icons = ['🍽️', '🚐', '📍', '🏥', '💰', '⚖️']
+                      
+                      return (
+                        <div key={resource.id} className={styles.featuredCard}>
+                          <div className={styles.resourceIcon} style={{ background: colors[index % colors.length] }}>
+                            {icons[index % icons.length]}
+                          </div>
+                          <h3>{resource.title}</h3>
+                          <p>{resource.description}</p>
+                          {resource.url && (
+                            <a href={resource.url} target="_blank" rel="noopener noreferrer" className={styles.learnMore}>
+                              Learn More <ExternalLink size={14} />
+                            </a>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </section>
+              )}
 
-          {/* Resources Near You */}
-          <section className={styles.section}>
-            <h2>Resources Near You</h2>
-            <div className={styles.localResources}>
-              {localResources.map((resource) => (
-                <div key={resource.id} className={styles.localCard}>
-                  <div className={styles.localInfo}>
-                    <div>
-                      <h3>{resource.name}</h3>
-                      <span className={styles.categoryTag}>{resource.category}</span>
+              {/* Resource Directory */}
+              <section className={styles.section}>
+                <h2>Resource Directory</h2>
+                <p className={styles.resultsCount}>
+                  {filteredResources.length} resource{filteredResources.length !== 1 ? 's' : ''} found
+                </p>
+                
+                <div className={styles.categoryTabs}>
+                  {categories.map((category) => (
+                    <button
+                      key={category}
+                      className={`${styles.categoryTab} ${activeCategory === category ? styles.active : ''}`}
+                      onClick={() => setActiveCategory(category)}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+
+                <div className={styles.directoryContent}>
+                  {filteredResources.length === 0 ? (
+                    <div className={styles.noResources}>
+                      <div className={styles.emptyIcon}>🌐</div>
+                      <h3>No resources found</h3>
+                      <p>Try adjusting your search or category filter</p>
                     </div>
-                    <p className={styles.distance}>
-                      <MapPin size={14} /> {resource.distance}
-                    </p>
-                  </div>
-                  <div className={styles.localActions}>
-                    <span className={styles.phone}>
-                      <Phone size={14} /> {resource.phone}
-                    </span>
-                    <button className={styles.connectBtn}>Connect</button>
-                  </div>
+                  ) : (
+                    <div className={styles.resourcesList}>
+                      {filteredResources.map((resource) => (
+                        <div key={resource.id} className={styles.resourceCard}>
+                          <div className={styles.resourceHeader}>
+                            <h3>{resource.title}</h3>
+                            <span className={styles.categoryBadge}>{resource.category}</span>
+                          </div>
+                          {resource.description && (
+                            <p className={styles.resourceDescription}>{resource.description}</p>
+                          )}
+                          {resource.url && (
+                            <a 
+                              href={resource.url} 
+                              target="_blank" 
+                              rel="noopener noreferrer" 
+                              className={styles.resourceLink}
+                            >
+                              <ExternalLink size={16} />
+                              Visit Website
+                            </a>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              ))}
-              <a href="#" className={styles.viewMoreLink}>View More Local Resources</a>
-            </div>
-          </section>
-
-          {/* Resource Directory */}
-          <section className={styles.section}>
-            <h2>Resource Directory</h2>
-            <div className={styles.categoryTabs}>
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  className={`${styles.categoryTab} ${activeCategory === category ? styles.active : ''}`}
-                  onClick={() => setActiveCategory(category)}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
-            <div className={styles.directoryContent}>
-              <div className={styles.noResources}>
-                <div className={styles.emptyIcon}>🌐</div>
-                <h3>No resources found</h3>
-                <p>No resources available in this category</p>
-              </div>
-            </div>
-          </section>
+              </section>
+            </>
+          )}
 
           {/* Tips Section */}
           <section className={styles.tipsSection}>
