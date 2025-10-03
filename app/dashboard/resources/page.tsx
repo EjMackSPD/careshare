@@ -179,26 +179,26 @@ export default function ResourcesPage() {
                   ) : (
                     <div className={styles.resourcesList}>
                       {filteredResources.map((resource) => (
-                        <div key={resource.id} className={styles.resourceCard}>
+                        <Link
+                          key={resource.id}
+                          href={`/dashboard/resources/${resource.id}`}
+                          className={styles.resourceCard}
+                        >
                           <div className={styles.resourceHeader}>
                             <h3>{resource.title}</h3>
                             <span className={styles.categoryBadge}>{resource.category}</span>
                           </div>
                           {resource.description && (
-                            <p className={styles.resourceDescription}>{resource.description}</p>
+                            <p className={styles.resourceDescription}>
+                              {resource.description.length > 150 
+                                ? `${resource.description.substring(0, 150)}...` 
+                                : resource.description}
+                            </p>
                           )}
-                          {resource.url && (
-                            <a 
-                              href={resource.url} 
-                              target="_blank" 
-                              rel="noopener noreferrer" 
-                              className={styles.resourceLink}
-                            >
-                              <ExternalLink size={16} />
-                              Visit Website
-                            </a>
-                          )}
-                        </div>
+                          <div className={styles.viewDetails}>
+                            View Details →
+                          </div>
+                        </Link>
                       ))}
                     </div>
                   )}

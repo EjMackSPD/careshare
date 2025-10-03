@@ -110,13 +110,30 @@
   border-radius: 0.75rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   border: 2px solid transparent;
+  text-decoration: none;
+  color: inherit;
+  display: block;
   transition: all 0.2s;
+  cursor: pointer;
 }
 
 .resourceCard:hover {
   border-color: #6366f1;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.viewDetails {
+  color: #2563eb;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-top: 1rem;
+  transition: all 0.2s;
+}
+
+.resourceCard:hover .viewDetails {
+  color: #1d4ed8;
+  text-decoration: underline;
 }
 
 .resourceHeader {
