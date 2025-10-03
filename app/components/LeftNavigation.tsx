@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { 
@@ -14,7 +15,9 @@ import {
   Gift, 
   UtensilsCrossed,
   Infinity,
-  CreditCard
+  CreditCard,
+  Menu,
+  X
 } from 'lucide-react'
 import styles from './LeftNavigation.module.css'
 
@@ -35,27 +38,53 @@ const menuItems = [
 
 export default function LeftNavigation() {
   const pathname = usePathname()
+  const [isOpen, setIsOpen] = useState(false)
+
+  const toggleMenu = () => setIsOpen(!isOpen)
+  const closeMenu = () => setIsOpen(false)
 
   return (
-    <aside className={styles.sidebar}>
-      <nav className={styles.nav}>
-        {menuItems.map((item) => {
-          const Icon = item.icon
-          const isActive = pathname === item.href || pathname?.startsWith(item.href + '/')
-          
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`${styles.navItem} ${isActive ? styles.active : ''}`}
-            >
-              <Icon size={20} strokeWidth={2} />
-              <span>{item.label}</span>
-            </Link>
-          )
-        })}
-      </nav>
-    </aside>
+    <>
+      {/* Mobile Menu Button */}
+      <button 
+        className={styles.menuButton} 
+        onClick={toggleMenu}
+        aria-label="Toggle navigation menu"
+      >
+        {isOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+
+      {/* Overlay */}
+      {isOpen && (
+        <div 
+          className={styles.overlay} 
+          onClick={closeMenu}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside className={`${styles.sidebar} ${isOpen ? styles.open : ''}`}>
+        <nav className={styles.nav}>
+          {menuItems.map((item) => {
+            const Icon = item.icon
+            const isActive = pathname === item.href || pathname?.startsWith(item.href + '/')
+            
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`${styles.navItem} ${isActive ? styles.active : ''}`}
+                onClick={closeMenu}
+              >
+                <Icon size={20} strokeWidth={2} />
+                <span>{item.label}</span>
+              </Link>
+            )
+          })}
+        </nav>
+      </aside>
+    </>
   )
 }
 
