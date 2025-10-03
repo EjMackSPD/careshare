@@ -480,6 +480,7 @@ export default function MedicationsPage() {
           )}
         </main>
       </div>
+      <Footer />
     </div>
   )
 }

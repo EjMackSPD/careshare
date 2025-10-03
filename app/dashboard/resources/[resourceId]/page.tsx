@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Navigation from '@/app/components/Navigation'
 import LeftNavigation from '@/app/components/LeftNavigation'
+import Footer from '@/app/components/Footer'
 import { ArrowLeft, ExternalLink, Bookmark, Share2, FileText, Phone, MapPin } from 'lucide-react'
 import styles from './page.module.css'
 
@@ -234,6 +235,7 @@ export default function ResourceDetailPage() {
           </div>
         </main>
       </div>
+      <Footer />
     </div>
   )
 }

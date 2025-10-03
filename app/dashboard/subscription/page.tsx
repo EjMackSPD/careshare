@@ -497,6 +497,7 @@ export default function SubscriptionPage() {
           )}
         </main>
       </div>
+      <Footer />
     </div>
   )
 }

@@ -232,6 +232,7 @@ export default function MemberProfilePage() {
           </div>
         </main>
       </div>
+      <Footer />
     </div>
   )
 }
