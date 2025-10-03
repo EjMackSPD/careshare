@@ -323,6 +323,7 @@ export default function FamilyDetail() {
         </div>
       </main>
       </div>
+      <Footer />
     </div>
   )
 }

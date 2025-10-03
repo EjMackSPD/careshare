@@ -363,6 +363,8 @@ export default function FamilyCosts() {
           </div>
         )}
       </main>
+      </div>
+      <Footer />
     </div>
   )
 }
