@@ -68,15 +68,15 @@ export default function OnboardingPage() {
     // Step 2: About You
     role: "",
     relationship: "",
-    
+
     // Step 3: Care Recipient
     recipientName: "",
     recipientAge: "",
     recipientConditions: [] as string[],
-    
+
     // Step 4: Family Members
     familyMembers: [] as Array<{ name: string; email: string; role: string }>,
-    
+
     // Step 5: Preferences
     notificationPreferences: {
       email: true,
@@ -133,9 +133,9 @@ export default function OnboardingPage() {
             </div>
             <h2>Welcome to CareShare, {session?.user?.name?.split(" ")[0]}!</h2>
             <p className={styles.welcomeText}>
-              We're here to help you coordinate care for your loved ones. This quick
-              setup will help us personalize your experience and get you started on
-              the right foot.
+              We're here to help you coordinate care for your loved ones. This
+              quick setup will help us personalize your experience and get you
+              started on the right foot.
             </p>
             <div className={styles.featuresList}>
               <div className={styles.featureItem}>
@@ -164,10 +164,26 @@ export default function OnboardingPage() {
               <label>What best describes your role?</label>
               <div className={styles.radioGroup}>
                 {[
-                  { value: "primary", label: "Primary Caregiver", desc: "Main person providing care" },
-                  { value: "secondary", label: "Supporting Family Member", desc: "Helping with care coordination" },
-                  { value: "manager", label: "Care Manager", desc: "Organizing and managing care" },
-                  { value: "professional", label: "Professional Caregiver", desc: "Providing professional care services" },
+                  {
+                    value: "primary",
+                    label: "Primary Caregiver",
+                    desc: "Main person providing care",
+                  },
+                  {
+                    value: "secondary",
+                    label: "Supporting Family Member",
+                    desc: "Helping with care coordination",
+                  },
+                  {
+                    value: "manager",
+                    label: "Care Manager",
+                    desc: "Organizing and managing care",
+                  },
+                  {
+                    value: "professional",
+                    label: "Professional Caregiver",
+                    desc: "Providing professional care services",
+                  },
                 ].map((option) => (
                   <label
                     key={option.value}
@@ -300,8 +316,8 @@ export default function OnboardingPage() {
           <div className={styles.formStep}>
             <h2>Invite family members</h2>
             <p>
-              Add other family members who will help coordinate care (you can always
-              add more later)
+              Add other family members who will help coordinate care (you can
+              always add more later)
             </p>
 
             <div className={styles.familyMembersList}>
@@ -367,10 +383,14 @@ export default function OnboardingPage() {
                         ],
                       });
                       (
-                        document.getElementById("memberName") as HTMLInputElement
+                        document.getElementById(
+                          "memberName"
+                        ) as HTMLInputElement
                       ).value = "";
                       (
-                        document.getElementById("memberEmail") as HTMLInputElement
+                        document.getElementById(
+                          "memberEmail"
+                        ) as HTMLInputElement
                       ).value = "";
                     }
                   }}
@@ -383,8 +403,8 @@ export default function OnboardingPage() {
 
             <p className={styles.hint}>
               <Sparkles size={16} />
-              Don't worry if you don't have everyone's info right now - you can invite
-              them later from your dashboard
+              Don't worry if you don't have everyone's info right now - you can
+              invite them later from your dashboard
             </p>
           </div>
         );
@@ -464,7 +484,8 @@ export default function OnboardingPage() {
               <CheckCircle size={48} className={styles.completionIcon} />
               <h3>You're all set!</h3>
               <p>
-                Click finish to start coordinating care with your family on CareShare
+                Click finish to start coordinating care with your family on
+                CareShare
               </p>
             </div>
           </div>
@@ -557,4 +578,3 @@ export default function OnboardingPage() {
     </div>
   );
 }
-

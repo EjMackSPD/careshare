@@ -113,7 +113,7 @@
 .menuButton {
   display: none;
   position: fixed;
-  top: 25px;
+  top: 1rem;
   right: 1rem;
   z-index: 150;
   background: #2563eb;

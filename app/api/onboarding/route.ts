@@ -33,7 +33,9 @@ export async function POST(request: NextRequest) {
       family = await prisma.family.create({
         data: {
           name: `${recipientName || user.name}'s Care Family`,
-          description: `Family coordinating care for ${recipientName || "loved one"}`,
+          description: `Family coordinating care for ${
+            recipientName || "loved one"
+          }`,
           createdBy: user.id,
           elderName: recipientName || null,
           elderBirthday: recipientAge
@@ -122,4 +124,3 @@ export async function GET(request: NextRequest) {
     );
   }
 }
-
