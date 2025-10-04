@@ -61,6 +61,69 @@
   background: #1d4ed8;
 }
 
+/* Mobile Menu Styles */
+.mobileMenuToggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  color: #495057;
+  z-index: 1001;
+}
+
+.mobileMenu {
+  display: none;
+  position: fixed;
+  top: 80px;
+  left: 0;
+  right: 0;
+  background: white;
+  border-bottom: 1px solid #e9ecef;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mobileMenu a {
+  display: block;
+  padding: 1rem 1.5rem;
+  color: #495057;
+  text-decoration: none;
+  font-weight: 500;
+  border-bottom: 1px solid #f1f3f5;
+  transition: background 0.2s;
+}
+
+.mobileMenu a:hover {
+  background: #f8f9fa;
+  color: #2563eb;
+}
+
+.mobileSignupBtn {
+  background: #2563eb;
+  color: white !important;
+  margin: 1rem 1.5rem;
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  text-align: center;
+}
+
+.mobileSignupBtn:hover {
+  background: #1d4ed8 !important;
+}
+
 .hero {
   position: relative;
   max-width: 100%;
@@ -393,8 +456,15 @@
   }
 
   .navLinks {
-    gap: 1rem;
-    font-size: 0.9rem;
+    display: none;
+  }
+
+  .mobileMenuToggle {
+    display: block;
+  }
+
+  .mobileMenu {
+    display: block;
   }
 
   .benefitsGrid {
@@ -404,5 +474,10 @@
   .heroButtons {
     flex-direction: column;
     gap: 0.75rem;
+  }
+  
+  .logo img {
+    width: 150px;
+    height: auto;
   }
 }

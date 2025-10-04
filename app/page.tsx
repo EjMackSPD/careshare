@@ -1,35 +1,14 @@
 import Link from "next/link";
-import Image from "next/image";
 import styles from "./page.module.css";
 import ImageCarousel from "./components/ImageCarousel";
 import Footer from "./components/Footer";
+import MarketingNav from "./components/MarketingNav";
 import { Wallet, CalendarDays, Users, Building2 } from "lucide-react";
 
 export default function Home() {
   return (
     <main className={styles.main}>
-      <nav className={styles.nav}>
-        <div className={styles.navContainer}>
-          <Link href="/" className={styles.logo}>
-            <Image
-              src="/careshare-logo.png"
-              alt="CareShare Logo"
-              width={200}
-              height={75}
-              priority
-            />
-          </Link>
-          <div className={styles.navLinks}>
-            <Link href="/features">Features</Link>
-            <Link href="/blog">Blog</Link>
-            <Link href="/partnerships">Partnerships</Link>
-            <Link href="/login">Login</Link>
-            <Link href="/signup" className={styles.signupBtn}>
-              Sign Up
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <MarketingNav />
 
       <section className={styles.hero}>
         <ImageCarousel />
