@@ -34,7 +34,15 @@ export default function Login() {
         return;
       }
 
-      router.push("/dashboard");
+      // Check if user has completed onboarding
+      const onboardingResponse = await fetch("/api/onboarding");
+      const onboardingData = await onboardingResponse.json();
+
+      if (!onboardingData.hasCompletedOnboarding) {
+        router.push("/onboarding");
+      } else {
+        router.push("/dashboard");
+      }
       router.refresh();
     } catch (error) {
       setError("Something went wrong");
@@ -71,7 +79,7 @@ export default function Login() {
         return;
       }
 
-      // Successfully logged in as demo user
+      // Demo users always skip onboarding (already have data)
       router.push("/dashboard");
       router.refresh();
     } catch (error) {
@@ -87,134 +95,135 @@ export default function Login() {
         {/* Left Panel - Hero Content */}
         <div className={styles.leftPanel}>
           <div className={styles.heroContent}>
-          <h1>Welcome back to CareShare</h1>
-          <p className={styles.subtitle}>
-            Continue coordinating care with your family. Sign in to access your
-            dashboard.
-          </p>
+            <h1>Welcome back to CareShare</h1>
+            <p className={styles.subtitle}>
+              Continue coordinating care with your family. Sign in to access
+              your dashboard.
+            </p>
 
-          <div className={styles.features}>
-            <div className={styles.feature}>
-              <div className={styles.featureIcon}>
-                <Heart size={24} />
+            <div className={styles.features}>
+              <div className={styles.feature}>
+                <div className={styles.featureIcon}>
+                  <Heart size={24} />
+                </div>
+                <div>
+                  <h3>Your Family Hub</h3>
+                  <p>
+                    Access all your family&apos;s caregiving information in one
+                    place
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3>Your Family Hub</h3>
-                <p>
-                  Access all your family&apos;s caregiving information in one
-                  place
-                </p>
-              </div>
-            </div>
 
-            <div className={styles.feature}>
-              <div className={styles.featureIcon}>
-                <Shield size={24} />
+              <div className={styles.feature}>
+                <div className={styles.featureIcon}>
+                  <Shield size={24} />
+                </div>
+                <div>
+                  <h3>Secure Access</h3>
+                  <p>Your data is protected with enterprise-grade security</p>
+                </div>
               </div>
-              <div>
-                <h3>Secure Access</h3>
-                <p>Your data is protected with enterprise-grade security</p>
-              </div>
-            </div>
 
-            <div className={styles.feature}>
-              <div className={styles.featureIcon}>
-                <Users size={24} />
+              <div className={styles.feature}>
+                <div className={styles.featureIcon}>
+                  <Users size={24} />
+                </div>
+                <div>
+                  <h3>Stay Connected</h3>
+                  <p>Keep everyone in your family informed and involved</p>
+                </div>
               </div>
-              <div>
-                <h3>Stay Connected</h3>
-                <p>Keep everyone in your family informed and involved</p>
-              </div>
-            </div>
 
-            <div className={styles.feature}>
-              <div className={styles.featureIcon}>
-                <Sparkles size={24} />
-              </div>
-              <div>
-                <h3>Try Demo Mode</h3>
-                <p>
-                  Explore with pre-loaded examples and see what&apos;s possible
-                </p>
+              <div className={styles.feature}>
+                <div className={styles.featureIcon}>
+                  <Sparkles size={24} />
+                </div>
+                <div>
+                  <h3>Try Demo Mode</h3>
+                  <p>
+                    Explore with pre-loaded examples and see what&apos;s
+                    possible
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Right Panel - Login Form */}
-      <div className={styles.rightPanel}>
-        <div className={styles.formContainer}>
-          <div className={styles.formHeader}>
-            <h2>Sign in to your account</h2>
-            <p>Enter your credentials to access your dashboard</p>
-          </div>
-
-          <form onSubmit={handleSubmit} className={styles.form}>
-            {error && <div className={styles.error}>{error}</div>}
-
-            <div className={styles.formGroup}>
-              <label htmlFor="email">Email</label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder="your@email.com"
-              />
+        {/* Right Panel - Login Form */}
+        <div className={styles.rightPanel}>
+          <div className={styles.formContainer}>
+            <div className={styles.formHeader}>
+              <h2>Sign in to your account</h2>
+              <p>Enter your credentials to access your dashboard</p>
             </div>
 
-            <div className={styles.formGroup}>
-              <label htmlFor="password">Password</label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder="••••••••"
-              />
+            <form onSubmit={handleSubmit} className={styles.form}>
+              {error && <div className={styles.error}>{error}</div>}
+
+              <div className={styles.formGroup}>
+                <label htmlFor="email">Email</label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="your@email.com"
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label htmlFor="password">Password</label>
+                <input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="••••••••"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className={styles.submitBtn}
+                disabled={loading}
+              >
+                {loading ? "Signing in..." : "Sign in"}
+              </button>
+            </form>
+
+            <div className={styles.divider}>
+              <span>OR</span>
             </div>
 
             <button
-              type="submit"
-              className={styles.submitBtn}
+              onClick={handleDemoMode}
+              className={styles.demoBtn}
+              type="button"
               disabled={loading}
             >
-              {loading ? "Signing in..." : "Sign in"}
+              <Sparkles size={20} />
+              {loading ? "Setting up demo..." : "Try Demo Mode"}
             </button>
-          </form>
-
-          <div className={styles.divider}>
-            <span>OR</span>
-          </div>
-
-          <button
-            onClick={handleDemoMode}
-            className={styles.demoBtn}
-            type="button"
-            disabled={loading}
-          >
-            <Sparkles size={20} />
-            {loading ? "Setting up demo..." : "Try Demo Mode"}
-          </button>
-          <p className={styles.demoText}>
-            Explore CareShare with pre-populated demo data
-          </p>
-
-          <div className={styles.formFooter}>
-            <p>
-              Don&apos;t have an account? <Link href="/signup">Sign up</Link>
+            <p className={styles.demoText}>
+              Explore CareShare with pre-populated demo data
             </p>
-            <p className={styles.adminLink}>
-              <Link href="/admin/login">Care Provider Login →</Link>
-            </p>
+
+            <div className={styles.formFooter}>
+              <p>
+                Don&apos;t have an account? <Link href="/signup">Sign up</Link>
+              </p>
+              <p className={styles.adminLink}>
+                <Link href="/admin/login">Care Provider Login →</Link>
+              </p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <Footer />
+      <Footer />
     </>
   );
 }
