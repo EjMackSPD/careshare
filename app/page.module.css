@@ -470,12 +470,12 @@
   .benefitsGrid {
     grid-template-columns: 1fr;
   }
-  
+
   .heroButtons {
     flex-direction: column;
     gap: 0.75rem;
   }
-  
+
   .logo img {
     width: 150px;
     height: auto;

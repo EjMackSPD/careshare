@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import Footer from '@/app/components/Footer'
+import { Heart, Shield, Users } from 'lucide-react'
 import styles from './page.module.css'
 
 export default function Signup() {
@@ -67,94 +67,137 @@ export default function Signup() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.signupBox}>
-        <div className={styles.header}>
-          <Link href="/" className={styles.logo}>
-            <Image 
-              src="/careshare-logo.png" 
-              alt="CareShare Logo" 
-              width={180} 
-              height={68}
-              priority
-            />
-          </Link>
-          <h1>Create your account</h1>
-          <p>Start coordinating care with your family</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className={styles.form}>
-          {error && (
-            <div className={styles.error}>{error}</div>
-          )}
-
-          <div className={styles.formGroup}>
-            <label htmlFor="name">Full Name</label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              placeholder="John Doe"
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label htmlFor="email">Email</label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              placeholder="your@email.com"
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              placeholder="At least 6 characters"
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label htmlFor="confirmPassword">Confirm Password</label>
-            <input
-              id="confirmPassword"
-              name="confirmPassword"
-              type="password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-              placeholder="Confirm your password"
-            />
-          </div>
-
-          <button 
-            type="submit" 
-            className={styles.submitBtn}
-            disabled={loading}
-          >
-            {loading ? 'Creating account...' : 'Create account'}
-          </button>
-        </form>
-
-        <div className={styles.footer}>
-          <p>
-            Already have an account? <Link href="/login">Sign in</Link>
+      <div className={styles.leftPanel}>
+        <Link href="/" className={styles.logoLink}>
+          <Image 
+            src="/careshare-logo.png" 
+            alt="CareShare Logo" 
+            width={200} 
+            height={75}
+            priority
+          />
+        </Link>
+        
+        <div className={styles.heroContent}>
+          <h1>Welcome to CareShare</h1>
+          <p className={styles.subtitle}>
+            Join thousands of families coordinating care for their loved ones
           </p>
+          
+          <div className={styles.features}>
+            <div className={styles.feature}>
+              <div className={styles.featureIcon}>
+                <Heart size={24} />
+              </div>
+              <div>
+                <h3>Care Together</h3>
+                <p>Bring your family together to provide the best care</p>
+              </div>
+            </div>
+            
+            <div className={styles.feature}>
+              <div className={styles.featureIcon}>
+                <Shield size={24} />
+              </div>
+              <div>
+                <h3>Secure & Private</h3>
+                <p>Your family&apos;s information is encrypted and protected</p>
+              </div>
+            </div>
+            
+            <div className={styles.feature}>
+              <div className={styles.featureIcon}>
+                <Users size={24} />
+              </div>
+              <div>
+                <h3>Share Responsibilities</h3>
+                <p>Coordinate tasks, costs, and schedules seamlessly</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <Footer />
+
+      <div className={styles.rightPanel}>
+        <div className={styles.formContainer}>
+          <div className={styles.formHeader}>
+            <h2>Create your account</h2>
+            <p>Get started with CareShare today</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className={styles.form}>
+            {error && (
+              <div className={styles.error}>{error}</div>
+            )}
+
+            <div className={styles.formGroup}>
+              <label htmlFor="name">Full Name</label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                placeholder="John Doe"
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="email">Email</label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                placeholder="your@email.com"
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="password">Password</label>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                placeholder="At least 6 characters"
+              />
+            </div>
+
+            <div className={styles.formGroup}>
+              <label htmlFor="confirmPassword">Confirm Password</label>
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                required
+                placeholder="Confirm your password"
+              />
+            </div>
+
+            <button 
+              type="submit" 
+              className={styles.submitBtn}
+              disabled={loading}
+            >
+              {loading ? 'Creating account...' : 'Create account'}
+            </button>
+          </form>
+
+          <div className={styles.formFooter}>
+            <p>
+              Already have an account? <Link href="/login">Sign in</Link>
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
