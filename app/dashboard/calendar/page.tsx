@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navigation from "@/app/components/Navigation";
 import LeftNavigation from "@/app/components/LeftNavigation";
 import Footer from "@/app/components/Footer";
@@ -15,544 +15,6 @@ type Event = {
   description?: string;
 };
 
-const sampleEvents: Event[] = [
-  // APRIL 2025 (Past)
-  {
-    id: "apr-1",
-    title: "Cardiology Checkup",
-    date: new Date(2025, 3, 5),
-    type: "Healthcare",
-    description: "Annual heart checkup with Dr. Martinez",
-  },
-  {
-    id: "apr-2",
-    title: "Medication Refill",
-    date: new Date(2025, 3, 10),
-    type: "Medication",
-    description: "Monthly prescription pickup",
-  },
-  {
-    id: "apr-3",
-    title: "Easter Brunch",
-    date: new Date(2025, 3, 20),
-    type: "Social",
-    description: "Family gathering for Easter",
-  },
-  {
-    id: "apr-4",
-    title: "Physical Therapy",
-    date: new Date(2025, 3, 15),
-    type: "Healthcare",
-    description: "Weekly PT session",
-  },
-  {
-    id: "apr-5",
-    title: "Home Care Visit",
-    date: new Date(2025, 3, 22),
-    type: "Healthcare",
-    description: "Nurse home visit for wellness check",
-  },
-
-  // MAY 2025 (Past)
-  {
-    id: "may-1",
-    title: "Dentist Cleaning",
-    date: new Date(2025, 4, 8),
-    type: "Healthcare",
-    description: "6-month dental cleaning with Dr. Williams",
-  },
-  {
-    id: "may-2",
-    title: "Mother's Day Celebration",
-    date: new Date(2025, 4, 11),
-    type: "Social",
-    description: "Special brunch with the family",
-  },
-  {
-    id: "may-3",
-    title: "Medication Refill",
-    date: new Date(2025, 4, 12),
-    type: "Medication",
-    description: "Monthly prescription pickup",
-  },
-  {
-    id: "may-4",
-    title: "Physical Therapy",
-    date: new Date(2025, 4, 19),
-    type: "Healthcare",
-    description: "Weekly PT session",
-  },
-  {
-    id: "may-5",
-    title: "Eye Doctor Appointment",
-    date: new Date(2025, 4, 22),
-    type: "Healthcare",
-    description: "Vision check and new glasses prescription",
-  },
-  {
-    id: "may-6",
-    title: "Grocery Delivery",
-    date: new Date(2025, 4, 25),
-    type: "Shopping",
-    description: "Weekly grocery delivery",
-  },
-
-  // JUNE 2025 (Past)
-  {
-    id: "jun-1",
-    title: "Grandma Birthday",
-    date: new Date(2025, 5, 15),
-    type: "Social",
-    description: "Mom's 80th birthday celebration",
-  },
-  {
-    id: "jun-2",
-    title: "Medication Refill",
-    date: new Date(2025, 5, 10),
-    type: "Medication",
-    description: "Monthly prescription pickup",
-  },
-  {
-    id: "jun-3",
-    title: "Primary Care Visit",
-    date: new Date(2025, 5, 5),
-    type: "Healthcare",
-    description: "Follow-up with Dr. Stevens",
-  },
-  {
-    id: "jun-4",
-    title: "Physical Therapy",
-    date: new Date(2025, 5, 18),
-    type: "Healthcare",
-    description: "Weekly PT session",
-  },
-  {
-    id: "jun-5",
-    title: "Blood Work",
-    date: new Date(2025, 5, 20),
-    type: "Healthcare",
-    description: "Quarterly lab work",
-  },
-  {
-    id: "jun-6",
-    title: "Garden Club Meeting",
-    date: new Date(2025, 5, 25),
-    type: "Social",
-    description: "Senior garden club monthly meeting",
-  },
-
-  // JULY 2025 (Past)
-  {
-    id: "jul-1",
-    title: "Medication Refill",
-    date: new Date(2025, 6, 10),
-    type: "Medication",
-    description: "Monthly prescription pickup",
-  },
-  {
-    id: "jul-2",
-    title: "Independence Day BBQ",
-    date: new Date(2025, 6, 4),
-    type: "Social",
-    description: "Family BBQ celebration",
-  },
-  {
-    id: "jul-3",
-    title: "Dermatology Screening",
-    date: new Date(2025, 6, 12),
-    type: "Healthcare",
-    description: "Skin cancer screening",
-  },
-  {
-    id: "jul-4",
-    title: "Physical Therapy",
-    date: new Date(2025, 6, 22),
-    type: "Healthcare",
-    description: "Weekly PT session",
-  },
-  {
-    id: "jul-5",
-    title: "Grocery Delivery",
-    date: new Date(2025, 6, 28),
-    type: "Shopping",
-    description: "Weekly grocery delivery",
-  },
-
-  // AUGUST 2025 (Past)
-  {
-    id: "aug-1",
-    title: "Medication Refill",
-    date: new Date(2025, 7, 10),
-    type: "Medication",
-    description: "Monthly prescription pickup",
-  },
-  {
-    id: "aug-2",
-    title: "Podiatrist Appointment",
-    date: new Date(2025, 7, 8),
-    type: "Healthcare",
-    description: "Foot care appointment",
-  },
-  {
-    id: "aug-3",
-    title: "Physical Therapy",
-    date: new Date(2025, 7, 15),
-    type: "Healthcare",
-    description: "Weekly PT session",
-  },
-  {
-    id: "aug-4",
-    title: "Book Club",
-    date: new Date(2025, 7, 20),
-    type: "Social",
-    description: "Senior book club meeting",
-  },
-  {
-    id: "aug-5",
-    title: "Audiology Test",
-    date: new Date(2025, 7, 25),
-    type: "Healthcare",
-    description: "Hearing test and aid adjustment",
-  },
-
-  // SEPTEMBER 2025 (Past)
-  {
-    id: "sep-1",
-    title: "Cardiology Follow-up",
-    date: new Date(2025, 8, 3),
-    type: "Healthcare",
-    description: "Heart specialist follow-up",
-  },
-  {
-    id: "sep-2",
-    title: "Medication Refill",
-    date: new Date(2025, 8, 10),
-    type: "Medication",
-    description: "Monthly prescription pickup",
-  },
-  {
-    id: "sep-3",
-    title: "Labor Day Picnic",
-    date: new Date(2025, 8, 1),
-    type: "Social",
-    description: "Family picnic at the park",
-  },
-  {
-    id: "sep-4",
-    title: "Physical Therapy",
-    date: new Date(2025, 8, 18),
-    type: "Healthcare",
-    description: "Weekly PT session",
-  },
-  {
-    id: "sep-5",
-    title: "Flu Shot",
-    date: new Date(2025, 8, 25),
-    type: "Healthcare",
-    description: "Annual flu vaccination",
-  },
-  {
-    id: "sep-6",
-    title: "Grocery Delivery",
-    date: new Date(2025, 8, 28),
-    type: "Shopping",
-    description: "Weekly grocery delivery",
-  },
-
-  // OCTOBER 2025 (Current Month)
-  {
-    id: "oct-1",
-    title: "Doctor Appointment",
-    date: new Date(2025, 9, 5),
-    type: "Healthcare",
-    description: "Quarterly checkup with Dr. Stevens",
-  },
-  {
-    id: "oct-2",
-    title: "Medication Refill",
-    date: new Date(2025, 9, 10),
-    type: "Medication",
-    description: "Monthly prescription pickup",
-  },
-  {
-    id: "oct-3",
-    title: "Family Dinner",
-    date: new Date(2025, 9, 12),
-    type: "Social",
-    description: "Dinner at Italian restaurant",
-  },
-  {
-    id: "oct-4",
-    title: "Dentist Appointment",
-    date: new Date(2025, 9, 15),
-    type: "Healthcare",
-    description: "Regular cleaning with Dr. Williams",
-  },
-  {
-    id: "oct-5",
-    title: "Physical Therapy",
-    date: new Date(2025, 9, 20),
-    type: "Healthcare",
-    description: "Weekly PT session at wellness center",
-  },
-  {
-    id: "oct-6",
-    title: "Blood Work",
-    date: new Date(2025, 9, 22),
-    type: "Healthcare",
-    description: "Routine lab work",
-  },
-  {
-    id: "oct-7",
-    title: "Grocery Delivery",
-    date: new Date(2025, 9, 25),
-    type: "Shopping",
-    description: "Weekly grocery delivery",
-  },
-  {
-    id: "oct-8",
-    title: "Book Club",
-    date: new Date(2025, 9, 28),
-    type: "Social",
-    description: "Monthly book club meeting",
-  },
-
-  // NOVEMBER 2025 (Future)
-  {
-    id: "nov-1",
-    title: "Medication Refill",
-    date: new Date(2025, 10, 8),
-    type: "Medication",
-    description: "Monthly prescription pickup",
-  },
-  {
-    id: "nov-2",
-    title: "Eye Doctor Appointment",
-    date: new Date(2025, 10, 10),
-    type: "Healthcare",
-    description: "Annual vision exam",
-  },
-  {
-    id: "nov-3",
-    title: "Physical Therapy",
-    date: new Date(2025, 10, 15),
-    type: "Healthcare",
-    description: "Weekly PT session",
-  },
-  {
-    id: "nov-4",
-    title: "Thanksgiving Dinner",
-    date: new Date(2025, 10, 27),
-    type: "Social",
-    description: "Family Thanksgiving celebration",
-  },
-  {
-    id: "nov-5",
-    title: "Home Care Visit",
-    date: new Date(2025, 10, 20),
-    type: "Healthcare",
-    description: "Monthly nurse visit",
-  },
-  {
-    id: "nov-6",
-    title: "Grocery Delivery",
-    date: new Date(2025, 10, 22),
-    type: "Shopping",
-    description: "Weekly grocery delivery",
-  },
-
-  // DECEMBER 2025 (Future)
-  {
-    id: "dec-1",
-    title: "Medication Refill",
-    date: new Date(2025, 11, 10),
-    type: "Medication",
-    description: "Monthly prescription pickup",
-  },
-  {
-    id: "dec-2",
-    title: "Cardiology Appointment",
-    date: new Date(2025, 11, 5),
-    type: "Healthcare",
-    description: "Heart specialist visit",
-  },
-  {
-    id: "dec-3",
-    title: "Christmas Celebration",
-    date: new Date(2025, 11, 25),
-    type: "Social",
-    description: "Family Christmas gathering",
-  },
-  {
-    id: "dec-4",
-    title: "Physical Therapy",
-    date: new Date(2025, 11, 18),
-    type: "Healthcare",
-    description: "Weekly PT session",
-  },
-  {
-    id: "dec-5",
-    title: "Holiday Meal Delivery",
-    date: new Date(2025, 11, 23),
-    type: "Shopping",
-    description: "Special holiday meal service",
-  },
-  {
-    id: "dec-6",
-    title: "New Year Eve Party",
-    date: new Date(2025, 11, 31),
-    type: "Social",
-    description: "Family New Year celebration",
-  },
-
-  // JANUARY 2026 (Future)
-  {
-    id: "jan-1",
-    title: "Annual Physical",
-    date: new Date(2026, 0, 15),
-    type: "Healthcare",
-    description: "Comprehensive annual physical exam",
-  },
-  {
-    id: "jan-2",
-    title: "Medication Refill",
-    date: new Date(2026, 0, 10),
-    type: "Medication",
-    description: "Monthly prescription pickup",
-  },
-  {
-    id: "jan-3",
-    title: "Physical Therapy",
-    date: new Date(2026, 0, 20),
-    type: "Healthcare",
-    description: "Weekly PT session",
-  },
-  {
-    id: "jan-4",
-    title: "Blood Work",
-    date: new Date(2026, 0, 25),
-    type: "Healthcare",
-    description: "Quarterly lab work",
-  },
-  {
-    id: "jan-5",
-    title: "Grocery Delivery",
-    date: new Date(2026, 0, 28),
-    type: "Shopping",
-    description: "Weekly grocery delivery",
-  },
-
-  // FEBRUARY 2026 (Future)
-  {
-    id: "feb-1",
-    title: "Medication Refill",
-    date: new Date(2026, 1, 10),
-    type: "Medication",
-    description: "Monthly prescription pickup",
-  },
-  {
-    id: "feb-2",
-    title: "Dentist Checkup",
-    date: new Date(2026, 1, 12),
-    type: "Healthcare",
-    description: "6-month dental cleaning",
-  },
-  {
-    id: "feb-3",
-    title: "Valentine Day Tea",
-    date: new Date(2026, 1, 14),
-    type: "Social",
-    description: "Senior center Valentine celebration",
-  },
-  {
-    id: "feb-4",
-    title: "Physical Therapy",
-    date: new Date(2026, 1, 20),
-    type: "Healthcare",
-    description: "Weekly PT session",
-  },
-  {
-    id: "feb-5",
-    title: "Specialist Consultation",
-    date: new Date(2026, 1, 25),
-    type: "Healthcare",
-    description: "Consultation with neurologist",
-  },
-
-  // MARCH 2026 (Future)
-  {
-    id: "mar-1",
-    title: "Medication Refill",
-    date: new Date(2026, 2, 10),
-    type: "Medication",
-    description: "Monthly prescription pickup",
-  },
-  {
-    id: "mar-2",
-    title: "Primary Care Visit",
-    date: new Date(2026, 2, 8),
-    type: "Healthcare",
-    description: "Checkup with Dr. Stevens",
-  },
-  {
-    id: "mar-3",
-    title: "Physical Therapy",
-    date: new Date(2026, 2, 15),
-    type: "Healthcare",
-    description: "Weekly PT session",
-  },
-  {
-    id: "mar-4",
-    title: "Garden Club Spring",
-    date: new Date(2026, 2, 22),
-    type: "Social",
-    description: "Spring garden club event",
-  },
-  {
-    id: "mar-5",
-    title: "Grocery Delivery",
-    date: new Date(2026, 2, 28),
-    type: "Shopping",
-    description: "Weekly grocery delivery",
-  },
-
-  // APRIL 2026 (Future)
-  {
-    id: "apr26-1",
-    title: "Eye Exam",
-    date: new Date(2026, 3, 10),
-    type: "Healthcare",
-    description: "Annual eye examination",
-  },
-  {
-    id: "apr26-2",
-    title: "Medication Refill",
-    date: new Date(2026, 3, 12),
-    type: "Medication",
-    description: "Monthly prescription pickup",
-  },
-  {
-    id: "apr26-3",
-    title: "Easter Dinner",
-    date: new Date(2026, 3, 20),
-    type: "Social",
-    description: "Family Easter celebration",
-  },
-  {
-    id: "apr26-4",
-    title: "Physical Therapy",
-    date: new Date(2026, 3, 18),
-    type: "Healthcare",
-    description: "Weekly PT session",
-  },
-  {
-    id: "apr26-5",
-    title: "Blood Work",
-    date: new Date(2026, 3, 25),
-    type: "Healthcare",
-    description: "Quarterly lab work",
-  },
-];
 
 const eventTypeColors: { [key: string]: string } = {
   Healthcare: "#3b82f6", // Blue
@@ -565,7 +27,9 @@ const eventTypeColors: { [key: string]: string } = {
 export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date(2025, 9, 2)); // October 2, 2025
   const [selectedDate, setSelectedDate] = useState(new Date(2025, 9, 2));
-  const [events, setEvents] = useState<Event[]>(sampleEvents);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [familyId, setFamilyId] = useState<string | null>(null);
   const [showAddEvent, setShowAddEvent] = useState(false);
   const [newEvent, setNewEvent] = useState({
     title: "",
@@ -574,6 +38,45 @@ export default function CalendarPage() {
     date: "",
     time: "",
   });
+
+  // Fetch events from database
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        // Fetch families
+        const familiesRes = await fetch("/api/families");
+        if (!familiesRes.ok) return;
+        const families = await familiesRes.json();
+        const familiesArray = Array.isArray(families) ? families : [];
+
+        if (familiesArray.length > 0) {
+          const family = familiesArray[0];
+          setFamilyId(family.id);
+
+          // Fetch events for the family
+          const eventsRes = await fetch(`/api/families/${family.id}/events`);
+          if (eventsRes.ok) {
+            const eventsData = await eventsRes.json();
+            // Map database events to component format
+            const mappedEvents = eventsData.map((evt: any) => ({
+              id: evt.id,
+              title: evt.title,
+              date: new Date(evt.eventDate),
+              type: evt.type,
+              description: evt.description,
+            }));
+            setEvents(mappedEvents);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching calendar data:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, []);
 
   const monthNames = [
     "January",
@@ -652,25 +155,47 @@ export default function CalendarPage() {
     setSelectedDate(date);
   };
 
-  const handleAddEvent = (e: React.FormEvent) => {
+  const handleAddEvent = async (e: React.FormEvent) => {
     e.preventDefault();
-    const eventDate = new Date(`${newEvent.date}T${newEvent.time || "12:00"}`);
-    const event: Event = {
-      id: Date.now().toString(),
-      title: newEvent.title,
-      date: eventDate,
-      type: newEvent.type,
-      description: newEvent.description,
-    };
-    setEvents([...events, event]);
-    setShowAddEvent(false);
-    setNewEvent({
-      title: "",
-      description: "",
-      type: "Healthcare",
-      date: "",
-      time: "",
-    });
+    if (!familyId) return;
+
+    try {
+      const eventDate = new Date(`${newEvent.date}T${newEvent.time || "12:00"}`);
+      
+      const response = await fetch(`/api/families/${familyId}/events`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: newEvent.title,
+          description: newEvent.description,
+          type: newEvent.type.toUpperCase(),
+          eventDate: eventDate.toISOString(),
+        }),
+      });
+
+      if (response.ok) {
+        const createdEvent = await response.json();
+        const mappedEvent: Event = {
+          id: createdEvent.id,
+          title: createdEvent.title,
+          date: new Date(createdEvent.eventDate),
+          type: createdEvent.type,
+          description: createdEvent.description,
+        };
+        setEvents([...events, mappedEvent]);
+        setShowAddEvent(false);
+        setNewEvent({
+          title: "",
+          description: "",
+          type: "Healthcare",
+          date: "",
+          time: "",
+        });
+      }
+    } catch (error) {
+      console.error("Error adding event:", error);
+      alert("Failed to add event. Please try again.");
+    }
   };
 
   const daysInMonth = getDaysInMonth(currentDate);

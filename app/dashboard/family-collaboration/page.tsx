@@ -45,51 +45,7 @@ type Event = {
   attendees: string[];
 };
 
-const teamMembers: TeamMember[] = [
-  {
-    id: "1",
-    name: "John Johnson",
-    initials: "JJ",
-    color: "#10b981",
-    active: true,
-  },
-  {
-    id: "2",
-    name: "Sarah Johnson",
-    initials: "SJ",
-    color: "#8b5cf6",
-    active: true,
-  },
-  {
-    id: "3",
-    name: "Michael Johnson",
-    initials: "MJ",
-    color: "#06b6d4",
-    active: true,
-  },
-];
-
-const upcomingEvents: Event[] = [
-  {
-    id: "1",
-    title: "Martha Johnson's Favorite Restaurant",
-    description: "A family gathering for dinner at 6:00 PM.",
-    date: "Aug 31",
-    category: "Family Dinner",
-    categoryColor: "#6366f1",
-    attendees: ["JE", "SC", "MD"],
-  },
-  {
-    id: "2",
-    title: "Extended Weekend Visit",
-    description:
-      "Mike is coming to stay for the weekend and help with home repairs.",
-    date: "Sep 10",
-    category: "Weekend Visit",
-    categoryColor: "#10b981",
-    attendees: ["JE", "MD"],
-  },
-];
+// Team members and events are now fetched from database
 
 const avatarColors = [
   "#6366f1",
@@ -131,6 +87,7 @@ export default function FamilyCollaborationPage() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const previousMessageCountRef = useRef(0);
+  const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
 
   // Fetch user's first family and members
   useEffect(() => {
@@ -159,6 +116,34 @@ export default function FamilyCollaborationPage() {
               const tasksData = await tasksRes.json();
               setTasks(tasksData);
               calculateTaskDistribution(tasksData, membersData);
+            }
+
+            // Fetch upcoming events
+            const eventsRes = await fetch(`/api/families/${family.id}/events`);
+            if (eventsRes.ok) {
+              const eventsData = await eventsRes.json();
+              // Filter to upcoming events and take first 2
+              const upcoming = eventsData
+                .filter((evt: any) => new Date(evt.eventDate) >= new Date())
+                .sort(
+                  (a: any, b: any) =>
+                    new Date(a.eventDate).getTime() -
+                    new Date(b.eventDate).getTime()
+                )
+                .slice(0, 2)
+                .map((evt: any) => ({
+                  id: evt.id,
+                  title: evt.title,
+                  description: evt.description || "",
+                  date: new Date(evt.eventDate).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  }),
+                  category: evt.type,
+                  categoryColor: "#6366f1",
+                  attendees: ["FM"], // Can be enhanced later
+                }));
+              setUpcomingEvents(upcoming);
             }
           }
         }
@@ -500,7 +485,7 @@ export default function FamilyCollaborationPage() {
                   <h3>{event.title}</h3>
                   <p>{event.description}</p>
                   <div className={styles.eventAttendees}>
-                    {event.attendees.map((attendee, idx) => (
+                    {event.attendees.map((attendee: string, idx: number) => (
                       <div key={idx} className={styles.attendeeAvatar}>
                         {attendee}
                       </div>
@@ -523,59 +508,39 @@ export default function FamilyCollaborationPage() {
             <h2>Family Contact Information</h2>
 
             <div className={styles.contactGrid}>
-              <div className={styles.contactCard}>
-                <div
-                  className={styles.contactAvatar}
-                  style={{ background: "#10b981" }}
-                >
-                  JJ
+              {familyMembers.map((member) => {
+                const memberColor = getAvatarColor(member.userId);
+                const initials = getInitials(member.user.name, member.user.email);
+                
+                return (
+                  <div key={member.id} className={styles.contactCard}>
+                    <div
+                      className={styles.contactAvatar}
+                      style={{ background: memberColor }}
+                    >
+                      {initials}
+                    </div>
+                    <h3>{member.user.name || member.user.email}</h3>
+                    <div className={styles.contactInfo}>
+                      <Mail size={14} />
+                      <span>{member.user.email}</span>
+                    </div>
+                    <div className={styles.contactInfo}>
+                      <Phone size={14} />
+                      <span>
+                        {member.role === "CARE_MANAGER"
+                          ? "Primary Contact"
+                          : "Contact info not available"}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+              {familyMembers.length === 0 && (
+                <div style={{ padding: "2rem", color: "#6c757d", gridColumn: "1 / -1" }}>
+                  No family members yet
                 </div>
-                <h3>John Johnson</h3>
-                <div className={styles.contactInfo}>
-                  <Mail size={14} />
-                  <span>john@example.com</span>
-                </div>
-                <div className={styles.contactInfo}>
-                  <Phone size={14} />
-                  <span>Phone not available</span>
-                </div>
-              </div>
-
-              <div className={styles.contactCard}>
-                <div
-                  className={styles.contactAvatar}
-                  style={{ background: "#8b5cf6" }}
-                >
-                  SJ
-                </div>
-                <h3>Sarah Johnson</h3>
-                <div className={styles.contactInfo}>
-                  <Mail size={14} />
-                  <span>sarah@example.com</span>
-                </div>
-                <div className={styles.contactInfo}>
-                  <Phone size={14} />
-                  <span>Phone not available</span>
-                </div>
-              </div>
-
-              <div className={styles.contactCard}>
-                <div
-                  className={styles.contactAvatar}
-                  style={{ background: "#06b6d4" }}
-                >
-                  MJ
-                </div>
-                <h3>Michael Johnson</h3>
-                <div className={styles.contactInfo}>
-                  <Mail size={14} />
-                  <span>michael@example.com</span>
-                </div>
-                <div className={styles.contactInfo}>
-                  <Phone size={14} />
-                  <span>Phone not available</span>
-                </div>
-              </div>
+              )}
             </div>
           </div>
 
