@@ -90,6 +90,7 @@ export async function POST(request: NextRequest) {
       data: {
         name,
         description: description || null,
+        createdBy: user.id,
       },
       select: {
         id: true,
