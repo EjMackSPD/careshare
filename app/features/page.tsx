@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import Footer from "../components/Footer";
+import MarketingNav from "../components/MarketingNav";
 import {
   Wallet,
   Calendar,
@@ -22,33 +22,11 @@ import {
   Video,
 } from "lucide-react";
 import styles from "./page.module.css";
-import homeStyles from "../page.module.css";
 
 export default function Features() {
   return (
     <div className={styles.container}>
-      <nav className={homeStyles.nav}>
-        <div className={homeStyles.navContainer}>
-          <Link href="/" className={homeStyles.logo}>
-            <Image
-              src="/careshare-logo.png"
-              alt="CareShare Logo"
-              width={200}
-              height={75}
-              priority
-            />
-          </Link>
-          <div className={homeStyles.navLinks}>
-            <Link href="/features">Features</Link>
-            <Link href="/blog">Blog</Link>
-            <Link href="/partnerships">Partnerships</Link>
-            <Link href="/login">Login</Link>
-            <Link href="/signup" className={homeStyles.signupBtn}>
-              Sign Up
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <MarketingNav />
 
       <main className={styles.main}>
         {/* Hero Section */}
@@ -61,12 +39,14 @@ export default function Features() {
             <h1>
               Everything Your Family Needs
               <br />
-              <span className={styles.heroHighlight}>In One Beautiful Place</span>
+              <span className={styles.heroHighlight}>
+                In One Beautiful Place
+              </span>
             </h1>
             <p className={styles.heroSubtitle}>
               Stop juggling emails, texts, and spreadsheets. CareShare brings
-              everyone together with powerful tools that actually make caregiving
-              easier.
+              everyone together with powerful tools that actually make
+              caregiving easier.
             </p>
             <div className={styles.heroButtons}>
               <Link href="/signup" className={styles.heroPrimaryBtn}>
@@ -93,13 +73,17 @@ export default function Features() {
           <div className={styles.grid}>
             {/* Financial Management */}
             <div className={styles.featureCard}>
-              <div className={styles.iconWrapper} style={{ background: "#dbeafe" }}>
+              <div
+                className={styles.iconWrapper}
+                style={{ background: "#dbeafe" }}
+              >
                 <Wallet size={32} style={{ color: "#2563eb" }} />
               </div>
               <h3>Smart Financial Tracking</h3>
               <p>
-                Say goodbye to awkward money conversations. Track expenses, split
-                costs fairly, and keep everyone on the same page financially.
+                Say goodbye to awkward money conversations. Track expenses,
+                split costs fairly, and keep everyone on the same page
+                financially.
               </p>
               <ul className={styles.checkList}>
                 <li>
@@ -123,13 +107,16 @@ export default function Features() {
 
             {/* Calendar & Events */}
             <div className={styles.featureCard}>
-              <div className={styles.iconWrapper} style={{ background: "#dcfce7" }}>
+              <div
+                className={styles.iconWrapper}
+                style={{ background: "#dcfce7" }}
+              >
                 <Calendar size={32} style={{ color: "#16a34a" }} />
               </div>
               <h3>Shared Family Calendar</h3>
               <p>
-                Never miss an appointment, birthday, or important event. Everyone
-                stays in sync with real-time updates.
+                Never miss an appointment, birthday, or important event.
+                Everyone stays in sync with real-time updates.
               </p>
               <ul className={styles.checkList}>
                 <li>
@@ -153,13 +140,16 @@ export default function Features() {
 
             {/* Task Management */}
             <div className={styles.featureCard}>
-              <div className={styles.iconWrapper} style={{ background: "#fef3c7" }}>
+              <div
+                className={styles.iconWrapper}
+                style={{ background: "#fef3c7" }}
+              >
                 <Target size={32} style={{ color: "#ca8a04" }} />
               </div>
               <h3>Task Coordination</h3>
               <p>
-                Divide responsibilities fairly. Assign tasks, set priorities, and
-                watch your family work together seamlessly.
+                Divide responsibilities fairly. Assign tasks, set priorities,
+                and watch your family work together seamlessly.
               </p>
               <ul className={styles.checkList}>
                 <li>
@@ -183,13 +173,16 @@ export default function Features() {
 
             {/* Communication */}
             <div className={styles.featureCard}>
-              <div className={styles.iconWrapper} style={{ background: "#e9d5ff" }}>
+              <div
+                className={styles.iconWrapper}
+                style={{ background: "#e9d5ff" }}
+              >
                 <MessageSquare size={32} style={{ color: "#7c3aed" }} />
               </div>
               <h3>Family Communication Hub</h3>
               <p>
-                Keep conversations organized. Share updates, photos, and important
-                information all in one secure place.
+                Keep conversations organized. Share updates, photos, and
+                important information all in one secure place.
               </p>
               <ul className={styles.checkList}>
                 <li>
@@ -213,7 +206,10 @@ export default function Features() {
 
             {/* Care Planning */}
             <div className={styles.featureCard}>
-              <div className={styles.iconWrapper} style={{ background: "#fecaca" }}>
+              <div
+                className={styles.iconWrapper}
+                style={{ background: "#fecaca" }}
+              >
                 <Heart size={32} style={{ color: "#dc2626" }} />
               </div>
               <h3>Comprehensive Care Planning</h3>
@@ -243,13 +239,16 @@ export default function Features() {
 
             {/* Resources */}
             <div className={styles.featureCard}>
-              <div className={styles.iconWrapper} style={{ background: "#fed7aa" }}>
+              <div
+                className={styles.iconWrapper}
+                style={{ background: "#fed7aa" }}
+              >
                 <FileText size={32} style={{ color: "#ea580c" }} />
               </div>
               <h3>Resource Library</h3>
               <p>
-                Access curated resources, guides, and support services. Find help
-                when you need it most.
+                Access curated resources, guides, and support services. Find
+                help when you need it most.
               </p>
               <ul className={styles.checkList}>
                 <li>
@@ -286,7 +285,10 @@ export default function Features() {
                 <BarChart3 size={24} />
               </div>
               <h4>Expense Analytics</h4>
-              <p>Visualize spending trends and budget better for future care needs.</p>
+              <p>
+                Visualize spending trends and budget better for future care
+                needs.
+              </p>
             </div>
 
             <div className={styles.advancedFeature}>
@@ -294,7 +296,9 @@ export default function Features() {
                 <Bell size={24} />
               </div>
               <h4>Smart Notifications</h4>
-              <p>Get alerted about bills, appointments, and important updates.</p>
+              <p>
+                Get alerted about bills, appointments, and important updates.
+              </p>
             </div>
 
             <div className={styles.advancedFeature}>
@@ -302,7 +306,10 @@ export default function Features() {
                 <Users size={24} />
               </div>
               <h4>Role Management</h4>
-              <p>Control access with care manager, family member, and contributor roles.</p>
+              <p>
+                Control access with care manager, family member, and contributor
+                roles.
+              </p>
             </div>
 
             <div className={styles.advancedFeature}>
@@ -310,7 +317,10 @@ export default function Features() {
                 <Shield size={24} />
               </div>
               <h4>Bank-Level Security</h4>
-              <p>Your family's data is encrypted and protected with enterprise security.</p>
+              <p>
+                Your family's data is encrypted and protected with enterprise
+                security.
+              </p>
             </div>
 
             <div className={styles.advancedFeature}>
@@ -339,8 +349,8 @@ export default function Features() {
               <div className={styles.stepNumber}>1</div>
               <h3>Create Your Family</h3>
               <p>
-                Set up your family group in minutes. Add a name, description, and
-                invite family members.
+                Set up your family group in minutes. Add a name, description,
+                and invite family members.
               </p>
             </div>
             <div className={styles.step}>
@@ -366,9 +376,7 @@ export default function Features() {
         <section className={styles.ctaSection}>
           <div className={styles.ctaContent}>
             <h2>Ready to Transform Family Caregiving?</h2>
-            <p>
-              Join thousands of families who are caring better, together.
-            </p>
+            <p>Join thousands of families who are caring better, together.</p>
             <div className={styles.ctaButtons}>
               <Link href="/signup" className={styles.ctaPrimaryBtn}>
                 Get Started Free
@@ -379,7 +387,8 @@ export default function Features() {
               </Link>
             </div>
             <p className={styles.ctaNote}>
-              ✓ No credit card required &nbsp;•&nbsp; ✓ 14-day free trial &nbsp;•&nbsp; ✓ Cancel anytime
+              ✓ No credit card required &nbsp;•&nbsp; ✓ 14-day free trial
+              &nbsp;•&nbsp; ✓ Cancel anytime
             </p>
           </div>
         </section>
@@ -389,4 +398,3 @@ export default function Features() {
     </div>
   );
 }
-

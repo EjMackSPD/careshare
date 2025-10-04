@@ -1,0 +1,336 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: white;
+}
+
+.main {
+  flex: 1;
+  padding-top: 5rem;
+}
+
+/* Hero */
+.hero {
+  text-align: center;
+  padding: 6rem 2rem 4rem 2rem;
+  background: linear-gradient(
+      135deg,
+      rgba(99, 102, 241, 0.95) 0%,
+      rgba(139, 92, 246, 0.95) 100%
+    ),
+    url("https://images.unsplash.com/photo-1511895426328-dc8714191300?w=1920&q=80")
+      center/cover;
+  color: white;
+  position: relative;
+}
+
+.hero h1 {
+  margin: 0 0 1.5rem 0;
+  font-size: 3.5rem;
+  font-weight: 900;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.heroSubtitle {
+  margin: 0 auto;
+  font-size: 1.375rem;
+  max-width: 800px;
+  opacity: 0.95;
+  line-height: 1.7;
+}
+
+/* Story */
+.story {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 6rem 2rem;
+}
+
+.story h2 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0 0 2rem 0;
+  text-align: center;
+}
+
+.storyContent p {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: #475569;
+  margin: 0 0 1.5rem 0;
+}
+
+/* Values */
+.values {
+  padding: 6rem 2rem;
+  background: #f8fafc;
+}
+
+.sectionTitle {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #1e293b;
+  margin: 0 0 3rem 0;
+  letter-spacing: -0.02em;
+}
+
+.sectionSubtitle {
+  text-align: center;
+  font-size: 1.25rem;
+  color: #64748b;
+  margin: 0 0 3rem 0;
+}
+
+.valuesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.valueCard {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 1.25rem;
+  border: 2px solid #e2e8f0;
+  text-align: center;
+  transition: all 0.3s;
+}
+
+.valueCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(99, 102, 241, 0.15);
+  border-color: #cbd5e1;
+}
+
+.valueIcon {
+  width: 80px;
+  height: 80px;
+  border-radius: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  transition: all 0.3s;
+}
+
+.valueCard:hover .valueIcon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.valueCard h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.valueCard p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.7;
+  font-size: 1rem;
+}
+
+/* Impact */
+.impact {
+  padding: 6rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.impactGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.impactStat {
+  text-align: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  border-radius: 1rem;
+}
+
+.statNumber {
+  font-size: 3.5rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+}
+
+.statLabel {
+  font-size: 1rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+/* Team */
+.team {
+  padding: 6rem 2rem;
+  background: #f8fafc;
+}
+
+.teamNote {
+  max-width: 800px;
+  margin: 3rem auto 0;
+  padding: 3rem;
+  background: white;
+  border-radius: 1.25rem;
+  border: 2px solid #e2e8f0;
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.teamNote svg {
+  color: #f59e0b;
+  flex-shrink: 0;
+}
+
+.teamNote p {
+  margin: 0;
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: #475569;
+}
+
+/* Vision */
+.vision {
+  padding: 6rem 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.visionIcon {
+  color: #6366f1;
+  margin: 0 auto 2rem;
+}
+
+.vision h2 {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #1e293b;
+  margin: 0 0 2rem 0;
+}
+
+.visionContent p {
+  font-size: 1.25rem;
+  line-height: 1.8;
+  color: #475569;
+  margin: 0 0 1.5rem 0;
+}
+
+/* CTA */
+.ctaSection {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  padding: 6rem 2rem;
+  text-align: center;
+  color: white;
+}
+
+.ctaSection h2 {
+  margin: 0 0 1rem 0;
+  font-size: 3rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.ctaSection > p {
+  margin: 0 auto 2.5rem auto;
+  font-size: 1.25rem;
+  opacity: 0.95;
+  max-width: 600px;
+}
+
+.ctaButtons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.ctaPrimaryBtn,
+.ctaSecondaryBtn {
+  padding: 1.125rem 2.5rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  border-radius: 0.75rem;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.ctaPrimaryBtn {
+  background: white;
+  color: #1e293b;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.ctaPrimaryBtn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+}
+
+.ctaSecondaryBtn {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 2px solid white;
+  backdrop-filter: blur(10px);
+}
+
+.ctaSecondaryBtn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 968px) {
+  .hero h1 {
+    font-size: 2.5rem;
+  }
+
+  .heroSubtitle {
+    font-size: 1.125rem;
+  }
+
+  .story h2,
+  .sectionTitle,
+  .vision h2,
+  .ctaSection h2 {
+    font-size: 2rem;
+  }
+
+  .storyContent p,
+  .visionContent p {
+    font-size: 1rem;
+  }
+
+  .valuesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .impactGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .teamNote {
+    flex-direction: column;
+    padding: 2rem;
+  }
+
+  .ctaButtons {
+    flex-direction: column;
+    max-width: 300px;
+    margin: 0 auto;
+  }
+}

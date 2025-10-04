@@ -12,7 +12,13 @@
 
 /* Hero Section */
 .hero {
-  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background: linear-gradient(
+      135deg,
+      rgba(99, 102, 241, 0.95) 0%,
+      rgba(139, 92, 246, 0.95) 100%
+    ),
+    url("https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=1920&q=80")
+      center/cover;
   padding: 8rem 2rem 6rem 2rem;
   text-align: center;
   color: white;
@@ -63,7 +69,11 @@
 }
 
 .heroHighlight {
-  background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.8) 100%);
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    rgba(255, 255, 255, 0.8) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

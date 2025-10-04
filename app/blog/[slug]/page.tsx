@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import Footer from "../../components/Footer";
+import MarketingNav from "../../components/MarketingNav";
 import {
   Calendar,
   Clock,
@@ -14,7 +14,6 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import styles from "./page.module.css";
-import homeStyles from "../../page.module.css";
 
 type BlogPost = {
   id: string;
@@ -82,28 +81,7 @@ export default function BlogPostPage() {
   if (loading) {
     return (
       <div className={styles.container}>
-        <nav className={homeStyles.nav}>
-          <div className={homeStyles.navContainer}>
-            <Link href="/" className={homeStyles.logo}>
-              <Image
-                src="/careshare-logo.png"
-                alt="CareShare Logo"
-                width={200}
-                height={75}
-                priority
-              />
-            </Link>
-            <div className={homeStyles.navLinks}>
-              <Link href="/features">Features</Link>
-              <Link href="/blog">Blog</Link>
-              <Link href="/partnerships">Partnerships</Link>
-              <Link href="/login">Login</Link>
-              <Link href="/signup" className={homeStyles.signupBtn}>
-                Sign Up
-              </Link>
-            </div>
-          </div>
-        </nav>
+        <MarketingNav />
         <div className={styles.loadingState}>
           <div className={styles.spinner}></div>
           <p>Loading article...</p>
@@ -119,28 +97,7 @@ export default function BlogPostPage() {
 
   return (
     <div className={styles.container}>
-      <nav className={homeStyles.nav}>
-        <div className={homeStyles.navContainer}>
-          <Link href="/" className={homeStyles.logo}>
-            <Image
-              src="/careshare-logo.png"
-              alt="CareShare Logo"
-              width={200}
-              height={75}
-              priority
-            />
-          </Link>
-          <div className={homeStyles.navLinks}>
-            <Link href="/features">Features</Link>
-            <Link href="/blog">Blog</Link>
-            <Link href="/partnerships">Partnerships</Link>
-            <Link href="/login">Login</Link>
-            <Link href="/signup" className={homeStyles.signupBtn}>
-              Sign Up
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <MarketingNav />
 
       <main className={styles.main}>
         <Link href="/blog" className={styles.backLink}>
