@@ -1,49 +1,54 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import styles from './ResetDemoButton.module.css'
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import styles from "./ResetDemoButton.module.css";
 
 export default function ResetDemoButton() {
-  const [loading, setLoading] = useState(false)
-  const router = useRouter()
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const handleReset = async () => {
-    if (!confirm('This will delete all current demo data and create fresh sample data. Continue?')) {
-      return
+    if (
+      !confirm(
+        "This will delete all current demo data and create fresh sample data. Continue?"
+      )
+    ) {
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
-      const res = await fetch('/api/demo/reset', {
-        method: 'POST'
-      })
+      const res = await fetch("/api/demo/reset", {
+        method: "POST",
+      });
 
-      const data = await res.json()
+      const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to reset demo data')
+        throw new Error(data.error || "Failed to reset demo data");
       }
 
-      alert('Demo data has been reset! Refreshing page...')
-      router.refresh()
-      window.location.reload()
+      alert("Demo data has been reset! Refreshing page...");
+      router.refresh();
+      window.location.reload();
     } catch (error) {
-      console.error('Reset demo error:', error)
-      alert(error instanceof Error ? error.message : 'Failed to reset demo data')
+      console.error("Reset demo error:", error);
+      alert(
+        error instanceof Error ? error.message : "Failed to reset demo data"
+      );
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <button 
-      onClick={handleReset} 
-      disabled={loading} 
+    <button
+      onClick={handleReset}
+      disabled={loading}
       className={styles.resetButton}
     >
-      {loading ? '🔄 Resetting...' : '🔄 Reset Demo Data'}
+      {loading ? "🔄 Resetting..." : "🔄 Reset Demo Data"}
     </button>
-  )
+  );
 }
-

@@ -74,14 +74,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Mark onboarding as complete by updating user
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        emailVerified: user.emailVerified || new Date(), // Ensure verified
-      },
-    });
-
+    // Onboarding complete - family and members created
     return NextResponse.json({
       success: true,
       familyId: family.id,
