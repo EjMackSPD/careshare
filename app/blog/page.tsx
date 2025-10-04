@@ -107,16 +107,22 @@ export default function BlogPage() {
     <div className={styles.container}>
       <MarketingNav />
 
-      <main className={styles.main}>
-        {/* Hero Section */}
-        <div className={styles.hero}>
+      {/* Hero Section */}
+      <div className={styles.hero}>
+        <div className={styles.heroContent}>
+          <div className={styles.badge}>
+            <TrendingUp size={16} />
+            <span>Resources & Insights</span>
+          </div>
           <h1>CareShare Blog</h1>
-          <p>
+          <p className={styles.heroSubtitle}>
             Expert advice, inspiring stories, and practical tips for family
-            caregivers
+            caregivers navigating the caregiving journey together
           </p>
         </div>
+      </div>
 
+      <main className={styles.main}>
         {/* Search and Filters */}
         <div className={styles.filters}>
           <div className={styles.searchBox}>
