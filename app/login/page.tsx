@@ -4,8 +4,9 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { Heart, Shield, Users, Sparkles } from "lucide-react";
+import MarketingNav from "../components/MarketingNav";
+import Footer from "../components/Footer";
 import styles from "./page.module.css";
 
 export default function Login() {
@@ -80,20 +81,12 @@ export default function Login() {
   };
 
   return (
-    <div className={styles.container}>
-      {/* Left Panel - Hero Content */}
-      <div className={styles.leftPanel}>
-        <Link href="/" className={styles.logoLink}>
-          <Image
-            src="/careshare-logo.png"
-            alt="CareShare Logo"
-            width={200}
-            height={75}
-            priority
-          />
-        </Link>
-
-        <div className={styles.heroContent}>
+    <>
+      <MarketingNav />
+      <div className={styles.container}>
+        {/* Left Panel - Hero Content */}
+        <div className={styles.leftPanel}>
+          <div className={styles.heroContent}>
           <h1>Welcome back to CareShare</h1>
           <p className={styles.subtitle}>
             Continue coordinating care with your family. Sign in to access your
@@ -221,5 +214,7 @@ export default function Login() {
         </div>
       </div>
     </div>
+    <Footer />
+    </>
   );
 }

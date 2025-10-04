@@ -3,8 +3,9 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import { Heart, Shield, Users } from 'lucide-react'
+import MarketingNav from '../components/MarketingNav'
+import Footer from '../components/Footer'
 import styles from './page.module.css'
 
 export default function Signup() {
@@ -66,19 +67,11 @@ export default function Signup() {
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.leftPanel}>
-        <Link href="/" className={styles.logoLink}>
-          <Image 
-            src="/careshare-logo.png" 
-            alt="CareShare Logo" 
-            width={200} 
-            height={75}
-            priority
-          />
-        </Link>
-        
-        <div className={styles.heroContent}>
+    <>
+      <MarketingNav />
+      <div className={styles.container}>
+        <div className={styles.leftPanel}>
+          <div className={styles.heroContent}>
           <h1>Welcome to CareShare</h1>
           <p className={styles.subtitle}>
             Join thousands of families coordinating care for their loved ones
@@ -199,6 +192,8 @@ export default function Signup() {
         </div>
       </div>
     </div>
+    <Footer />
+    </>
   )
 }
 

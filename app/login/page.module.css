@@ -1,5 +1,5 @@
 .container {
-  min-height: 100vh;
+  min-height: calc(100vh - 80px);
   display: grid;
   grid-template-columns: 1fr 1fr;
 }
@@ -32,13 +32,6 @@
       transparent 50%
     );
   pointer-events: none;
-}
-
-.logoLink {
-  position: relative;
-  z-index: 1;
-  display: inline-block;
-  margin-bottom: 3rem;
 }
 
 .heroContent {
