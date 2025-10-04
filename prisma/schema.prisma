@@ -77,6 +77,7 @@ model User {
   lifeStories     LifeStory[]
   medications     Medication[]
   notes           Note[]
+  uploadedDocuments Document[]
 
   @@index([email])
 }
@@ -110,6 +111,10 @@ model Family {
   lifeStories   LifeStory[]
   medications   Medication[]
   notes         Note[]
+  documents     Document[]
+  carePlan      CarePlan?
+  careScenarios CareScenario[]
+  contributions FamilyContribution[]
 
   @@index([createdBy])
 }
@@ -474,4 +479,101 @@ model Note {
   @@index([userId])
   @@index([createdAt])
   @@index([category])
+}
+
+// Important documents for care planning
+enum DocumentCategory {
+  MEDICAL
+  LEGAL
+  INSURANCE
+  FINANCIAL
+  OTHER
+}
+
+model Document {
+  id          String           @id @default(cuid())
+  familyId    String
+  name        String
+  category    DocumentCategory
+  fileUrl     String?          // URL to uploaded file
+  fileName    String?          // Original file name
+  fileSize    Int?             // File size in bytes
+  mimeType    String?          // File MIME type
+  notes       String?          @db.Text
+  uploadedBy  String?          // User who uploaded
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  family       Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  uploadedByUser User? @relation(fields: [uploadedBy], references: [id])
+
+  @@index([familyId])
+  @@index([category])
+  @@index([createdAt])
+}
+
+// Care plan details
+enum CareLevel {
+  LOW
+  MODERATE
+  HIGH
+  INTENSIVE
+}
+
+model CarePlan {
+  id                String    @id @default(cuid())
+  familyId          String    @unique
+  careLevel         CareLevel @default(MODERATE)
+  careLevelDescription String? @db.Text
+  estimatedCostMin  Int?      // Minimum estimated monthly cost in dollars
+  estimatedCostMax  Int?      // Maximum estimated monthly cost in dollars
+  careNotes         String?   @db.Text
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@index([familyId])
+}
+
+// Care scenarios for different situations
+enum ScenarioType {
+  MEDICAL_EMERGENCY
+  HOSPITALIZATION
+  INCREASED_CARE
+  ASSISTED_LIVING
+  END_OF_LIFE
+}
+
+model CareScenario {
+  id          String       @id @default(cuid())
+  familyId    String
+  type        ScenarioType
+  title       String
+  icon        String?      // Emoji or icon
+  content     String       @db.Text // JSON string with scenario details
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@index([familyId])
+  @@index([type])
+}
+
+// Family member monthly contribution splits
+model FamilyContribution {
+  id          String   @id @default(cuid())
+  familyId    String
+  memberName  String   // Name of the family member contributing
+  amount      Float    // Monthly contribution amount
+  percentage  Int      // Percentage of total contributions (1-100)
+  color       String   @default("#6366f1") // Color for UI display
+  initial     String   @default("FM") // Initials for avatar
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@index([familyId])
 }

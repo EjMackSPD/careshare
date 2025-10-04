@@ -1,6 +1,7 @@
 .container {
   min-height: 100vh;
   background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+  padding-top: 110px;
 }
 
 .nav {
@@ -242,4 +243,3 @@
     font-size: 2rem;
   }
 }
-

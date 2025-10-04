@@ -1,7 +1,7 @@
 .container {
   min-height: 100vh;
   background: #f8f9fa;
-  padding-top: 81px;
+  padding-top: 110px;
 }
 
 .layout {
@@ -12,9 +12,7 @@
 .main {
   flex: 1;
   max-width: 1000px;
-  margin: 0 auto;
   padding: 2rem;
-  margin-left: 260px;
   width: 100%;
 }
 
@@ -39,7 +37,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .loading p,
@@ -260,7 +260,7 @@
 }
 
 .tipsList li::before {
-  content: '✓';
+  content: "✓";
   color: #10b981;
   font-weight: 700;
   flex-shrink: 0;
@@ -317,4 +317,3 @@
     font-size: 1.5rem;
   }
 }
-

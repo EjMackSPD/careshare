@@ -1,7 +1,7 @@
 .container {
   min-height: 100vh;
   background: #f8f9fa;
-  padding-top: 126px;
+  padding-top: 155px;
 }
 
 .layout {
@@ -12,10 +12,8 @@
 .main {
   flex: 1;
   max-width: 1600px;
-  margin: 0 auto;
   padding: 3rem 2rem;
   width: 100%;
-  margin-left: 260px;
 }
 
 .pageHeader {
@@ -376,4 +374,3 @@
     grid-template-columns: 1fr;
   }
 }
-

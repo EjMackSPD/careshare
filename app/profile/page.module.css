@@ -1,6 +1,7 @@
 .container {
   min-height: 100vh;
   background: #f8f9fa;
+  padding-top: 110px;
 }
 
 .layout {
@@ -99,6 +100,40 @@
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
+.passwordInput {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.passwordInput input {
+  width: 100%;
+  padding-right: 3rem;
+}
+
+.togglePassword {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.togglePassword:hover {
+  color: #2563eb;
+}
+
+.togglePassword:focus {
+  outline: none;
+  color: #2563eb;
+}
+
 .formRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -140,4 +175,3 @@
     grid-template-columns: 1fr;
   }
 }
-

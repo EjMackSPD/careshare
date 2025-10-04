@@ -1,242 +1,460 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import Navigation from '@/app/components/Navigation'
-import LeftNavigation from '@/app/components/LeftNavigation'
-import Footer from '@/app/components/Footer'
-import { Search, Trash2, UserPlus, X, Edit } from 'lucide-react'
-import styles from './page.module.css'
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Navigation from "@/app/components/Navigation";
+import LeftNavigation from "@/app/components/LeftNavigation";
+import Footer from "@/app/components/Footer";
+import { Search, Trash2, UserPlus, X, Edit } from "lucide-react";
+import styles from "./page.module.css";
 
 type Task = {
-  id: string
-  title: string
-  description: string
-  category: string
-  priority: 'HIGH' | 'MEDIUM' | 'LOW'
-  assignedTo: string
-  assignedToName?: string
-  dueDate: string
-  completed: boolean
-}
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  priority: "HIGH" | "MEDIUM" | "LOW";
+  assignedTo: string;
+  assignedToName?: string;
+  dueDate: string;
+  completed: boolean;
+};
 
 type FamilyMember = {
-  id: string
-  userId: string
+  id: string;
+  userId: string;
   user: {
-    id: string
-    name: string | null
-    email: string
-  }
-}
+    id: string;
+    name: string | null;
+    email: string;
+  };
+};
 
 type Family = {
-  id: string
-  name: string
-  elderName: string | null
-  members: FamilyMember[]
-}
+  id: string;
+  name: string;
+  elderName: string | null;
+  members: FamilyMember[];
+};
 
 const sampleTasks: Task[] = [
+  // HIGH PRIORITY - Urgent Tasks
   {
-    id: '1',
-    title: 'Pick up prescriptions',
-    description: 'Get monthly medications from Walgreens',
-    category: 'Medication',
-    priority: 'HIGH',
-    assignedTo: 'Sarah Miller',
-    dueDate: '10/3/2025, 12:26:15 PM',
+    id: "1",
+    title: "Pick up prescriptions",
+    description:
+      "Get monthly medications from CVS Pharmacy - Blood pressure meds and vitamins",
+    category: "Medication",
+    priority: "HIGH",
+    assignedTo: "Sarah Miller",
+    dueDate: "10/5/2025, 9:00:00 AM",
     completed: false,
   },
   {
-    id: '2',
-    title: 'Schedule doctor appointment',
-    description: 'Annual checkup with Dr. Stevens',
-    category: 'Healthcare',
-    priority: 'MEDIUM',
-    assignedTo: 'John Johnson',
-    dueDate: '10/9/2025, 12:26:15 PM',
+    id: "2",
+    title: "Refill insulin prescription",
+    description:
+      "Running low - need to refill by end of week. Call Dr. Johnson for refill authorization",
+    category: "Medication",
+    priority: "HIGH",
+    assignedTo: "John Johnson",
+    dueDate: "10/6/2025, 10:00:00 AM",
     completed: false,
   },
   {
-    id: '3',
-    title: 'Grocery shopping',
-    description: 'Get weekly groceries including fresh fruits',
-    category: 'Shopping',
-    priority: 'MEDIUM',
-    assignedTo: 'Robert James',
-    dueDate: '10/4/2025, 12:26:15 PM',
+    id: "3",
+    title: "Emergency dental appointment",
+    description: "Mom has tooth pain - schedule with Dr. Williams ASAP",
+    category: "Healthcare",
+    priority: "HIGH",
+    assignedTo: "Sarah Miller",
+    dueDate: "10/4/2025, 2:00:00 PM",
     completed: false,
   },
   {
-    id: '4',
-    title: 'Fix leaking faucet',
-    description: 'Call plumber or fix bathroom sink',
-    category: 'Home Maintenance',
-    priority: 'LOW',
-    assignedTo: '',
-    dueDate: '10/5/2025, 12:26:15 PM',
+    id: "4",
+    title: "Submit insurance claim",
+    description:
+      "Physical therapy claim from last week needs to be submitted before deadline",
+    category: "Healthcare",
+    priority: "HIGH",
+    assignedTo: "Michael Smith",
+    dueDate: "10/7/2025, 5:00:00 PM",
     completed: false,
   },
-]
+
+  // MEDIUM PRIORITY - Important but not urgent
+  {
+    id: "5",
+    title: "Schedule annual checkup",
+    description:
+      "Book appointment with Dr. Stevens for yearly physical examination",
+    category: "Healthcare",
+    priority: "MEDIUM",
+    assignedTo: "John Johnson",
+    dueDate: "10/12/2025, 12:00:00 PM",
+    completed: false,
+  },
+  {
+    id: "6",
+    title: "Grocery shopping for the week",
+    description:
+      "Get fresh fruits, vegetables, bread, milk, and low-sodium snacks",
+    category: "Shopping",
+    priority: "MEDIUM",
+    assignedTo: "Robert James",
+    dueDate: "10/8/2025, 10:00:00 AM",
+    completed: false,
+  },
+  {
+    id: "7",
+    title: "Order medical supplies",
+    description:
+      "Restock bandages, gloves, thermometer covers, and hand sanitizer",
+    category: "Healthcare",
+    priority: "MEDIUM",
+    assignedTo: "Emily Davis",
+    dueDate: "10/10/2025, 11:00:00 AM",
+    completed: false,
+  },
+  {
+    id: "8",
+    title: "Schedule eye exam",
+    description:
+      "Book appointment with optometrist - Mom mentioned blurry vision",
+    category: "Healthcare",
+    priority: "MEDIUM",
+    assignedTo: "Sarah Miller",
+    dueDate: "10/14/2025, 9:00:00 AM",
+    completed: false,
+  },
+  {
+    id: "9",
+    title: "Replace smoke detector batteries",
+    description: "Check all smoke detectors and replace batteries as needed",
+    category: "Home Maintenance",
+    priority: "MEDIUM",
+    assignedTo: "Michael Smith",
+    dueDate: "10/11/2025, 2:00:00 PM",
+    completed: false,
+  },
+  {
+    id: "10",
+    title: "Organize medication cabinet",
+    description:
+      "Sort medications, check expiration dates, and create updated list",
+    category: "Medication",
+    priority: "MEDIUM",
+    assignedTo: "Emily Davis",
+    dueDate: "10/13/2025, 1:00:00 PM",
+    completed: false,
+  },
+  {
+    id: "11",
+    title: "Transportation to physical therapy",
+    description: "Drive Mom to PT appointment at Wellness Center",
+    category: "Healthcare",
+    priority: "MEDIUM",
+    assignedTo: "John Johnson",
+    dueDate: "10/9/2025, 1:30:00 PM",
+    completed: false,
+  },
+  {
+    id: "12",
+    title: "Update emergency contact list",
+    description:
+      "Review and update all emergency contacts and keep copies accessible",
+    category: "Healthcare",
+    priority: "MEDIUM",
+    assignedTo: "Sarah Miller",
+    dueDate: "10/15/2025, 3:00:00 PM",
+    completed: false,
+  },
+
+  // LOW PRIORITY - Can wait
+  {
+    id: "13",
+    title: "Fix leaking faucet",
+    description: "Call plumber or attempt DIY repair for kitchen sink",
+    category: "Home Maintenance",
+    priority: "LOW",
+    assignedTo: "Michael Smith",
+    dueDate: "10/20/2025, 10:00:00 AM",
+    completed: false,
+  },
+  {
+    id: "14",
+    title: "Garden maintenance",
+    description: "Trim bushes, mow lawn, water plants in backyard",
+    category: "Home Maintenance",
+    priority: "LOW",
+    assignedTo: "Robert James",
+    dueDate: "10/18/2025, 9:00:00 AM",
+    completed: false,
+  },
+  {
+    id: "15",
+    title: "Clean out garage",
+    description: "Organize and declutter garage, donate unused items",
+    category: "Home Maintenance",
+    priority: "LOW",
+    assignedTo: "",
+    dueDate: "10/25/2025, 11:00:00 AM",
+    completed: false,
+  },
+  {
+    id: "16",
+    title: "Update family photo album",
+    description: "Add recent photos and organize albums for Mom to enjoy",
+    category: "Shopping",
+    priority: "LOW",
+    assignedTo: "Emily Davis",
+    dueDate: "10/22/2025, 2:00:00 PM",
+    completed: false,
+  },
+  {
+    id: "17",
+    title: "Research senior activities",
+    description: "Look into local senior centers and activity programs",
+    category: "Shopping",
+    priority: "LOW",
+    assignedTo: "",
+    dueDate: "10/28/2025, 4:00:00 PM",
+    completed: false,
+  },
+
+  // COMPLETED TASKS
+  {
+    id: "18",
+    title: "Weekly medication check",
+    description:
+      "Verified all medications organized in pill organizer for the week",
+    category: "Medication",
+    priority: "HIGH",
+    assignedTo: "Sarah Miller",
+    dueDate: "10/1/2025, 8:00:00 AM",
+    completed: true,
+  },
+  {
+    id: "19",
+    title: "Paid monthly bills",
+    description: "Paid rent, utilities, and insurance premiums for October",
+    category: "Shopping",
+    priority: "HIGH",
+    assignedTo: "John Johnson",
+    dueDate: "10/1/2025, 9:00:00 AM",
+    completed: true,
+  },
+  {
+    id: "20",
+    title: "Cardiology appointment",
+    description:
+      "Accompanied Mom to heart specialist appointment - all looks good!",
+    category: "Healthcare",
+    priority: "HIGH",
+    assignedTo: "Emily Davis",
+    dueDate: "10/2/2025, 10:30:00 AM",
+    completed: true,
+  },
+  {
+    id: "21",
+    title: "Install grab bars in bathroom",
+    description:
+      "Installed safety grab bars near toilet and in shower for fall prevention",
+    category: "Home Maintenance",
+    priority: "MEDIUM",
+    assignedTo: "Michael Smith",
+    dueDate: "10/1/2025, 3:00:00 PM",
+    completed: true,
+  },
+  {
+    id: "22",
+    title: "Set up telehealth account",
+    description: "Created account and tested video calls with doctor's office",
+    category: "Healthcare",
+    priority: "MEDIUM",
+    assignedTo: "Sarah Miller",
+    dueDate: "9/28/2025, 4:00:00 PM",
+    completed: true,
+  },
+];
 
 export default function TasksPage() {
-  const router = useRouter()
-  const [tasks, setTasks] = useState<Task[]>([])
-  const [searchQuery, setSearchQuery] = useState('')
-  const [filterCategory, setFilterCategory] = useState('all')
-  const [showCompleted, setShowCompleted] = useState(false)
-  const [showAddTask, setShowAddTask] = useState(false)
-  const [families, setFamilies] = useState<Family[]>([])
-  const [selectedFamily, setSelectedFamily] = useState<string>('')
-  const [selectedMembers, setSelectedMembers] = useState<string[]>([])
-  const [loading, setLoading] = useState(true)
-  const [editingTask, setEditingTask] = useState<Task | null>(null)
+  const router = useRouter();
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterCategory, setFilterCategory] = useState("all");
+  const [showCompleted, setShowCompleted] = useState(false);
+  const [showAddTask, setShowAddTask] = useState(false);
+  const [families, setFamilies] = useState<Family[]>([]);
+  const [selectedFamily, setSelectedFamily] = useState<string>("");
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [newTask, setNewTask] = useState({
-    title: '',
-    description: '',
-    category: 'Medication',
-    priority: 'MEDIUM' as 'HIGH' | 'MEDIUM' | 'LOW',
-    assignedTo: '',
-    dueDate: '',
-  })
+    title: "",
+    description: "",
+    category: "Medication",
+    priority: "MEDIUM" as "HIGH" | "MEDIUM" | "LOW",
+    assignedTo: "",
+    dueDate: "",
+  });
 
   // Fetch families with members
   useEffect(() => {
     async function fetchFamilies() {
       try {
-        const res = await fetch('/api/families')
-        if (!res.ok) throw new Error('Failed to fetch families')
-        const data = await res.json()
-        
+        const res = await fetch("/api/families");
+        if (!res.ok) throw new Error("Failed to fetch families");
+        const data = await res.json();
+
         // Fetch members for each family
         const familiesWithMembers = await Promise.all(
           data.map(async (family: any) => {
-            const membersRes = await fetch(`/api/families/${family.id}/members`)
-            const members = membersRes.ok ? await membersRes.json() : []
-            return { ...family, members }
+            const membersRes = await fetch(
+              `/api/families/${family.id}/members`
+            );
+            const members = membersRes.ok ? await membersRes.json() : [];
+            return { ...family, members };
           })
-        )
-        
-        setFamilies(familiesWithMembers)
+        );
+
+        setFamilies(familiesWithMembers);
         if (familiesWithMembers.length > 0) {
-          setSelectedFamily(familiesWithMembers[0].id)
+          setSelectedFamily(familiesWithMembers[0].id);
         }
       } catch (error) {
-        console.error('Error fetching families:', error)
+        console.error("Error fetching families:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
-    fetchFamilies()
-  }, [])
+    fetchFamilies();
+  }, []);
 
   // Fetch tasks when family changes
   useEffect(() => {
-    if (!selectedFamily) return
-    fetchTasks()
-  }, [selectedFamily])
+    if (!selectedFamily) return;
+    fetchTasks();
+  }, [selectedFamily]);
 
   async function fetchTasks() {
-    setLoading(true)
+    setLoading(true);
     try {
-      const res = await fetch(`/api/families/${selectedFamily}/tasks`)
+      const res = await fetch(`/api/families/${selectedFamily}/tasks`);
       if (res.ok) {
-        const data = await res.json()
+        const data = await res.json();
         // Convert database format to display format
         const formattedTasks = data.map((t: any) => ({
           id: t.id,
           title: t.title,
-          description: t.description || '',
-          category: 'General',
+          description: t.description || "",
+          category: "General",
           priority: t.priority,
-          assignedTo: t.assignments?.map((a: any) => a.userId).join(',') || '', // Store user IDs for editing
-          assignedToName: t.assignments?.map((a: any) => a.user.name || a.user.email).join(', ') || '', // For display
-          dueDate: t.dueDate ? new Date(t.dueDate).toLocaleString() : '',
-          completed: t.status === 'COMPLETED'
-        }))
-        setTasks(formattedTasks)
+          assignedTo: t.assignments?.map((a: any) => a.userId).join(",") || "", // Store user IDs for editing
+          assignedToName:
+            t.assignments
+              ?.map((a: any) => a.user.name || a.user.email)
+              .join(", ") || "", // For display
+          dueDate: t.dueDate ? new Date(t.dueDate).toLocaleString() : "",
+          completed: t.status === "COMPLETED",
+        }));
+        setTasks(formattedTasks);
       }
     } catch (error) {
-      console.error('Error fetching tasks:', error)
+      console.error("Error fetching tasks:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
-  const categories = ['all', 'Medication', 'Healthcare', 'Shopping', 'Home Maintenance']
+  const categories = [
+    "all",
+    "Medication",
+    "Healthcare",
+    "Shopping",
+    "Home Maintenance",
+  ];
 
-  const filteredTasks = tasks.filter(task => {
-    const matchesSearch = task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         task.description.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory = filterCategory === 'all' || task.category === filterCategory
-    const matchesCompleted = showCompleted || !task.completed
-    return matchesSearch && matchesCategory && matchesCompleted
-  })
+  const filteredTasks = tasks.filter((task) => {
+    const matchesSearch =
+      task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      task.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory =
+      filterCategory === "all" || task.category === filterCategory;
+    const matchesCompleted = showCompleted || !task.completed;
+    return matchesSearch && matchesCategory && matchesCompleted;
+  });
 
   const toggleTask = (id: string) => {
-    setTasks(tasks.map(task => 
-      task.id === id ? { ...task, completed: !task.completed } : task
-    ))
-  }
+    setTasks(
+      tasks.map((task) =>
+        task.id === id ? { ...task, completed: !task.completed } : task
+      )
+    );
+  };
 
   const deleteTask = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this task?')) {
-      return
+    if (!confirm("Are you sure you want to delete this task?")) {
+      return;
     }
 
     try {
       const res = await fetch(`/api/tasks/${id}`, {
-        method: 'DELETE',
-      })
+        method: "DELETE",
+      });
 
       if (!res.ok) {
-        throw new Error('Failed to delete task')
+        throw new Error("Failed to delete task");
       }
 
       // Remove task from local state
-      setTasks(tasks.filter(task => task.id !== id))
+      setTasks(tasks.filter((task) => task.id !== id));
     } catch (error) {
-      console.error('Error deleting task:', error)
-      alert('Failed to delete task. Please try again.')
+      console.error("Error deleting task:", error);
+      alert("Failed to delete task. Please try again.");
     }
-  }
+  };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'HIGH': return styles.highPriority
-      case 'MEDIUM': return styles.mediumPriority
-      case 'LOW': return styles.lowPriority
-      default: return ''
+      case "HIGH":
+        return styles.highPriority;
+      case "MEDIUM":
+        return styles.mediumPriority;
+      case "LOW":
+        return styles.lowPriority;
+      default:
+        return "";
     }
-  }
+  };
 
-  const currentFamily = families.find(f => f.id === selectedFamily)
-  const familyMembers = currentFamily?.members || []
+  const currentFamily = families.find((f) => f.id === selectedFamily);
+  const familyMembers = currentFamily?.members || [];
 
   const toggleMemberSelection = (userId: string) => {
-    setSelectedMembers(prev => 
+    setSelectedMembers((prev) =>
       prev.includes(userId)
-        ? prev.filter(id => id !== userId)
+        ? prev.filter((id) => id !== userId)
         : [...prev, userId]
-    )
-  }
+    );
+  };
 
   const getSelectedMemberNames = () => {
     return selectedMembers
-      .map(userId => {
-        const member = familyMembers.find(m => m.userId === userId)
-        return member?.user.name || member?.user.email || 'Unknown'
+      .map((userId) => {
+        const member = familyMembers.find((m) => m.userId === userId);
+        return member?.user.name || member?.user.email || "Unknown";
       })
-      .join(', ')
-  }
+      .join(", ");
+  };
 
   const handleAddTask = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
+    e.preventDefault();
+
     if (!selectedFamily) {
-      alert('Please select a family first')
-      return
+      alert("Please select a family first");
+      return;
     }
 
     try {
@@ -246,82 +464,91 @@ export default function TasksPage() {
         priority: newTask.priority,
         assignedMembers: selectedMembers, // Send array of all selected member IDs
         dueDate: newTask.dueDate || null,
-        status: editingTask ? undefined : 'TODO' // Don't override status when editing
-      }
+        status: editingTask ? undefined : "TODO", // Don't override status when editing
+      };
 
       const url = editingTask
         ? `/api/tasks/${editingTask.id}`
-        : `/api/families/${selectedFamily}/tasks`
-      
-      const method = editingTask ? 'PATCH' : 'POST'
+        : `/api/families/${selectedFamily}/tasks`;
 
-      console.log('Saving task:', { url, method, taskData, selectedMembers })
+      const method = editingTask ? "PATCH" : "POST";
+
+      console.log("Saving task:", { url, method, taskData, selectedMembers });
 
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(taskData)
-      })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(taskData),
+      });
 
-      console.log('Task save response:', { status: res.status, ok: res.ok })
+      console.log("Task save response:", { status: res.status, ok: res.ok });
 
       if (!res.ok) {
-        const error = await res.json()
-        console.error('Task save error:', error)
-        throw new Error(error.error || 'Failed to save task')
+        const error = await res.json();
+        console.error("Task save error:", error);
+        throw new Error(error.error || "Failed to save task");
       }
 
       // Refresh tasks list
-      await fetchTasks()
-      
-      setShowAddTask(false)
-      setEditingTask(null)
-      setSelectedMembers([])
+      await fetchTasks();
+
+      setShowAddTask(false);
+      setEditingTask(null);
+      setSelectedMembers([]);
       setNewTask({
-        title: '',
-        description: '',
-        category: 'Medication',
-        priority: 'MEDIUM',
-        assignedTo: '',
-        dueDate: '',
-      })
+        title: "",
+        description: "",
+        category: "Medication",
+        priority: "MEDIUM",
+        assignedTo: "",
+        dueDate: "",
+      });
     } catch (error) {
-      console.error('Error saving task:', error)
-      alert(error instanceof Error ? error.message : 'Failed to save task')
+      console.error("Error saving task:", error);
+      alert(error instanceof Error ? error.message : "Failed to save task");
     }
-  }
+  };
 
   const handleEditTask = (task: Task) => {
-    setEditingTask(task)
-    
+    setEditingTask(task);
+
     // Parse assigned members from assignedTo field (comma-separated IDs)
-    const assignedIds = task.assignedTo ? task.assignedTo.split(',').filter(id => id.trim()) : []
-    setSelectedMembers(assignedIds)
-    
+    const assignedIds = task.assignedTo
+      ? task.assignedTo.split(",").filter((id) => id.trim())
+      : [];
+    setSelectedMembers(assignedIds);
+
     setNewTask({
       title: task.title,
       description: task.description,
       category: task.category,
       priority: task.priority,
       assignedTo: task.assignedTo,
-      dueDate: task.dueDate ? new Date(task.dueDate).toISOString().slice(0, 16) : '',
-    })
-    setShowAddTask(true)
-  }
+      dueDate: task.dueDate
+        ? new Date(task.dueDate).toISOString().slice(0, 16)
+        : "",
+    });
+    setShowAddTask(true);
+  };
 
   return (
     <div className={styles.container}>
       <Navigation showAuthLinks={true} />
-      
+
       <div className={styles.layout}>
         <LeftNavigation />
         <main className={styles.main}>
           <div className={styles.pageHeader}>
             <div>
               <h1>Tasks & Responsibilities</h1>
-              <p className={styles.subtitle}>Manage and track tasks for your loved ones</p>
+              <p className={styles.subtitle}>
+                Manage and track tasks for your loved ones
+              </p>
             </div>
-            <button className={styles.addTaskBtn} onClick={() => setShowAddTask(!showAddTask)}>
+            <button
+              className={styles.addTaskBtn}
+              onClick={() => setShowAddTask(!showAddTask)}
+            >
               + Add Task
             </button>
           </div>
@@ -336,16 +563,16 @@ export default function TasksPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            
+
             <div className={styles.filters}>
-              <select 
+              <select
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
                 className={styles.filterSelect}
               >
-                {categories.map(cat => (
+                {categories.map((cat) => (
                   <option key={cat} value={cat}>
-                    {cat === 'all' ? 'Filter by category' : cat}
+                    {cat === "all" ? "Filter by category" : cat}
                   </option>
                 ))}
               </select>
@@ -361,22 +588,32 @@ export default function TasksPage() {
             </div>
           </div>
 
-            {/* Add/Edit Task Modal */}
+          {/* Add/Edit Task Modal */}
           {showAddTask && (
             <div className={styles.modal} onClick={() => setShowAddTask(false)}>
-              <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+              <div
+                className={styles.modalContent}
+                onClick={(e) => e.stopPropagation()}
+              >
                 <div className={styles.modalHeader}>
-                  <h2>{editingTask ? 'Edit Task' : 'Add New Task'}</h2>
-                  <button className={styles.closeBtn} onClick={() => setShowAddTask(false)}>✕</button>
+                  <h2>{editingTask ? "Edit Task" : "Add New Task"}</h2>
+                  <button
+                    className={styles.closeBtn}
+                    onClick={() => setShowAddTask(false)}
+                  >
+                    ✕
+                  </button>
                 </div>
-                
+
                 <form onSubmit={handleAddTask} className={styles.taskForm}>
                   <div className={styles.formGroup}>
                     <label>Task Title *</label>
                     <input
                       type="text"
                       value={newTask.title}
-                      onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+                      onChange={(e) =>
+                        setNewTask({ ...newTask, title: e.target.value })
+                      }
                       placeholder="e.g., Pick up prescriptions"
                       required
                     />
@@ -386,7 +623,9 @@ export default function TasksPage() {
                     <label>Description</label>
                     <textarea
                       value={newTask.description}
-                      onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+                      onChange={(e) =>
+                        setNewTask({ ...newTask, description: e.target.value })
+                      }
                       placeholder="Additional details about the task..."
                       rows={3}
                     />
@@ -397,13 +636,17 @@ export default function TasksPage() {
                       <label>Category *</label>
                       <select
                         value={newTask.category}
-                        onChange={(e) => setNewTask({ ...newTask, category: e.target.value })}
+                        onChange={(e) =>
+                          setNewTask({ ...newTask, category: e.target.value })
+                        }
                         required
                       >
                         <option value="Medication">Medication</option>
                         <option value="Healthcare">Healthcare</option>
                         <option value="Shopping">Shopping</option>
-                        <option value="Home Maintenance">Home Maintenance</option>
+                        <option value="Home Maintenance">
+                          Home Maintenance
+                        </option>
                       </select>
                     </div>
 
@@ -411,7 +654,15 @@ export default function TasksPage() {
                       <label>Priority *</label>
                       <select
                         value={newTask.priority}
-                        onChange={(e) => setNewTask({ ...newTask, priority: e.target.value as 'HIGH' | 'MEDIUM' | 'LOW' })}
+                        onChange={(e) =>
+                          setNewTask({
+                            ...newTask,
+                            priority: e.target.value as
+                              | "HIGH"
+                              | "MEDIUM"
+                              | "LOW",
+                          })
+                        }
                         required
                       >
                         <option value="LOW">Low Priority</option>
@@ -428,32 +679,43 @@ export default function TasksPage() {
                         type="button"
                         className={styles.addMemberLink}
                         onClick={() => {
-                          setShowAddTask(false)
-                          router.push(`/family/${selectedFamily}/members`)
+                          setShowAddTask(false);
+                          router.push(`/family/${selectedFamily}/members`);
                         }}
                       >
                         <UserPlus size={14} />
                         Add Member
                       </button>
                     </div>
-                    
+
                     {loading ? (
-                      <div className={styles.loadingText}>Loading family members...</div>
+                      <div className={styles.loadingText}>
+                        Loading family members...
+                      </div>
                     ) : familyMembers.length === 0 ? (
                       <div className={styles.noMembers}>
-                        <p>No family members found. Add members to assign tasks.</p>
+                        <p>
+                          No family members found. Add members to assign tasks.
+                        </p>
                       </div>
                     ) : (
                       <div className={styles.memberSelector}>
                         {familyMembers.map((member) => {
-                          const isSelected = selectedMembers.includes(member.userId)
-                          const displayName = member.user.name || member.user.email
-                          
+                          const isSelected = selectedMembers.includes(
+                            member.userId
+                          );
+                          const displayName =
+                            member.user.name || member.user.email;
+
                           return (
                             <div
                               key={member.userId}
-                              className={`${styles.memberOption} ${isSelected ? styles.selected : ''}`}
-                              onClick={() => toggleMemberSelection(member.userId)}
+                              className={`${styles.memberOption} ${
+                                isSelected ? styles.selected : ""
+                              }`}
+                              onClick={() =>
+                                toggleMemberSelection(member.userId)
+                              }
                             >
                               <input
                                 type="checkbox"
@@ -463,18 +725,23 @@ export default function TasksPage() {
                               />
                               <span>{displayName}</span>
                             </div>
-                          )
+                          );
                         })}
                       </div>
                     )}
-                    
+
                     {selectedMembers.length > 0 && (
                       <div className={styles.selectedMembers}>
                         <span className={styles.selectedLabel}>Selected:</span>
-                        {selectedMembers.map(userId => {
-                          const member = familyMembers.find(m => m.userId === userId)
-                          const displayName = member?.user.name || member?.user.email || 'Unknown'
-                          
+                        {selectedMembers.map((userId) => {
+                          const member = familyMembers.find(
+                            (m) => m.userId === userId
+                          );
+                          const displayName =
+                            member?.user.name ||
+                            member?.user.email ||
+                            "Unknown";
+
                           return (
                             <span key={userId} className={styles.selectedTag}>
                               {displayName}
@@ -486,7 +753,7 @@ export default function TasksPage() {
                                 <X size={14} />
                               </button>
                             </span>
-                          )
+                          );
                         })}
                       </div>
                     )}
@@ -497,16 +764,22 @@ export default function TasksPage() {
                     <input
                       type="datetime-local"
                       value={newTask.dueDate}
-                      onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
+                      onChange={(e) =>
+                        setNewTask({ ...newTask, dueDate: e.target.value })
+                      }
                     />
                   </div>
 
                   <div className={styles.formActions}>
-                    <button type="button" onClick={() => setShowAddTask(false)} className={styles.cancelBtn}>
+                    <button
+                      type="button"
+                      onClick={() => setShowAddTask(false)}
+                      className={styles.cancelBtn}
+                    >
                       Cancel
                     </button>
                     <button type="submit" className={styles.submitBtn}>
-                      {editingTask ? 'Save Task' : 'Add Task'}
+                      {editingTask ? "Save Task" : "Add Task"}
                     </button>
                   </div>
                 </form>
@@ -517,7 +790,9 @@ export default function TasksPage() {
           <div className={styles.tasksSection}>
             <div className={styles.tasksSectionHeader}>
               <h2>Tasks</h2>
-              <p className={styles.taskCount}>Showing {filteredTasks.length} of {tasks.length} tasks</p>
+              <p className={styles.taskCount}>
+                Showing {filteredTasks.length} of {tasks.length} tasks
+              </p>
             </div>
 
             {loading ? (
@@ -528,48 +803,65 @@ export default function TasksPage() {
             ) : (
               <div className={styles.tasksList}>
                 {filteredTasks.map((task) => (
-                <div key={task.id} className={`${styles.taskCard} ${task.completed ? styles.completed : ''}`}>
-                  <input
-                    type="checkbox"
-                    checked={task.completed}
-                    onChange={() => toggleTask(task.id)}
-                    className={styles.taskCheckbox}
-                  />
-                  
-                  <div className={styles.taskContent}>
-                    <h3>{task.title}</h3>
-                    <p>{task.description}</p>
-                    <div className={styles.taskMeta}>
-                      <span className={styles.dueDate}>Due: {task.dueDate}</span>
-                    </div>
-                    <div className={styles.taskTags}>
-                      <span className={styles.categoryBadge}>{task.category}</span>
-                      <span className={`${styles.priorityBadge} ${getPriorityColor(task.priority)}`}>
-                        {task.priority.charAt(0) + task.priority.slice(1).toLowerCase()} Priority
-                      </span>
-                      {task.assignedToName && (
-                        <span className={styles.assignedBadge}>Assigned to: {task.assignedToName}</span>
-                      )}
-                    </div>
-                  </div>
+                  <div
+                    key={task.id}
+                    className={`${styles.taskCard} ${
+                      task.completed ? styles.completed : ""
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={task.completed}
+                      onChange={() => toggleTask(task.id)}
+                      className={styles.taskCheckbox}
+                    />
 
-                  <div className={styles.taskCardActions}>
-                    <button
-                      onClick={() => handleEditTask(task)}
-                      className={styles.editTaskBtn}
-                      title="Edit task"
-                    >
-                      <Edit size={18} />
-                    </button>
-                    <button
-                      onClick={() => deleteTask(task.id)}
-                      className={styles.deleteBtn}
-                      title="Delete task"
-                    >
-                      <Trash2 size={18} />
-                    </button>
+                    <div className={styles.taskContent}>
+                      <h3>{task.title}</h3>
+                      <p>{task.description}</p>
+                      <div className={styles.taskMeta}>
+                        <span className={styles.dueDate}>
+                          Due: {task.dueDate}
+                        </span>
+                      </div>
+                      <div className={styles.taskTags}>
+                        <span className={styles.categoryBadge}>
+                          {task.category}
+                        </span>
+                        <span
+                          className={`${
+                            styles.priorityBadge
+                          } ${getPriorityColor(task.priority)}`}
+                        >
+                          {task.priority.charAt(0) +
+                            task.priority.slice(1).toLowerCase()}{" "}
+                          Priority
+                        </span>
+                        {task.assignedToName && (
+                          <span className={styles.assignedBadge}>
+                            Assigned to: {task.assignedToName}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className={styles.taskCardActions}>
+                      <button
+                        onClick={() => handleEditTask(task)}
+                        className={styles.editTaskBtn}
+                        title="Edit task"
+                      >
+                        <Edit size={18} />
+                      </button>
+                      <button
+                        onClick={() => deleteTask(task.id)}
+                        className={styles.deleteBtn}
+                        title="Delete task"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
                   </div>
-                </div>
                 ))}
               </div>
             )}
@@ -578,6 +870,5 @@ export default function TasksPage() {
       </div>
       <Footer />
     </div>
-  )
+  );
 }
-

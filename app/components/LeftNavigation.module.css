@@ -2,12 +2,11 @@
   width: 260px;
   background: white;
   border-right: 1px solid #e9ecef;
-  position: fixed;
-  top: 81px;
-  left: 0;
-  height: calc(100vh - 81px);
+  position: sticky;
+  top: 110px;
+  height: calc(100vh - 110px);
   overflow-y: auto;
-  z-index: 50;
+  flex-shrink: 0;
 }
 
 .nav {
@@ -116,4 +115,3 @@
     display: block;
   }
 }
-

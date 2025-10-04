@@ -1,6 +1,7 @@
 .container {
   min-height: 100vh;
   background: #f8f9fa;
+  padding-top: 110px;
 }
 
 .nav {
@@ -132,4 +133,3 @@
     padding: 2rem;
   }
 }
-

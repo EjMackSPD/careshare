@@ -1,280 +1,310 @@
-'use client'
+"use client";
 
-import { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import Navigation from '@/app/components/Navigation'
-import LeftNavigation from '@/app/components/LeftNavigation'
-import Footer from '@/app/components/Footer'
-import { UserPlus, MoreVertical, Send, Calendar, Mail, Phone } from 'lucide-react'
-import styles from './page.module.css'
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Navigation from "@/app/components/Navigation";
+import LeftNavigation from "@/app/components/LeftNavigation";
+import Footer from "@/app/components/Footer";
+import {
+  UserPlus,
+  MoreVertical,
+  Send,
+  Calendar,
+  Mail,
+  Phone,
+} from "lucide-react";
+import styles from "./page.module.css";
 
 type TeamMember = {
-  id: string
-  name: string
-  initials: string
-  color: string
-  active: boolean
-}
+  id: string;
+  name: string;
+  initials: string;
+  color: string;
+  active: boolean;
+};
 
 type MessageType = {
-  id: string
-  message: string
-  createdAt: string
+  id: string;
+  message: string;
+  createdAt: string;
   user: {
-    id: string
-    name: string | null
-    email: string
-  }
-}
+    id: string;
+    name: string | null;
+    email: string;
+  };
+};
 
 type Event = {
-  id: string
-  title: string
-  description: string
-  date: string
-  category: string
-  categoryColor: string
-  attendees: string[]
-}
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  category: string;
+  categoryColor: string;
+  attendees: string[];
+};
 
 const teamMembers: TeamMember[] = [
-  { id: '1', name: 'John Johnson', initials: 'JJ', color: '#10b981', active: true },
-  { id: '2', name: 'Sarah Johnson', initials: 'SJ', color: '#8b5cf6', active: true },
-  { id: '3', name: 'Michael Johnson', initials: 'MJ', color: '#06b6d4', active: true }
-]
-
-const taskDistribution = [
-  { name: 'You', percentage: 65, color: '#6366f1' },
-  { name: 'Sarah', percentage: 25, color: '#8b5cf6' },
-  { name: 'Mike', percentage: 10, color: '#10b981' }
-]
+  {
+    id: "1",
+    name: "John Johnson",
+    initials: "JJ",
+    color: "#10b981",
+    active: true,
+  },
+  {
+    id: "2",
+    name: "Sarah Johnson",
+    initials: "SJ",
+    color: "#8b5cf6",
+    active: true,
+  },
+  {
+    id: "3",
+    name: "Michael Johnson",
+    initials: "MJ",
+    color: "#06b6d4",
+    active: true,
+  },
+];
 
 const upcomingEvents: Event[] = [
   {
-    id: '1',
+    id: "1",
     title: "Martha Johnson's Favorite Restaurant",
-    description: 'A family gathering for dinner at 6:00 PM.',
-    date: 'Aug 31',
-    category: 'Family Dinner',
-    categoryColor: '#6366f1',
-    attendees: ['JE', 'SC', 'MD']
+    description: "A family gathering for dinner at 6:00 PM.",
+    date: "Aug 31",
+    category: "Family Dinner",
+    categoryColor: "#6366f1",
+    attendees: ["JE", "SC", "MD"],
   },
   {
-    id: '2',
-    title: 'Extended Weekend Visit',
-    description: 'Mike is coming to stay for the weekend and help with home repairs.',
-    date: 'Sep 10',
-    category: 'Weekend Visit',
-    categoryColor: '#10b981',
-    attendees: ['JE', 'MD']
-  }
-]
+    id: "2",
+    title: "Extended Weekend Visit",
+    description:
+      "Mike is coming to stay for the weekend and help with home repairs.",
+    date: "Sep 10",
+    category: "Weekend Visit",
+    categoryColor: "#10b981",
+    attendees: ["JE", "MD"],
+  },
+];
 
-const avatarColors = ['#6366f1', '#8b5cf6', '#ec4899', '#10b981', '#f59e0b', '#06b6d4']
+const avatarColors = [
+  "#6366f1",
+  "#8b5cf6",
+  "#ec4899",
+  "#10b981",
+  "#f59e0b",
+  "#06b6d4",
+];
 
 function getInitials(name: string | null, email: string): string {
   if (name) {
-    const parts = name.split(' ')
+    const parts = name.split(" ");
     if (parts.length >= 2) {
-      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     }
-    return name.substring(0, 2).toUpperCase()
+    return name.substring(0, 2).toUpperCase();
   }
-  return email.substring(0, 2).toUpperCase()
+  return email.substring(0, 2).toUpperCase();
 }
 
 function getAvatarColor(userId: string): string {
   // Use userId to generate consistent color
-  const hash = userId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-  return avatarColors[hash % avatarColors.length]
+  const hash = userId
+    .split("")
+    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return avatarColors[hash % avatarColors.length];
 }
 
 export default function FamilyCollaborationPage() {
-  const router = useRouter()
-  const [message, setMessage] = useState('')
-  const [messages, setMessages] = useState<MessageType[]>([])
-  const [familyId, setFamilyId] = useState<string | null>(null)
-  const [familyMembers, setFamilyMembers] = useState<any[]>([])
-  const [tasks, setTasks] = useState<any[]>([])
-  const [taskDistribution, setTaskDistribution] = useState<any[]>([])
-  const [showRebalance, setShowRebalance] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [sending, setSending] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const previousMessageCountRef = useRef(0)
+  const router = useRouter();
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState<MessageType[]>([]);
+  const [familyId, setFamilyId] = useState<string | null>(null);
+  const [familyMembers, setFamilyMembers] = useState<any[]>([]);
+  const [tasks, setTasks] = useState<any[]>([]);
+  const [taskDistribution, setTaskDistribution] = useState<any[]>([]);
+  const [showRebalance, setShowRebalance] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+  const previousMessageCountRef = useRef(0);
 
   // Fetch user's first family and members
   useEffect(() => {
     async function fetchFamily() {
       try {
-        const res = await fetch('/api/families')
-        if (!res.ok) throw new Error('Failed to fetch families')
-        const families = await res.json()
-        
+        const res = await fetch("/api/families");
+        if (!res.ok) throw new Error("Failed to fetch families");
+        const families = await res.json();
+
         // API returns array directly
-        const familiesArray = Array.isArray(families) ? families : []
-        
+        const familiesArray = Array.isArray(families) ? families : [];
+
         if (familiesArray.length > 0) {
-          const family = familiesArray[0]
-          setFamilyId(family.id)
-          
+          const family = familiesArray[0];
+          setFamilyId(family.id);
+
           // Fetch family members
-          const membersRes = await fetch(`/api/families/${family.id}/members`)
+          const membersRes = await fetch(`/api/families/${family.id}/members`);
           if (membersRes.ok) {
-            const membersData = await membersRes.json()
-            setFamilyMembers(membersData)
-            
+            const membersData = await membersRes.json();
+            setFamilyMembers(membersData);
+
             // Fetch tasks
-            const tasksRes = await fetch(`/api/families/${family.id}/tasks`)
+            const tasksRes = await fetch(`/api/families/${family.id}/tasks`);
             if (tasksRes.ok) {
-              const tasksData = await tasksRes.json()
-              setTasks(tasksData)
-              calculateTaskDistribution(tasksData, membersData)
+              const tasksData = await tasksRes.json();
+              setTasks(tasksData);
+              calculateTaskDistribution(tasksData, membersData);
             }
           }
         }
       } catch (error) {
-        console.error('Error fetching families:', error)
+        console.error("Error fetching families:", error);
       }
     }
-    fetchFamily()
-  }, [])
+    fetchFamily();
+  }, []);
 
   const calculateTaskDistribution = (tasksData: any[], membersData: any[]) => {
     // Count tasks per member
-    const memberTaskCounts: { [key: string]: number } = {}
-    const totalTasks = tasksData.filter(t => t.status !== 'COMPLETED').length
+    const memberTaskCounts: { [key: string]: number } = {};
+    const totalTasks = tasksData.filter((t) => t.status !== "COMPLETED").length;
 
     if (totalTasks === 0) {
-      setTaskDistribution([])
-      return
+      setTaskDistribution([]);
+      return;
     }
 
-    tasksData.forEach(task => {
-      if (task.status === 'COMPLETED') return
-      
+    tasksData.forEach((task) => {
+      if (task.status === "COMPLETED") return;
+
       task.assignments?.forEach((assignment: any) => {
-        memberTaskCounts[assignment.userId] = (memberTaskCounts[assignment.userId] || 0) + 1
+        memberTaskCounts[assignment.userId] =
+          (memberTaskCounts[assignment.userId] || 0) + 1;
+      });
+    });
+
+    const distribution = membersData
+      .map((member, index) => {
+        const taskCount = memberTaskCounts[member.userId] || 0;
+        const percentage = totalTasks > 0 ? (taskCount / totalTasks) * 100 : 0;
+        const color = getAvatarColor(member.userId);
+
+        return {
+          userId: member.userId,
+          name: member.user.name || member.user.email,
+          taskCount,
+          percentage: Math.round(percentage),
+          color,
+        };
       })
-    })
+      .sort((a, b) => b.taskCount - a.taskCount);
 
-    const distribution = membersData.map((member, index) => {
-      const taskCount = memberTaskCounts[member.userId] || 0
-      const percentage = totalTasks > 0 ? (taskCount / totalTasks) * 100 : 0
-      const color = getAvatarColor(member.userId)
-
-      return {
-        userId: member.userId,
-        name: member.user.name || member.user.email,
-        taskCount,
-        percentage: Math.round(percentage),
-        color
-      }
-    }).sort((a, b) => b.taskCount - a.taskCount)
-
-    setTaskDistribution(distribution)
-  }
+    setTaskDistribution(distribution);
+  };
 
   const handleReassignTask = async (taskId: string, newUserId: string) => {
     try {
       const res = await fetch(`/api/tasks/${taskId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           assignedMembers: [newUserId],
-          title: tasks.find(t => t.id === taskId)?.title,
-          description: tasks.find(t => t.id === taskId)?.description,
-          priority: tasks.find(t => t.id === taskId)?.priority,
-          status: tasks.find(t => t.id === taskId)?.status
-        })
-      })
+          title: tasks.find((t) => t.id === taskId)?.title,
+          description: tasks.find((t) => t.id === taskId)?.description,
+          priority: tasks.find((t) => t.id === taskId)?.priority,
+          status: tasks.find((t) => t.id === taskId)?.status,
+        }),
+      });
 
-      if (!res.ok) throw new Error('Failed to reassign task')
+      if (!res.ok) throw new Error("Failed to reassign task");
 
       // Refresh tasks
       if (familyId) {
-        const tasksRes = await fetch(`/api/families/${familyId}/tasks`)
+        const tasksRes = await fetch(`/api/families/${familyId}/tasks`);
         if (tasksRes.ok) {
-          const tasksData = await tasksRes.json()
-          setTasks(tasksData)
-          calculateTaskDistribution(tasksData, familyMembers)
+          const tasksData = await tasksRes.json();
+          setTasks(tasksData);
+          calculateTaskDistribution(tasksData, familyMembers);
         }
       }
     } catch (error) {
-      console.error('Error reassigning task:', error)
-      alert('Failed to reassign task')
+      console.error("Error reassigning task:", error);
+      alert("Failed to reassign task");
     }
-  }
+  };
 
   // Fetch messages when familyId is available
   useEffect(() => {
-    if (!familyId) return
+    if (!familyId) return;
 
     async function fetchMessages() {
       try {
-        const res = await fetch(`/api/families/${familyId}/messages`)
-        if (!res.ok) throw new Error('Failed to fetch messages')
-        const data = await res.json()
-        setMessages(data)
-        setLoading(false)
+        const res = await fetch(`/api/families/${familyId}/messages`);
+        if (!res.ok) throw new Error("Failed to fetch messages");
+        const data = await res.json();
+        setMessages(data);
+        setLoading(false);
       } catch (error) {
-        console.error('Error fetching messages:', error)
-        setLoading(false)
+        console.error("Error fetching messages:", error);
+        setLoading(false);
       }
     }
 
-    fetchMessages()
+    fetchMessages();
 
     // Poll for new messages every 3 seconds
-    const interval = setInterval(fetchMessages, 3000)
+    const interval = setInterval(fetchMessages, 3000);
 
-    return () => clearInterval(interval)
-  }, [familyId])
+    return () => clearInterval(interval);
+  }, [familyId]);
 
-  // Scroll to bottom only when message count increases (new message added)
+  // Update previous message count (for future enhancements)
   useEffect(() => {
-    if (messages.length > previousMessageCountRef.current && previousMessageCountRef.current > 0) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-    }
-    previousMessageCountRef.current = messages.length
-  }, [messages.length])
+    previousMessageCountRef.current = messages.length;
+  }, [messages.length]);
 
   const handleSendMessage = async () => {
-    if (!message.trim() || !familyId || sending) return
+    if (!message.trim() || !familyId || sending) return;
 
-    setSending(true)
+    setSending(true);
     try {
       const res = await fetch(`/api/families/${familyId}/messages`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: message.trim() })
-      })
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: message.trim() }),
+      });
 
-      if (!res.ok) throw new Error('Failed to send message')
+      if (!res.ok) throw new Error("Failed to send message");
 
-      const newMessage = await res.json()
-      setMessages(prev => [...prev, newMessage])
-      setMessage('')
+      const newMessage = await res.json();
+      setMessages((prev) => [newMessage, ...prev]); // Add new message at the top
+      setMessage("");
     } catch (error) {
-      console.error('Error sending message:', error)
-      alert('Failed to send message. Please try again.')
+      console.error("Error sending message:", error);
+      alert("Failed to send message. Please try again.");
     } finally {
-      setSending(false)
+      setSending(false);
     }
-  }
+  };
 
   return (
     <div className={styles.container}>
       <Navigation showAuthLinks={true} />
-      
+
       <div className={styles.layout}>
         <LeftNavigation />
         <main className={styles.main}>
           <div className={styles.pageHeader}>
             <div>
               <h1>Family Collaboration</h1>
-              <p className={styles.subtitle}>Connect and coordinate with your caregiving team</p>
+              <p className={styles.subtitle}>
+                Connect and coordinate with your caregiving team
+              </p>
             </div>
             <button className={styles.inviteBtn}>
               <UserPlus size={18} />
@@ -286,30 +316,41 @@ export default function FamilyCollaborationPage() {
             {/* Caregiving Team */}
             <div className={styles.card}>
               <h2>Caregiving Team</h2>
-              <p className={styles.cardSubtitle}>People helping with Martha Johnson's care</p>
-              
+              <p className={styles.cardSubtitle}>
+                People helping with Martha Johnson's care
+              </p>
+
               <div className={styles.teamList}>
                 {familyMembers.map((member) => {
-                  const memberColor = getAvatarColor(member.userId)
-                  const initials = (member.user.name || member.user.email).charAt(0).toUpperCase()
-                  
+                  const memberColor = getAvatarColor(member.userId);
+                  const initials = (member.user.name || member.user.email)
+                    .charAt(0)
+                    .toUpperCase();
+
                   return (
-                    <Link 
-                      key={member.id} 
+                    <Link
+                      key={member.id}
                       href={`/family/${familyId}/members/${member.userId}`}
                       className={styles.teamMember}
                     >
-                      <div className={styles.avatar} style={{ background: memberColor }}>
+                      <div
+                        className={styles.avatar}
+                        style={{ background: memberColor }}
+                      >
                         {initials}
                       </div>
                       <div className={styles.memberInfo}>
-                        <div className={styles.memberName}>{member.user.name || member.user.email}</div>
+                        <div className={styles.memberName}>
+                          {member.user.name || member.user.email}
+                        </div>
                         <div className={styles.memberRole}>
-                          {member.role === 'CARE_MANAGER' ? '⭐ Care Manager' : 'Family Member'}
+                          {member.role === "CARE_MANAGER"
+                            ? "⭐ Care Manager"
+                            : "Family Member"}
                         </div>
                       </div>
                     </Link>
-                  )
+                  );
                 })}
               </div>
 
@@ -322,8 +363,10 @@ export default function FamilyCollaborationPage() {
             {/* Family Communication */}
             <div className={styles.card}>
               <h2>Family Communication</h2>
-              <p className={styles.cardSubtitle}>Messages about Martha Johnson's care</p>
-              
+              <p className={styles.cardSubtitle}>
+                Messages about Martha Johnson's care
+              </p>
+
               <div className={styles.messagesArea}>
                 {loading ? (
                   <div className={styles.loadingState}>Loading messages...</div>
@@ -333,11 +376,14 @@ export default function FamilyCollaborationPage() {
                   </div>
                 ) : (
                   messages.map((msg) => {
-                    const initials = getInitials(msg.user.name, msg.user.email)
-                    const color = getAvatarColor(msg.user.id)
+                    const initials = getInitials(msg.user.name, msg.user.email);
+                    const color = getAvatarColor(msg.user.id);
                     return (
                       <div key={msg.id} className={styles.messageBubble}>
-                        <div className={styles.messageAvatar} style={{ background: color }}>
+                        <div
+                          className={styles.messageAvatar}
+                          style={{ background: color }}
+                        >
                           {initials}
                         </div>
                         <div className={styles.messageWrapper}>
@@ -346,19 +392,20 @@ export default function FamilyCollaborationPage() {
                               {msg.user.name || msg.user.email}
                             </span>
                             <span className={styles.messageTime}>
-                              {new Date(msg.createdAt).toLocaleTimeString([], { 
-                                hour: '2-digit', 
-                                minute: '2-digit' 
+                              {new Date(msg.createdAt).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
                               })}
                             </span>
                           </div>
-                          <div className={styles.messageContent}>{msg.message}</div>
+                          <div className={styles.messageContent}>
+                            {msg.message}
+                          </div>
                         </div>
                       </div>
-                    )
+                    );
                   })
                 )}
-                <div ref={messagesEndRef} />
               </div>
 
               <div className={styles.messageInput}>
@@ -367,11 +414,13 @@ export default function FamilyCollaborationPage() {
                   placeholder="Type a message..."
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
+                  onKeyPress={(e) =>
+                    e.key === "Enter" && !e.shiftKey && handleSendMessage()
+                  }
                   disabled={sending || !familyId}
                 />
-                <button 
-                  onClick={handleSendMessage} 
+                <button
+                  onClick={handleSendMessage}
                   className={styles.sendBtn}
                   disabled={sending || !message.trim() || !familyId}
                 >
@@ -384,35 +433,46 @@ export default function FamilyCollaborationPage() {
           {/* Task Distribution */}
           <div className={styles.card}>
             <h2>Task Distribution</h2>
-            <p className={styles.cardSubtitle}>Active task workload across family members</p>
-            
+            <p className={styles.cardSubtitle}>
+              Active task workload across family members
+            </p>
+
             <div className={styles.taskBars}>
               {taskDistribution.length === 0 ? (
-                <p className={styles.emptyText}>No active tasks to distribute</p>
+                <p className={styles.emptyText}>
+                  No active tasks to distribute
+                </p>
               ) : (
                 taskDistribution.map((person) => (
                   <div key={person.userId} className={styles.taskRow}>
                     <div className={styles.taskName}>
                       {person.name}
-                      <span className={styles.taskCount}>({person.taskCount} tasks)</span>
+                      <span className={styles.taskCount}>
+                        ({person.taskCount} tasks)
+                      </span>
                     </div>
                     <div className={styles.taskBarContainer}>
-                      <div 
+                      <div
                         className={styles.taskBar}
-                        style={{ 
+                        style={{
                           width: `${person.percentage}%`,
-                          background: person.color
+                          background: person.color,
                         }}
                       ></div>
                     </div>
-                    <div className={styles.taskPercentage}>{person.percentage}%</div>
+                    <div className={styles.taskPercentage}>
+                      {person.percentage}%
+                    </div>
                   </div>
                 ))
               )}
             </div>
 
-            {tasks.filter(t => t.status !== 'COMPLETED').length > 0 && (
-              <button className={styles.rebalanceBtn} onClick={() => setShowRebalance(true)}>
+            {tasks.filter((t) => t.status !== "COMPLETED").length > 0 && (
+              <button
+                className={styles.rebalanceBtn}
+                onClick={() => setShowRebalance(true)}
+              >
                 Rebalance Tasks
               </button>
             )}
@@ -421,12 +481,12 @@ export default function FamilyCollaborationPage() {
           {/* Upcoming Family Events */}
           <div className={styles.eventsSection}>
             <h2>Upcoming Family Events</h2>
-            
+
             <div className={styles.eventsGrid}>
               {upcomingEvents.map((event) => (
                 <div key={event.id} className={styles.eventCard}>
                   <div className={styles.eventHeader}>
-                    <span 
+                    <span
                       className={styles.eventCategory}
                       style={{ background: event.categoryColor }}
                     >
@@ -461,10 +521,13 @@ export default function FamilyCollaborationPage() {
           {/* Family Contact Information */}
           <div className={styles.contactSection}>
             <h2>Family Contact Information</h2>
-            
+
             <div className={styles.contactGrid}>
               <div className={styles.contactCard}>
-                <div className={styles.contactAvatar} style={{ background: '#10b981' }}>
+                <div
+                  className={styles.contactAvatar}
+                  style={{ background: "#10b981" }}
+                >
                   JJ
                 </div>
                 <h3>John Johnson</h3>
@@ -479,7 +542,10 @@ export default function FamilyCollaborationPage() {
               </div>
 
               <div className={styles.contactCard}>
-                <div className={styles.contactAvatar} style={{ background: '#8b5cf6' }}>
+                <div
+                  className={styles.contactAvatar}
+                  style={{ background: "#8b5cf6" }}
+                >
                   SJ
                 </div>
                 <h3>Sarah Johnson</h3>
@@ -494,7 +560,10 @@ export default function FamilyCollaborationPage() {
               </div>
 
               <div className={styles.contactCard}>
-                <div className={styles.contactAvatar} style={{ background: '#06b6d4' }}>
+                <div
+                  className={styles.contactAvatar}
+                  style={{ background: "#06b6d4" }}
+                >
                   MJ
                 </div>
                 <h3>Michael Johnson</h3>
@@ -512,55 +581,83 @@ export default function FamilyCollaborationPage() {
 
           {/* Rebalance Tasks Modal */}
           {showRebalance && (
-            <div className={styles.modal} onClick={() => setShowRebalance(false)}>
-              <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div
+              className={styles.modal}
+              onClick={() => setShowRebalance(false)}
+            >
+              <div
+                className={styles.modalContent}
+                onClick={(e) => e.stopPropagation()}
+              >
                 <div className={styles.modalHeader}>
                   <h2>Rebalance Tasks</h2>
-                  <p>Quickly reassign tasks to balance workload across family members</p>
+                  <p>
+                    Quickly reassign tasks to balance workload across family
+                    members
+                  </p>
                 </div>
 
                 <div className={styles.rebalanceList}>
-                  {tasks.filter(t => t.status !== 'COMPLETED').map((task) => {
-                    const currentAssignee = task.assignments?.[0]
-                    const assignedName = currentAssignee 
-                      ? familyMembers.find(m => m.userId === currentAssignee.userId)?.user.name || currentAssignee.user.name
-                      : 'Unassigned'
+                  {tasks
+                    .filter((t) => t.status !== "COMPLETED")
+                    .map((task) => {
+                      const currentAssignee = task.assignments?.[0];
+                      const assignedName = currentAssignee
+                        ? familyMembers.find(
+                            (m) => m.userId === currentAssignee.userId
+                          )?.user.name || currentAssignee.user.name
+                        : "Unassigned";
 
-                    return (
-                      <div key={task.id} className={styles.rebalanceItem}>
-                        <div className={styles.taskInfo}>
-                          <h4>{task.title}</h4>
-                          <p className={styles.taskMeta}>
-                            <span className={`${styles.priorityBadge} ${styles[`priority${task.priority}`]}`}>
-                              {task.priority}
-                            </span>
-                            {task.dueDate && (
-                              <span>Due: {new Date(task.dueDate).toLocaleDateString()}</span>
-                            )}
-                          </p>
+                      return (
+                        <div key={task.id} className={styles.rebalanceItem}>
+                          <div className={styles.taskInfo}>
+                            <h4>{task.title}</h4>
+                            <p className={styles.taskMeta}>
+                              <span
+                                className={`${styles.priorityBadge} ${
+                                  styles[`priority${task.priority}`]
+                                }`}
+                              >
+                                {task.priority}
+                              </span>
+                              {task.dueDate && (
+                                <span>
+                                  Due:{" "}
+                                  {new Date(task.dueDate).toLocaleDateString()}
+                                </span>
+                              )}
+                            </p>
+                          </div>
+                          <div className={styles.reassignControl}>
+                            <label>Assign to:</label>
+                            <select
+                              value={currentAssignee?.userId || ""}
+                              onChange={(e) =>
+                                handleReassignTask(task.id, e.target.value)
+                              }
+                              className={styles.memberSelect}
+                            >
+                              <option value="">Unassigned</option>
+                              {familyMembers.map((member) => (
+                                <option
+                                  key={member.userId}
+                                  value={member.userId}
+                                >
+                                  {member.user.name || member.user.email}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
                         </div>
-                        <div className={styles.reassignControl}>
-                          <label>Assign to:</label>
-                          <select
-                            value={currentAssignee?.userId || ''}
-                            onChange={(e) => handleReassignTask(task.id, e.target.value)}
-                            className={styles.memberSelect}
-                          >
-                            <option value="">Unassigned</option>
-                            {familyMembers.map(member => (
-                              <option key={member.userId} value={member.userId}>
-                                {member.user.name || member.user.email}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-                    )
-                  })}
+                      );
+                    })}
                 </div>
 
                 <div className={styles.modalActions}>
-                  <button className={styles.doneBtn} onClick={() => setShowRebalance(false)}>
+                  <button
+                    className={styles.doneBtn}
+                    onClick={() => setShowRebalance(false)}
+                  >
                     Done
                   </button>
                 </div>
@@ -570,6 +667,5 @@ export default function FamilyCollaborationPage() {
         </main>
       </div>
     </div>
-  )
+  );
 }
-

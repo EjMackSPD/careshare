@@ -1,7 +1,7 @@
 .container {
   min-height: 100vh;
   background: #f8f9fa;
-  padding-top: 126px;
+  padding-top: 155px;
 }
 
 .layout {
@@ -12,10 +12,8 @@
 .main {
   flex: 1;
   max-width: 1200px;
-  margin: 0 auto;
   padding: 3rem 2rem;
   width: 100%;
-  margin-left: 260px;
 }
 
 .pageHeader {
@@ -313,7 +311,6 @@
   border: 1px solid #a7f3d0;
   border-radius: 0.75rem;
   max-width: 600px;
-  margin: 0 auto;
 }
 
 .guaranteeIcon {
@@ -723,4 +720,3 @@
     padding: 2rem 1.5rem;
   }
 }
-

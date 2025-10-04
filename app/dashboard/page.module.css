@@ -1,12 +1,12 @@
 .container {
   min-height: 100vh;
   background: #f8f9fa;
-  padding-top: 81px;
+  padding-top: 110px;
 }
 
 .layout {
   display: flex;
-  min-height: calc(100vh - 81px);
+  min-height: calc(100vh - 110px);
 }
 
 .nav {
@@ -51,10 +51,8 @@
 .main {
   flex: 1;
   max-width: 1400px;
-  margin: 0 auto;
   padding: 3rem 2rem;
   width: 100%;
-  margin-left: 260px;
 }
 
 .header {
@@ -344,7 +342,7 @@
   .widgetLarge {
     grid-column: span 12;
   }
-  
+
   .widgetMedium {
     grid-column: span 6;
   }
@@ -372,4 +370,3 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
-
