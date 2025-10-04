@@ -21,6 +21,8 @@ export default function Home() {
           </Link>
           <div className={styles.navLinks}>
             <Link href="/features">Features</Link>
+            <Link href="/blog">Blog</Link>
+            <Link href="/partnerships">Partnerships</Link>
             <Link href="/login">Login</Link>
             <Link href="/signup" className={styles.signupBtn}>Sign Up</Link>
           </div>

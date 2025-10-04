@@ -58,3 +58,70 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+// POST /api/admin/families - Create a new family (admin only)
+export async function POST(request: NextRequest) {
+  try {
+    const user = await requireAuth();
+
+    // Check if user is admin
+    if (
+      user.email !== "admin@careshare.app" &&
+      user.email !== "demo@careshare.app"
+    ) {
+      return NextResponse.json(
+        { error: "Unauthorized - Admin access required" },
+        { status: 403 }
+      );
+    }
+
+    const body = await request.json();
+    const { name, description } = body;
+
+    if (!name) {
+      return NextResponse.json(
+        { error: "Family name is required" },
+        { status: 400 }
+      );
+    }
+
+    // Create new family
+    const newFamily = await prisma.family.create({
+      data: {
+        name,
+        description: description || null,
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        createdAt: true,
+        _count: {
+          select: {
+            members: true,
+            tasks: true,
+            events: true,
+          },
+        },
+      },
+    });
+
+    const formattedFamily = {
+      id: newFamily.id,
+      name: newFamily.name,
+      description: newFamily.description,
+      createdAt: newFamily.createdAt,
+      membersCount: newFamily._count.members,
+      tasksCount: newFamily._count.tasks,
+      eventsCount: newFamily._count.events,
+    };
+
+    return NextResponse.json(formattedFamily, { status: 201 });
+  } catch (error) {
+    console.error("Error creating family:", error);
+    return NextResponse.json(
+      { error: "Failed to create family" },
+      { status: 500 }
+    );
+  }
+}
