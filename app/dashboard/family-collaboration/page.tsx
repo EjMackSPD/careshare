@@ -16,6 +16,18 @@ import {
 } from "lucide-react";
 import styles from "./page.module.css";
 
+// Map database EventType to display type
+const mapEventType = (dbType: string): string => {
+  const typeMap: { [key: string]: string } = {
+    APPOINTMENT: "Healthcare",
+    VISIT: "Social Visit",
+    FOOD_DELIVERY: "Food Delivery",
+    BIRTHDAY: "Birthday",
+    OTHER: "Other",
+  };
+  return typeMap[dbType] || dbType;
+};
+
 type TeamMember = {
   id: string;
   name: string;
@@ -139,7 +151,7 @@ export default function FamilyCollaborationPage() {
                     month: "short",
                     day: "numeric",
                   }),
-                  category: evt.type,
+                  category: mapEventType(evt.type), // Convert DB type to display type
                   categoryColor: "#6366f1",
                   attendees: ["FM"], // Can be enhanced later
                 }));
@@ -510,8 +522,11 @@ export default function FamilyCollaborationPage() {
             <div className={styles.contactGrid}>
               {familyMembers.map((member) => {
                 const memberColor = getAvatarColor(member.userId);
-                const initials = getInitials(member.user.name, member.user.email);
-                
+                const initials = getInitials(
+                  member.user.name,
+                  member.user.email
+                );
+
                 return (
                   <div key={member.id} className={styles.contactCard}>
                     <div
@@ -537,7 +552,13 @@ export default function FamilyCollaborationPage() {
                 );
               })}
               {familyMembers.length === 0 && (
-                <div style={{ padding: "2rem", color: "#6c757d", gridColumn: "1 / -1" }}>
+                <div
+                  style={{
+                    padding: "2rem",
+                    color: "#6c757d",
+                    gridColumn: "1 / -1",
+                  }}
+                >
                   No family members yet
                 </div>
               )}

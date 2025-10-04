@@ -15,13 +15,40 @@ type Event = {
   description?: string;
 };
 
-
 const eventTypeColors: { [key: string]: string } = {
   Healthcare: "#3b82f6", // Blue
   Medication: "#ef4444", // Red
   Social: "#10b981", // Green
   Shopping: "#f59e0b", // Amber
   Other: "#8b5cf6", // Purple
+  APPOINTMENT: "#3b82f6", // Blue (maps to Healthcare)
+  VISIT: "#10b981", // Green (maps to Social)
+  FOOD_DELIVERY: "#f59e0b", // Amber (maps to Shopping)
+  BIRTHDAY: "#ec4899", // Pink
+};
+
+// Map database EventType to display type
+const mapEventType = (dbType: string): string => {
+  const typeMap: { [key: string]: string } = {
+    APPOINTMENT: "Healthcare",
+    VISIT: "Social",
+    FOOD_DELIVERY: "Shopping",
+    BIRTHDAY: "Social",
+    OTHER: "Other",
+  };
+  return typeMap[dbType] || dbType;
+};
+
+// Map display type to database EventType
+const mapDisplayTypeToDb = (displayType: string): string => {
+  const reverseMap: { [key: string]: string } = {
+    Healthcare: "APPOINTMENT",
+    Medication: "APPOINTMENT", // Medical appointments
+    Social: "VISIT",
+    Shopping: "FOOD_DELIVERY",
+    Other: "OTHER",
+  };
+  return reverseMap[displayType] || "OTHER";
 };
 
 export default function CalendarPage() {
@@ -62,7 +89,7 @@ export default function CalendarPage() {
               id: evt.id,
               title: evt.title,
               date: new Date(evt.eventDate),
-              type: evt.type,
+              type: mapEventType(evt.type), // Convert DB type to display type
               description: evt.description,
             }));
             setEvents(mappedEvents);
@@ -160,15 +187,17 @@ export default function CalendarPage() {
     if (!familyId) return;
 
     try {
-      const eventDate = new Date(`${newEvent.date}T${newEvent.time || "12:00"}`);
-      
+      const eventDate = new Date(
+        `${newEvent.date}T${newEvent.time || "12:00"}`
+      );
+
       const response = await fetch(`/api/families/${familyId}/events`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: newEvent.title,
           description: newEvent.description,
-          type: newEvent.type.toUpperCase(),
+          type: mapDisplayTypeToDb(newEvent.type), // Convert display type to DB type
           eventDate: eventDate.toISOString(),
         }),
       });
@@ -179,7 +208,7 @@ export default function CalendarPage() {
           id: createdEvent.id,
           title: createdEvent.title,
           date: new Date(createdEvent.eventDate),
-          type: createdEvent.type,
+          type: mapEventType(createdEvent.type), // Convert DB type back to display type
           description: createdEvent.description,
         };
         setEvents([...events, mappedEvent]);

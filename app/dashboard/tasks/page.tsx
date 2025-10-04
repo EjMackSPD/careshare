@@ -48,6 +48,8 @@ export default function TasksPage() {
   const [selectedFamily, setSelectedFamily] = useState<string>("");
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [newTask, setNewTask] = useState({
     title: "",
@@ -143,6 +145,17 @@ export default function TasksPage() {
     const matchesCompleted = showCompleted || !task.completed;
     return matchesSearch && matchesCategory && matchesCompleted;
   });
+
+  // Pagination calculations
+  const totalPages = Math.ceil(filteredTasks.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedTasks = filteredTasks.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterCategory, showCompleted]);
 
   const toggleTask = (id: string) => {
     setTasks(
@@ -559,69 +572,128 @@ export default function TasksPage() {
                 <p>Loading tasks...</p>
               </div>
             ) : (
-              <div className={styles.tasksList}>
-                {filteredTasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className={`${styles.taskCard} ${
-                      task.completed ? styles.completed : ""
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={task.completed}
-                      onChange={() => toggleTask(task.id)}
-                      className={styles.taskCheckbox}
-                    />
+              <>
+                <div className={styles.tasksList}>
+                  {paginatedTasks.map((task) => (
+                    <div
+                      key={task.id}
+                      className={`${styles.taskCard} ${
+                        task.completed ? styles.completed : ""
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={task.completed}
+                        onChange={() => toggleTask(task.id)}
+                        className={styles.taskCheckbox}
+                      />
 
-                    <div className={styles.taskContent}>
-                      <h3>{task.title}</h3>
-                      <p>{task.description}</p>
-                      <div className={styles.taskMeta}>
-                        <span className={styles.dueDate}>
-                          Due: {task.dueDate}
-                        </span>
-                      </div>
-                      <div className={styles.taskTags}>
-                        <span className={styles.categoryBadge}>
-                          {task.category}
-                        </span>
-                        <span
-                          className={`${
-                            styles.priorityBadge
-                          } ${getPriorityColor(task.priority)}`}
-                        >
-                          {task.priority.charAt(0) +
-                            task.priority.slice(1).toLowerCase()}{" "}
-                          Priority
-                        </span>
-                        {task.assignedToName && (
-                          <span className={styles.assignedBadge}>
-                            Assigned to: {task.assignedToName}
+                      <div className={styles.taskContent}>
+                        <h3>{task.title}</h3>
+                        <p>{task.description}</p>
+                        <div className={styles.taskMeta}>
+                          <span className={styles.dueDate}>
+                            Due: {task.dueDate}
                           </span>
-                        )}
+                        </div>
+                        <div className={styles.taskTags}>
+                          <span className={styles.categoryBadge}>
+                            {task.category}
+                          </span>
+                          <span
+                            className={`${
+                              styles.priorityBadge
+                            } ${getPriorityColor(task.priority)}`}
+                          >
+                            {task.priority.charAt(0) +
+                              task.priority.slice(1).toLowerCase()}{" "}
+                            Priority
+                          </span>
+                          {task.assignedToName && (
+                            <span className={styles.assignedBadge}>
+                              Assigned to: {task.assignedToName}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className={styles.taskCardActions}>
+                        <button
+                          onClick={() => handleEditTask(task)}
+                          className={styles.editTaskBtn}
+                          title="Edit task"
+                        >
+                          <Edit size={18} />
+                        </button>
+                        <button
+                          onClick={() => deleteTask(task.id)}
+                          className={styles.deleteBtn}
+                          title="Delete task"
+                        >
+                          <Trash2 size={18} />
+                        </button>
                       </div>
                     </div>
+                  ))}
+                </div>
 
-                    <div className={styles.taskCardActions}>
+                {/* Pagination */}
+                {filteredTasks.length > itemsPerPage && (
+                  <div className={styles.pagination}>
+                    <div className={styles.paginationInfo}>
+                      Showing {startIndex + 1}-
+                      {Math.min(endIndex, filteredTasks.length)} of{" "}
+                      {filteredTasks.length} tasks
+                    </div>
+                    <div className={styles.paginationControls}>
                       <button
-                        onClick={() => handleEditTask(task)}
-                        className={styles.editTaskBtn}
-                        title="Edit task"
+                        className={styles.pageBtn}
+                        onClick={() =>
+                          setCurrentPage(Math.max(1, currentPage - 1))
+                        }
+                        disabled={currentPage === 1}
                       >
-                        <Edit size={18} />
+                        Previous
                       </button>
+                      <div className={styles.pageNumbers}>
+                        {Array.from({ length: totalPages }, (_, i) => i + 1)
+                          .filter((page) => {
+                            // Show first page, last page, current page, and pages around current
+                            return (
+                              page === 1 ||
+                              page === totalPages ||
+                              Math.abs(page - currentPage) <= 1
+                            );
+                          })
+                          .map((page, index, array) => (
+                            <div key={page}>
+                              {index > 0 && array[index - 1] !== page - 1 && (
+                                <span className={styles.ellipsis}>...</span>
+                              )}
+                              <button
+                                className={`${styles.pageNumber} ${
+                                  currentPage === page ? styles.active : ""
+                                }`}
+                                onClick={() => setCurrentPage(page)}
+                              >
+                                {page}
+                              </button>
+                            </div>
+                          ))}
+                      </div>
                       <button
-                        onClick={() => deleteTask(task.id)}
-                        className={styles.deleteBtn}
-                        title="Delete task"
+                        className={styles.pageBtn}
+                        onClick={() =>
+                          setCurrentPage(Math.min(totalPages, currentPage + 1))
+                        }
+                        disabled={currentPage === totalPages}
                       >
-                        <Trash2 size={18} />
+                        Next
                       </button>
                     </div>
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             )}
           </div>
         </main>
