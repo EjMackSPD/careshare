@@ -210,6 +210,14 @@
 
 /* Responsive */
 @media (max-width: 968px) {
+  .main {
+    padding-top: 0;
+  }
+
+  .hero {
+    padding: 6rem 1.5rem 4rem 1.5rem;
+  }
+
   .content {
     grid-template-columns: 1fr;
   }

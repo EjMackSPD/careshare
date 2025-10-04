@@ -96,7 +96,8 @@ export default function Login() {
         <div className={styles.heroContent}>
           <h1>Welcome back to CareShare</h1>
           <p className={styles.subtitle}>
-            Continue coordinating care with your family. Sign in to access your dashboard.
+            Continue coordinating care with your family. Sign in to access your
+            dashboard.
           </p>
 
           <div className={styles.features}>
@@ -106,7 +107,10 @@ export default function Login() {
               </div>
               <div>
                 <h3>Your Family Hub</h3>
-                <p>Access all your family&apos;s caregiving information in one place</p>
+                <p>
+                  Access all your family&apos;s caregiving information in one
+                  place
+                </p>
               </div>
             </div>
 
@@ -136,7 +140,9 @@ export default function Login() {
               </div>
               <div>
                 <h3>Try Demo Mode</h3>
-                <p>Explore with pre-loaded examples and see what&apos;s possible</p>
+                <p>
+                  Explore with pre-loaded examples and see what&apos;s possible
+                </p>
               </div>
             </div>
           </div>
