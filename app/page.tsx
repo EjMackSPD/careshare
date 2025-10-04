@@ -1,9 +1,9 @@
-import Link from 'next/link'
-import Image from 'next/image'
-import styles from './page.module.css'
-import ImageCarousel from './components/ImageCarousel'
-import Footer from './components/Footer'
-import { Wallet, CalendarDays, Users, Building2 } from 'lucide-react'
+import Link from "next/link";
+import Image from "next/image";
+import styles from "./page.module.css";
+import ImageCarousel from "./components/ImageCarousel";
+import Footer from "./components/Footer";
+import { Wallet, CalendarDays, Users, Building2 } from "lucide-react";
 
 export default function Home() {
   return (
@@ -11,10 +11,10 @@ export default function Home() {
       <nav className={styles.nav}>
         <div className={styles.navContainer}>
           <Link href="/" className={styles.logo}>
-            <Image 
-              src="/careshare-logo.png" 
-              alt="CareShare Logo" 
-              width={200} 
+            <Image
+              src="/careshare-logo.png"
+              alt="CareShare Logo"
+              width={200}
               height={75}
               priority
             />
@@ -24,7 +24,9 @@ export default function Home() {
             <Link href="/blog">Blog</Link>
             <Link href="/partnerships">Partnerships</Link>
             <Link href="/login">Login</Link>
-            <Link href="/signup" className={styles.signupBtn}>Sign Up</Link>
+            <Link href="/signup" className={styles.signupBtn}>
+              Sign Up
+            </Link>
           </div>
         </div>
       </nav>
@@ -36,8 +38,9 @@ export default function Home() {
             Caring for loved ones, <span>together</span>
           </h1>
           <p className={styles.heroSubtitle}>
-            CareShare helps families coordinate care for elderly relatives. 
-            Share costs, organize events, and manage responsibilities—all in one place.
+            CareShare helps families coordinate care for elderly relatives.
+            Share costs, organize events, and manage responsibilities—all in one
+            place.
           </p>
           <div className={styles.heroButtons}>
             <Link href="/signup" className={styles.primaryBtn}>
@@ -58,28 +61,40 @@ export default function Home() {
               <Wallet size={48} strokeWidth={1.5} />
             </div>
             <h3>Split Costs Fairly</h3>
-            <p>Track expenses and contributions transparently. No more awkward money conversations.</p>
+            <p>
+              Track expenses and contributions transparently. No more awkward
+              money conversations.
+            </p>
           </div>
           <div className={styles.benefitCard}>
             <div className={styles.benefitIcon}>
               <CalendarDays size={48} strokeWidth={1.5} />
             </div>
             <h3>Coordinate Events</h3>
-            <p>Plan birthdays, appointments, and food deliveries together. Everyone stays in the loop.</p>
+            <p>
+              Plan birthdays, appointments, and food deliveries together.
+              Everyone stays in the loop.
+            </p>
           </div>
           <div className={styles.benefitCard}>
             <div className={styles.benefitIcon}>
               <Users size={48} strokeWidth={1.5} />
             </div>
             <h3>Bring Family Together</h3>
-            <p>Share the responsibility of care. Everyone contributes in their own way.</p>
+            <p>
+              Share the responsibility of care. Everyone contributes in their
+              own way.
+            </p>
           </div>
           <div className={styles.benefitCard}>
             <div className={styles.benefitIcon}>
               <Building2 size={48} strokeWidth={1.5} />
             </div>
             <h3>For Care Providers</h3>
-            <p>Nursing homes can offer CareShare to help families stay organized and engaged.</p>
+            <p>
+              Nursing homes can offer CareShare to help families stay organized
+              and engaged.
+            </p>
           </div>
         </div>
       </section>
@@ -88,7 +103,10 @@ export default function Home() {
         <div className={styles.demoContent}>
           <div className={styles.demoText}>
             <h2>See CareShare in Action</h2>
-            <p>Experience the platform with a fully interactive demo account. No signup required!</p>
+            <p>
+              Experience the platform with a fully interactive demo account. No
+              signup required!
+            </p>
             <ul className={styles.demoFeatures}>
               <li>✓ Pre-loaded with realistic caregiving scenarios</li>
               <li>✓ Explore all features and functionality</li>
@@ -100,7 +118,9 @@ export default function Home() {
             <Link href="/login" className={styles.demoBtn}>
               🎭 Try Demo Walkthrough
             </Link>
-            <p className={styles.demoNote}>Click "Try Demo Mode" on the login page</p>
+            <p className={styles.demoNote}>
+              Click "Try Demo Mode" on the login page
+            </p>
           </div>
         </div>
       </section>
@@ -115,5 +135,5 @@ export default function Home() {
 
       <Footer />
     </main>
-  )
+  );
 }

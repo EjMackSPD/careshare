@@ -88,7 +88,10 @@ export default function PartnershipsPage() {
 
           <div className={styles.benefitsGrid}>
             <div className={styles.benefitCard}>
-              <div className={styles.benefitIcon} style={{ background: "#dbeafe" }}>
+              <div
+                className={styles.benefitIcon}
+                style={{ background: "#dbeafe" }}
+              >
                 <TrendingUp size={32} style={{ color: "#2563eb" }} />
               </div>
               <h3>Growing Market</h3>
@@ -98,7 +101,10 @@ export default function PartnershipsPage() {
               </p>
             </div>
             <div className={styles.benefitCard}>
-              <div className={styles.benefitIcon} style={{ background: "#dcfce7" }}>
+              <div
+                className={styles.benefitIcon}
+                style={{ background: "#dcfce7" }}
+              >
                 <Heart size={32} style={{ color: "#16a34a" }} />
               </div>
               <h3>Meaningful Impact</h3>
@@ -108,7 +114,10 @@ export default function PartnershipsPage() {
               </p>
             </div>
             <div className={styles.benefitCard}>
-              <div className={styles.benefitIcon} style={{ background: "#fef3c7" }}>
+              <div
+                className={styles.benefitIcon}
+                style={{ background: "#fef3c7" }}
+              >
                 <Shield size={32} style={{ color: "#ca8a04" }} />
               </div>
               <h3>Trusted Platform</h3>
@@ -118,13 +127,16 @@ export default function PartnershipsPage() {
               </p>
             </div>
             <div className={styles.benefitCard}>
-              <div className={styles.benefitIcon} style={{ background: "#e9d5ff" }}>
+              <div
+                className={styles.benefitIcon}
+                style={{ background: "#e9d5ff" }}
+              >
                 <Zap size={32} style={{ color: "#7c3aed" }} />
               </div>
               <h3>Easy Integration</h3>
               <p>
-                Simple onboarding process and white-label options available.
-                We handle the technology, you focus on care.
+                Simple onboarding process and white-label options available. We
+                handle the technology, you focus on care.
               </p>
             </div>
           </div>
@@ -292,8 +304,8 @@ export default function PartnershipsPage() {
               </div>
               <div className={styles.partnershipContent}>
                 <p>
-                  Empower your community with tools to support family
-                  caregivers and enhance your mission impact.
+                  Empower your community with tools to support family caregivers
+                  and enhance your mission impact.
                 </p>
                 <ul className={styles.featureList}>
                   <li>
@@ -445,7 +457,8 @@ export default function PartnershipsPage() {
               </a>
             </p>
             <p>
-              <strong>Phone:</strong> <a href="tel:+18005551234">(800) 555-1234</a>
+              <strong>Phone:</strong>{" "}
+              <a href="tel:+18005551234">(800) 555-1234</a>
             </p>
             <p>
               <strong>Hours:</strong> Monday - Friday, 9AM - 5PM EST
@@ -458,4 +471,3 @@ export default function PartnershipsPage() {
     </div>
   );
 }
-
