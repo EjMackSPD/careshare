@@ -46,8 +46,6 @@ Remember, being a caregiver is one of the most challenging yet rewarding roles y
     authorTitle: "Senior Care Specialist",
     coverImage:
       "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=1920&q=80",
-    coverImage:
-      "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=1920&q=80",
     readTime: 8,
     published: true,
     publishedAt: new Date("2025-09-15"),
