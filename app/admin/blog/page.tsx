@@ -394,71 +394,71 @@ export default function ManageBlogPage() {
                     </tr>
                   ) : (
                     paginatedPosts.map((post) => (
-                    <tr key={post.id}>
-                      <td>
-                        <Link
-                          href={`/blog/${post.slug}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={styles.postTitleLink}
-                        >
-                          {post.title}
-                        </Link>
-                        <div className={styles.postSlug}>{post.slug}</div>
-                      </td>
-                      <td>
-                        <div>{post.author}</div>
-                        {post.authorTitle && (
-                          <div
-                            style={{ fontSize: "0.875rem", color: "#64748b" }}
+                      <tr key={post.id}>
+                        <td>
+                          <Link
+                            href={`/blog/${post.slug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={styles.postTitleLink}
                           >
-                            {post.authorTitle}
+                            {post.title}
+                          </Link>
+                          <div className={styles.postSlug}>{post.slug}</div>
+                        </td>
+                        <td>
+                          <div>{post.author}</div>
+                          {post.authorTitle && (
+                            <div
+                              style={{ fontSize: "0.875rem", color: "#64748b" }}
+                            >
+                              {post.authorTitle}
+                            </div>
+                          )}
+                        </td>
+                        <td>
+                          <span className={styles.badge}>
+                            {
+                              categoryOptions.find(
+                                (c) => c.value === post.category
+                              )?.label
+                            }
+                          </span>
+                        </td>
+                        <td>
+                          <button
+                            onClick={() => handleTogglePublish(post)}
+                            className={`${styles.statusBadge} ${
+                              post.published ? styles.active : styles.inactive
+                            }`}
+                          >
+                            {post.published ? "Published" : "Draft"}
+                          </button>
+                        </td>
+                        <td>{post.views.toLocaleString()}</td>
+                        <td>
+                          {post.publishedAt
+                            ? new Date(post.publishedAt).toLocaleDateString()
+                            : "-"}
+                        </td>
+                        <td>
+                          <div className={styles.actions}>
+                            <button
+                              onClick={() => handleEditPost(post)}
+                              className={styles.actionBtn}
+                              title="Edit"
+                            >
+                              <Edit2 size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleDeletePost(post.id)}
+                              className={`${styles.actionBtn} ${styles.danger}`}
+                              title="Delete"
+                            >
+                              <Trash2 size={16} />
+                            </button>
                           </div>
-                        )}
-                      </td>
-                      <td>
-                        <span className={styles.badge}>
-                          {
-                            categoryOptions.find(
-                              (c) => c.value === post.category
-                            )?.label
-                          }
-                        </span>
-                      </td>
-                      <td>
-                        <button
-                          onClick={() => handleTogglePublish(post)}
-                          className={`${styles.statusBadge} ${
-                            post.published ? styles.active : styles.inactive
-                          }`}
-                        >
-                          {post.published ? "Published" : "Draft"}
-                        </button>
-                      </td>
-                      <td>{post.views.toLocaleString()}</td>
-                      <td>
-                        {post.publishedAt
-                          ? new Date(post.publishedAt).toLocaleDateString()
-                          : "-"}
-                      </td>
-                      <td>
-                        <div className={styles.actions}>
-                          <button
-                            onClick={() => handleEditPost(post)}
-                            className={styles.actionBtn}
-                            title="Edit"
-                          >
-                            <Edit2 size={16} />
-                          </button>
-                          <button
-                            onClick={() => handleDeletePost(post.id)}
-                            className={`${styles.actionBtn} ${styles.danger}`}
-                            title="Delete"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
+                        </td>
                       </tr>
                     ))
                   )}
@@ -469,7 +469,8 @@ export default function ManageBlogPage() {
               {totalPages > 1 && (
                 <div className={styles.pagination}>
                   <div className={styles.paginationInfo}>
-                    Showing {startIndex + 1}-{Math.min(endIndex, filteredPosts.length)} of{" "}
+                    Showing {startIndex + 1}-
+                    {Math.min(endIndex, filteredPosts.length)} of{" "}
                     {filteredPosts.length} posts
                   </div>
                   <div className={styles.paginationControls}>
@@ -481,29 +482,34 @@ export default function ManageBlogPage() {
                       <ChevronLeft size={16} />
                       Previous
                     </button>
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                      // Show first, last, current, and adjacent pages
-                      if (
-                        page === 1 ||
-                        page === totalPages ||
-                        (page >= currentPage - 1 && page <= currentPage + 1)
-                      ) {
-                        return (
-                          <button
-                            key={page}
-                            onClick={() => setCurrentPage(page)}
-                            className={`${styles.pageBtn} ${
-                              currentPage === page ? styles.active : ""
-                            }`}
-                          >
-                            {page}
-                          </button>
-                        );
-                      } else if (page === currentPage - 2 || page === currentPage + 2) {
-                        return <span key={page}>...</span>;
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (page) => {
+                        // Show first, last, current, and adjacent pages
+                        if (
+                          page === 1 ||
+                          page === totalPages ||
+                          (page >= currentPage - 1 && page <= currentPage + 1)
+                        ) {
+                          return (
+                            <button
+                              key={page}
+                              onClick={() => setCurrentPage(page)}
+                              className={`${styles.pageBtn} ${
+                                currentPage === page ? styles.active : ""
+                              }`}
+                            >
+                              {page}
+                            </button>
+                          );
+                        } else if (
+                          page === currentPage - 2 ||
+                          page === currentPage + 2
+                        ) {
+                          return <span key={page}>...</span>;
+                        }
+                        return null;
                       }
-                      return null;
-                    })}
+                    )}
                     <button
                       onClick={() => setCurrentPage(currentPage + 1)}
                       disabled={currentPage === totalPages}
@@ -552,239 +558,275 @@ export default function ManageBlogPage() {
             <form onSubmit={handleSavePost}>
               <div className={styles.modalBody}>
                 <div className={styles.formGroup}>
-                <label>Title *</label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => {
-                    const title = e.target.value;
-                    setFormData({
-                      ...formData,
-                      title,
-                      slug: title
-                        .toLowerCase()
-                        .replace(/[^a-z0-9]+/g, "-")
-                        .replace(/(^-|-$)/g, ""),
-                    });
-                  }}
-                  required
-                  placeholder="e.g., 10 Tips for New Caregivers"
-                  className={styles.input}
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Slug (URL) *</label>
-                <input
-                  type="text"
-                  value={formData.slug}
-                  onChange={(e) =>
-                    setFormData({ ...formData, slug: e.target.value })
-                  }
-                  required
-                  placeholder="e.g., 10-tips-new-caregivers"
-                  className={styles.input}
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Excerpt *</label>
-                <textarea
-                  value={formData.excerpt}
-                  onChange={(e) =>
-                    setFormData({ ...formData, excerpt: e.target.value })
-                  }
-                  required
-                  rows={3}
-                  placeholder="Brief summary shown in blog list..."
-                  className={styles.input}
-                  style={{ resize: "vertical" }}
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Content *</label>
-                <RichTextEditor
-                  value={formData.content}
-                  onChange={(value) =>
-                    setFormData({ ...formData, content: value })
-                  }
-                  placeholder="Write your blog post content here..."
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>
-                  <LinkIcon size={16} style={{ display: "inline", marginRight: "0.5rem" }} />
-                  Related Posts (Cross-Reference)
-                </label>
-                <p style={{ fontSize: "0.875rem", color: "#64748b", marginBottom: "0.75rem" }}>
-                  Select up to 3 related blog posts to display at the end of this article
-                </p>
-                <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                  {posts
-                    .filter((p) => p.id !== editingPost?.id)
-                    .map((post) => (
-                      <label
-                        key={post.id}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          padding: "0.75rem",
-                          border: "1px solid #e2e8f0",
-                          borderRadius: "0.5rem",
-                          cursor: "pointer",
-                          background: formData.relatedPostIds.includes(post.id)
-                            ? "#f0f9ff"
-                            : "white",
-                          transition: "all 0.2s",
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={formData.relatedPostIds.includes(post.id)}
-                          onChange={(e) => {
-                            const isChecked = e.target.checked;
-                            setFormData({
-                              ...formData,
-                              relatedPostIds: isChecked
-                                ? [...formData.relatedPostIds, post.id].slice(0, 3)
-                                : formData.relatedPostIds.filter((id) => id !== post.id),
-                            });
-                          }}
-                          disabled={
-                            !formData.relatedPostIds.includes(post.id) &&
-                            formData.relatedPostIds.length >= 3
-                          }
-                          style={{ marginRight: "0.75rem" }}
-                        />
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: 600, color: "#1e293b" }}>
-                            {post.title}
-                          </div>
-                          <div style={{ fontSize: "0.875rem", color: "#64748b" }}>
-                            {categoryOptions.find((c) => c.value === post.category)?.label} •{" "}
-                            {post.readTime} min read
-                          </div>
-                        </div>
-                      </label>
-                    ))}
-                </div>
-              </div>
-
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "1rem",
-                }}
-              >
-                <div className={styles.formGroup}>
-                  <label>Category *</label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) =>
-                      setFormData({ ...formData, category: e.target.value })
-                    }
-                    required
-                    className={styles.input}
-                  >
-                    {categoryOptions.map((cat) => (
-                      <option key={cat.value} value={cat.value}>
-                        {cat.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Read Time (minutes) *</label>
+                  <label>Title *</label>
                   <input
-                    type="number"
-                    value={formData.readTime}
-                    onChange={(e) =>
+                    type="text"
+                    value={formData.title}
+                    onChange={(e) => {
+                      const title = e.target.value;
                       setFormData({
                         ...formData,
-                        readTime: parseInt(e.target.value),
-                      })
-                    }
+                        title,
+                        slug: title
+                          .toLowerCase()
+                          .replace(/[^a-z0-9]+/g, "-")
+                          .replace(/(^-|-$)/g, ""),
+                      });
+                    }}
                     required
-                    min="1"
-                    max="60"
-                    className={styles.input}
-                  />
-                </div>
-              </div>
-
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "1rem",
-                }}
-              >
-                <div className={styles.formGroup}>
-                  <label>Author *</label>
-                  <input
-                    type="text"
-                    value={formData.author}
-                    onChange={(e) =>
-                      setFormData({ ...formData, author: e.target.value })
-                    }
-                    required
-                    placeholder="e.g., Dr. Sarah Mitchell"
+                    placeholder="e.g., 10 Tips for New Caregivers"
                     className={styles.input}
                   />
                 </div>
 
                 <div className={styles.formGroup}>
-                  <label>Author Title</label>
+                  <label>Slug (URL) *</label>
                   <input
                     type="text"
-                    value={formData.authorTitle}
+                    value={formData.slug}
                     onChange={(e) =>
-                      setFormData({ ...formData, authorTitle: e.target.value })
+                      setFormData({ ...formData, slug: e.target.value })
                     }
-                    placeholder="e.g., Senior Care Specialist"
+                    required
+                    placeholder="e.g., 10-tips-new-caregivers"
                     className={styles.input}
                   />
                 </div>
-              </div>
 
-              <div className={styles.formGroup}>
-                <label>Cover Image URL</label>
-                <input
-                  type="url"
-                  value={formData.coverImage}
-                  onChange={(e) =>
-                    setFormData({ ...formData, coverImage: e.target.value })
-                  }
-                  placeholder="https://images.unsplash.com/photo-..."
-                  className={styles.input}
-                />
-                <small style={{ color: "#64748b", fontSize: "0.875rem" }}>
-                  Recommended: 1920x1080px, Use Unsplash for high-quality images
-                </small>
-              </div>
+                <div className={styles.formGroup}>
+                  <label>Excerpt *</label>
+                  <textarea
+                    value={formData.excerpt}
+                    onChange={(e) =>
+                      setFormData({ ...formData, excerpt: e.target.value })
+                    }
+                    required
+                    rows={3}
+                    placeholder="Brief summary shown in blog list..."
+                    className={styles.input}
+                    style={{ resize: "vertical" }}
+                  />
+                </div>
 
-              <div className={styles.formGroup}>
-                <label
+                <div className={styles.formGroup}>
+                  <label>Content *</label>
+                  <RichTextEditor
+                    value={formData.content}
+                    onChange={(value) =>
+                      setFormData({ ...formData, content: value })
+                    }
+                    placeholder="Write your blog post content here..."
+                  />
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>
+                    <LinkIcon
+                      size={16}
+                      style={{ display: "inline", marginRight: "0.5rem" }}
+                    />
+                    Related Posts (Cross-Reference)
+                  </label>
+                  <p
+                    style={{
+                      fontSize: "0.875rem",
+                      color: "#64748b",
+                      marginBottom: "0.75rem",
+                    }}
+                  >
+                    Select up to 3 related blog posts to display at the end of
+                    this article
+                  </p>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.5rem",
+                    }}
+                  >
+                    {posts
+                      .filter((p) => p.id !== editingPost?.id)
+                      .map((post) => (
+                        <label
+                          key={post.id}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            padding: "0.75rem",
+                            border: "1px solid #e2e8f0",
+                            borderRadius: "0.5rem",
+                            cursor: "pointer",
+                            background: formData.relatedPostIds.includes(
+                              post.id
+                            )
+                              ? "#f0f9ff"
+                              : "white",
+                            transition: "all 0.2s",
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={formData.relatedPostIds.includes(post.id)}
+                            onChange={(e) => {
+                              const isChecked = e.target.checked;
+                              setFormData({
+                                ...formData,
+                                relatedPostIds: isChecked
+                                  ? [...formData.relatedPostIds, post.id].slice(
+                                      0,
+                                      3
+                                    )
+                                  : formData.relatedPostIds.filter(
+                                      (id) => id !== post.id
+                                    ),
+                              });
+                            }}
+                            disabled={
+                              !formData.relatedPostIds.includes(post.id) &&
+                              formData.relatedPostIds.length >= 3
+                            }
+                            style={{ marginRight: "0.75rem" }}
+                          />
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontWeight: 600, color: "#1e293b" }}>
+                              {post.title}
+                            </div>
+                            <div
+                              style={{ fontSize: "0.875rem", color: "#64748b" }}
+                            >
+                              {
+                                categoryOptions.find(
+                                  (c) => c.value === post.category
+                                )?.label
+                              }{" "}
+                              • {post.readTime} min read
+                            </div>
+                          </div>
+                        </label>
+                      ))}
+                  </div>
+                </div>
+
+                <div
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "1rem",
                   }}
                 >
+                  <div className={styles.formGroup}>
+                    <label>Category *</label>
+                    <select
+                      value={formData.category}
+                      onChange={(e) =>
+                        setFormData({ ...formData, category: e.target.value })
+                      }
+                      required
+                      className={styles.input}
+                    >
+                      {categoryOptions.map((cat) => (
+                        <option key={cat.value} value={cat.value}>
+                          {cat.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label>Read Time (minutes) *</label>
+                    <input
+                      type="number"
+                      value={formData.readTime}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          readTime: parseInt(e.target.value),
+                        })
+                      }
+                      required
+                      min="1"
+                      max="60"
+                      className={styles.input}
+                    />
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 1fr",
+                    gap: "1rem",
+                  }}
+                >
+                  <div className={styles.formGroup}>
+                    <label>Author *</label>
+                    <input
+                      type="text"
+                      value={formData.author}
+                      onChange={(e) =>
+                        setFormData({ ...formData, author: e.target.value })
+                      }
+                      required
+                      placeholder="e.g., Dr. Sarah Mitchell"
+                      className={styles.input}
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label>Author Title</label>
+                    <input
+                      type="text"
+                      value={formData.authorTitle}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          authorTitle: e.target.value,
+                        })
+                      }
+                      placeholder="e.g., Senior Care Specialist"
+                      className={styles.input}
+                    />
+                  </div>
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Cover Image URL</label>
                   <input
-                    type="checkbox"
-                    checked={formData.published}
+                    type="url"
+                    value={formData.coverImage}
                     onChange={(e) =>
-                      setFormData({ ...formData, published: e.target.checked })
+                      setFormData({ ...formData, coverImage: e.target.value })
                     }
+                    placeholder="https://images.unsplash.com/photo-..."
+                    className={styles.input}
                   />
-                  Publish immediately
-                </label>
-              </div>
+                  <small style={{ color: "#64748b", fontSize: "0.875rem" }}>
+                    Recommended: 1920x1080px, Use Unsplash for high-quality
+                    images
+                  </small>
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={formData.published}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          published: e.target.checked,
+                        })
+                      }
+                    />
+                    Publish immediately
+                  </label>
+                </div>
               </div>
 
               <div className={styles.modalActions}>
