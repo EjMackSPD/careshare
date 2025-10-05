@@ -1,40 +1,18 @@
 .container {
   min-height: 100vh;
   background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
-  padding-top: 100px;
 }
 
-.nav {
-  background: white;
-  border-bottom: 1px solid #e9ecef;
-  padding: 1rem 2rem;
+.layout {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.logo {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #2563eb;
-  text-decoration: none;
-}
-
-.backLink {
-  color: #6c757d;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s;
-}
-
-.backLink:hover {
-  color: #2563eb;
+  min-height: calc(100vh - 100px);
 }
 
 .main {
-  max-width: 900px;
-  margin: 0 auto;
+  flex: 1;
+  max-width: 1200px;
   padding: 3rem 2rem;
+  padding-top: 100px;
 }
 
 .header {
