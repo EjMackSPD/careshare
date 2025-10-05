@@ -516,8 +516,9 @@ export default function ManageBlogPage() {
                 </div>
               )}
             </div>
-          </main>
-        </div>
+          </div>
+        </main>
+      </div>
 
       <Footer />
 
