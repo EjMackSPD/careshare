@@ -362,38 +362,38 @@ export default function ManageBlogPage() {
             {/* Posts Table */}
             <div className={styles.tableWrapper}>
               <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Title</th>
-                  <th>Author</th>
-                  <th>Category</th>
-                  <th>Status</th>
-                  <th>Views</th>
-                  <th>Published</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
+                <thead>
                   <tr>
-                    <td
-                      colSpan={7}
-                      style={{ textAlign: "center", padding: "2rem" }}
-                    >
-                      Loading...
-                    </td>
+                    <th>Title</th>
+                    <th>Author</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Views</th>
+                    <th>Published</th>
+                    <th>Actions</th>
                   </tr>
-                ) : paginatedPosts.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={7}
-                      style={{ textAlign: "center", padding: "2rem" }}
-                    >
-                      No blog posts found
-                    </td>
-                  </tr>
-                ) : (
-                  paginatedPosts.map((post) => (
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr>
+                      <td
+                        colSpan={7}
+                        style={{ textAlign: "center", padding: "2rem" }}
+                      >
+                        Loading...
+                      </td>
+                    </tr>
+                  ) : paginatedPosts.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={7}
+                        style={{ textAlign: "center", padding: "2rem" }}
+                      >
+                        No blog posts found
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedPosts.map((post) => (
                     <tr key={post.id}>
                       <td>
                         <Link
@@ -459,65 +459,65 @@ export default function ManageBlogPage() {
                           </button>
                         </div>
                       </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className={styles.pagination}>
-                <div className={styles.paginationInfo}>
-                  Showing {startIndex + 1}-{Math.min(endIndex, filteredPosts.length)} of{" "}
-                  {filteredPosts.length} posts
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className={styles.pagination}>
+                  <div className={styles.paginationInfo}>
+                    Showing {startIndex + 1}-{Math.min(endIndex, filteredPosts.length)} of{" "}
+                    {filteredPosts.length} posts
+                  </div>
+                  <div className={styles.paginationControls}>
+                    <button
+                      onClick={() => setCurrentPage(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className={styles.pageBtn}
+                    >
+                      <ChevronLeft size={16} />
+                      Previous
+                    </button>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                      // Show first, last, current, and adjacent pages
+                      if (
+                        page === 1 ||
+                        page === totalPages ||
+                        (page >= currentPage - 1 && page <= currentPage + 1)
+                      ) {
+                        return (
+                          <button
+                            key={page}
+                            onClick={() => setCurrentPage(page)}
+                            className={`${styles.pageBtn} ${
+                              currentPage === page ? styles.active : ""
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        );
+                      } else if (page === currentPage - 2 || page === currentPage + 2) {
+                        return <span key={page}>...</span>;
+                      }
+                      return null;
+                    })}
+                    <button
+                      onClick={() => setCurrentPage(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className={styles.pageBtn}
+                    >
+                      Next
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
                 </div>
-                <div className={styles.paginationControls}>
-                  <button
-                    onClick={() => setCurrentPage(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className={styles.pageBtn}
-                  >
-                    <ChevronLeft size={16} />
-                    Previous
-                  </button>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                    // Show first, last, current, and adjacent pages
-                    if (
-                      page === 1 ||
-                      page === totalPages ||
-                      (page >= currentPage - 1 && page <= currentPage + 1)
-                    ) {
-                      return (
-                        <button
-                          key={page}
-                          onClick={() => setCurrentPage(page)}
-                          className={`${styles.pageBtn} ${
-                            currentPage === page ? styles.active : ""
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      );
-                    } else if (page === currentPage - 2 || page === currentPage + 2) {
-                      return <span key={page}>...</span>;
-                    }
-                    return null;
-                  })}
-                  <button
-                    onClick={() => setCurrentPage(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className={styles.pageBtn}
-                  >
-                    Next
-                    <ChevronRight size={16} />
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </main>
-      </div>
+              )}
+            </div>
+          </main>
+        </div>
 
       <Footer />
 
