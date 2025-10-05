@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import Footer from "../components/Footer";
 import MarketingNav from "../components/MarketingNav";
 import {
@@ -24,6 +25,7 @@ type BlogPost = {
   category: string;
   author: string;
   authorTitle: string | null;
+  coverImage: string | null;
   readTime: number;
   publishedAt: string;
   views: number;
@@ -186,6 +188,16 @@ export default function BlogPage() {
                 href={`/blog/${featuredPost.slug}`}
                 className={styles.featuredPost}
               >
+                {featuredPost.coverImage && (
+                  <div className={styles.featuredImage}>
+                    <Image
+                      src={featuredPost.coverImage}
+                      alt={featuredPost.title}
+                      fill
+                      style={{ objectFit: "cover" }}
+                    />
+                  </div>
+                )}
                 <div className={styles.featuredContent}>
                   <div className={styles.featuredMeta}>
                     <span
@@ -235,15 +247,26 @@ export default function BlogPage() {
                   href={`/blog/${post.slug}`}
                   className={styles.postCard}
                 >
-                  <span
-                    className={styles.categoryBadge}
-                    style={{ background: categoryColors[post.category] }}
-                  >
-                    <Tag size={14} />
-                    {categoryLabels[post.category]}
-                  </span>
-                  <h3>{post.title}</h3>
-                  <p>{post.excerpt}</p>
+                  {post.coverImage && (
+                    <div className={styles.postImage}>
+                      <Image
+                        src={post.coverImage}
+                        alt={post.title}
+                        fill
+                        style={{ objectFit: "cover" }}
+                      />
+                      <span
+                        className={styles.categoryBadge}
+                        style={{ background: categoryColors[post.category] }}
+                      >
+                        <Tag size={14} />
+                        {categoryLabels[post.category]}
+                      </span>
+                    </div>
+                  )}
+                  <div className={styles.postContent}>
+                    <h3>{post.title}</h3>
+                    <p>{post.excerpt}</p>
                   <div className={styles.postFooter}>
                     <div className={styles.author}>
                       <div className={styles.authorAvatar}>
@@ -268,6 +291,7 @@ export default function BlogPage() {
                         <span>{post.views}</span>
                       </div>
                     </div>
+                  </div>
                   </div>
                 </Link>
               ))}

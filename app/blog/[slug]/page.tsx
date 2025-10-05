@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import Footer from "../../components/Footer";
 import MarketingNav from "../../components/MarketingNav";
 import {
@@ -24,6 +25,7 @@ type BlogPost = {
   category: string;
   author: string;
   authorTitle: string | null;
+  coverImage: string | null;
   readTime: number;
   publishedAt: string;
   views: number;
@@ -143,6 +145,19 @@ export default function BlogPostPage() {
               </div>
             </div>
           </header>
+
+          {post.coverImage && (
+            <div className={styles.coverImage}>
+              <Image
+                src={post.coverImage}
+                alt={post.title}
+                width={1200}
+                height={600}
+                style={{ width: "100%", height: "auto" }}
+                priority
+              />
+            </div>
+          )}
 
           <div className={styles.content}>
             {post.content.split("\n").map((paragraph, index) => {

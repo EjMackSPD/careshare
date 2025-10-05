@@ -5,7 +5,12 @@ const nextConfig = {
   
   // Optimize images (if you add images later)
   images: {
-    domains: [],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+    ],
   },
 }
 
