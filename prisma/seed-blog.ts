@@ -44,8 +44,10 @@ Remember, being a caregiver is one of the most challenging yet rewarding roles y
     category: BlogCategory.CAREGIVING_TIPS,
     author: "Dr. Sarah Mitchell",
     authorTitle: "Senior Care Specialist",
-    coverImage: "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=1920&q=80",
-    coverImage: "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=1920&q=80",
+    coverImage:
+      "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=1920&q=80",
+    coverImage:
+      "https://images.unsplash.com/photo-1576765608535-5f04d1e3f289?w=1920&q=80",
     readTime: 8,
     published: true,
     publishedAt: new Date("2025-09-15"),
@@ -99,7 +101,8 @@ Their story reminds us that with love, communication, and the right tools, famil
     category: BlogCategory.FAMILY_STORIES,
     author: "Emma Rodriguez",
     authorTitle: "Family Care Coordinator",
-    coverImage: "https://images.unsplash.com/photo-1511895426328-dc8714191300?w=1920&q=80",
+    coverImage:
+      "https://images.unsplash.com/photo-1511895426328-dc8714191300?w=1920&q=80",
     readTime: 6,
     published: true,
     publishedAt: new Date("2025-09-20"),
