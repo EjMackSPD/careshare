@@ -87,6 +87,62 @@ export async function POST() {
         })
       }
 
+      let davidUser = await prisma.user.findUnique({
+        where: { email: 'david.smith@example.com' }
+      })
+      if (!davidUser) {
+        davidUser = await prisma.user.create({
+          data: {
+            email: 'david.smith@example.com',
+            name: 'David Smith',
+            password: await bcrypt.hash('demo123', 10),
+            role: 'FAMILY_MEMBER',
+          },
+        })
+      }
+
+      let lisaUser = await prisma.user.findUnique({
+        where: { email: 'lisa.johnson@example.com' }
+      })
+      if (!lisaUser) {
+        lisaUser = await prisma.user.create({
+          data: {
+            email: 'lisa.johnson@example.com',
+            name: 'Lisa Johnson',
+            password: await bcrypt.hash('demo123', 10),
+            role: 'FAMILY_MEMBER',
+          },
+        })
+      }
+
+      let jamesUser = await prisma.user.findUnique({
+        where: { email: 'james.smith@example.com' }
+      })
+      if (!jamesUser) {
+        jamesUser = await prisma.user.create({
+          data: {
+            email: 'james.smith@example.com',
+            name: 'James Smith',
+            password: await bcrypt.hash('demo123', 10),
+            role: 'FAMILY_MEMBER',
+          },
+        })
+      }
+
+      let robertUser = await prisma.user.findUnique({
+        where: { email: 'robert.brown@example.com' }
+      })
+      if (!robertUser) {
+        robertUser = await prisma.user.create({
+          data: {
+            email: 'robert.brown@example.com',
+            name: 'Robert Brown',
+            password: await bcrypt.hash('demo123', 10),
+            role: 'FAMILY_MEMBER',
+          },
+        })
+      }
+
       // Create demo family with all members
       const demoFamily = await prisma.family.create({
         data: {
@@ -111,10 +167,26 @@ export async function POST() {
               },
               {
                 userId: michaelUser.id,
-                role: FamilyRole.FAMILY_MEMBER,
+                role: FamilyRole.CONTRIBUTOR,
               },
               {
                 userId: emilyUser.id,
+                role: FamilyRole.FAMILY_MEMBER,
+              },
+              {
+                userId: davidUser.id,
+                role: FamilyRole.CONTRIBUTOR,
+              },
+              {
+                userId: lisaUser.id,
+                role: FamilyRole.FAMILY_MEMBER,
+              },
+              {
+                userId: jamesUser.id,
+                role: FamilyRole.CONTRIBUTOR,
+              },
+              {
+                userId: robertUser.id,
                 role: FamilyRole.FAMILY_MEMBER,
               },
             ],

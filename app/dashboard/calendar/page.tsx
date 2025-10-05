@@ -331,7 +331,8 @@ export default function CalendarPage() {
                           )}
                           {hasEvent && (
                             <div className={styles.eventCount}>
-                              {dayEvents.length} {dayEvents.length === 1 ? "event" : "events"}
+                              {dayEvents.length}{" "}
+                              {dayEvents.length === 1 ? "event" : "events"}
                             </div>
                           )}
                         </div>
