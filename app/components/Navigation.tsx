@@ -21,35 +21,11 @@ type NavigationProps = {
 export default function Navigation({
   showAuthLinks = false,
   backLink,
-  banner,
 }: NavigationProps) {
   const { data: session } = useSession();
 
-  // Auto-detect demo mode if no banner prop provided
-  const isDemoMode = session?.user?.email === "demo@careshare.app";
-  // Only show demo banner on authenticated pages
-  const shouldShowBanner = banner || (isDemoMode && showAuthLinks);
-
   return (
     <div className={styles.navigationWrapper}>
-      {/* Alert/Demo Banner */}
-      {shouldShowBanner && (
-        <div className={`${styles.banner} ${styles[banner?.type || "demo"]}`}>
-          <div className={styles.bannerContent}>
-            <div className={styles.bannerMessage}>
-              {banner?.message || (
-                <>
-                  <strong>🎮 Demo Mode Active</strong>
-                  <span>
-                    You're exploring with sample data. Feel free to experiment!
-                  </span>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Main Navigation */}
       <nav className={styles.nav}>
         <Link href="/" className={styles.logo}>
