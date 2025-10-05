@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import Navigation from "@/app/components/Navigation";
 import LeftNavigation from "@/app/components/LeftNavigation";
 import Footer from "@/app/components/Footer";
@@ -10,7 +11,6 @@ import RichTextEditor from "@/app/components/RichTextEditor";
 import {
   FileText,
   Search,
-  Eye,
   Edit2,
   Trash2,
   Plus,
@@ -19,8 +19,10 @@ import {
   Calendar,
   User,
   Link as LinkIcon,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
-import styles from "../users/page.module.css";
+import styles from "./page.module.css";
 
 type BlogPost = {
   id: string;
@@ -56,6 +58,10 @@ export default function ManageBlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [postsPerPage] = useState(10);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
@@ -218,11 +224,34 @@ export default function ManageBlogPage() {
     }
   };
 
-  const filteredPosts = posts.filter(
-    (post) =>
+  // Filter posts based on search and filters
+  const filteredPosts = posts.filter((post) => {
+    const matchesSearch =
       post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.author.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+      post.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesCategory =
+      categoryFilter === "all" || post.category === categoryFilter;
+
+    const matchesStatus =
+      statusFilter === "all" ||
+      (statusFilter === "published" && post.published) ||
+      (statusFilter === "draft" && !post.published);
+
+    return matchesSearch && matchesCategory && matchesStatus;
+  });
+
+  // Pagination
+  const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+  const startIndex = (currentPage - 1) * postsPerPage;
+  const endIndex = startIndex + postsPerPage;
+  const paginatedPosts = filteredPosts.slice(startIndex, endIndex);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, categoryFilter, statusFilter]);
 
   const stats = {
     total: posts.length,
@@ -253,19 +282,20 @@ export default function ManageBlogPage() {
   }
 
   return (
-    <div className={styles.container}>
+    <>
       <Navigation showAuthLinks={true} />
 
       <div className={styles.layout}>
         <LeftNavigation />
 
         <main className={styles.main}>
+          {/* Header */}
           <div className={styles.header}>
-            <div>
-              <h1>Manage Blog Posts</h1>
-              <p className={styles.subtitle}>
-                Create, edit, and manage blog content
-              </p>
+            <div className={styles.headerLeft}>
+              <h1>
+                <FileText size={32} />
+                Blog Management
+              </h1>
             </div>
             <button onClick={handleAddPost} className={styles.addButton}>
               <Plus size={20} />
@@ -273,54 +303,65 @@ export default function ManageBlogPage() {
             </button>
           </div>
 
-          {/* Stats */}
-          <div className={styles.stats}>
+          {/* Stats Cards */}
+          <div className={styles.statsGrid}>
             <div className={styles.statCard}>
-              <FileText size={24} />
-              <div className={styles.statInfo}>
-                <span className={styles.statValue}>{stats.total}</span>
-                <span className={styles.statLabel}>Total Posts</span>
-              </div>
+              <h3>Total Posts</h3>
+              <p>{stats.total}</p>
             </div>
             <div className={styles.statCard}>
-              <Eye size={24} />
-              <div className={styles.statInfo}>
-                <span className={styles.statValue}>{stats.published}</span>
-                <span className={styles.statLabel}>Published</span>
-              </div>
+              <h3>Published</h3>
+              <p>{stats.published}</p>
             </div>
             <div className={styles.statCard}>
-              <Edit2 size={24} />
-              <div className={styles.statInfo}>
-                <span className={styles.statValue}>{stats.drafts}</span>
-                <span className={styles.statLabel}>Drafts</span>
-              </div>
+              <h3>Drafts</h3>
+              <p>{stats.drafts}</p>
             </div>
             <div className={styles.statCard}>
-              <TrendingUp size={24} />
-              <div className={styles.statInfo}>
-                <span className={styles.statValue}>
-                  {stats.totalViews.toLocaleString()}
-                </span>
-                <span className={styles.statLabel}>Total Views</span>
-              </div>
+              <h3>Total Views</h3>
+              <p>{stats.totalViews.toLocaleString()}</p>
             </div>
           </div>
 
-          {/* Search */}
-          <div className={styles.searchBar}>
-            <Search size={20} />
-            <input
-              type="text"
-              placeholder="Search blog posts..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+          {/* Controls */}
+          <div className={styles.container}>
+            <div className={styles.controls}>
+              <div className={styles.searchWrapper}>
+                <Search className={styles.searchIcon} size={20} />
+                <input
+                  type="text"
+                  placeholder="Search by title, author, or excerpt..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className={styles.searchInput}
+                />
+              </div>
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className={styles.filterSelect}
+              >
+                <option value="all">All Categories</option>
+                {categoryOptions.map((cat) => (
+                  <option key={cat.value} value={cat.value}>
+                    {cat.label}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className={styles.filterSelect}
+              >
+                <option value="all">All Status</option>
+                <option value="published">Published</option>
+                <option value="draft">Draft</option>
+              </select>
+            </div>
 
-          {/* Posts Table */}
-          <div className={styles.tableContainer}>
-            <table className={styles.table}>
+            {/* Posts Table */}
+            <div className={styles.tableWrapper}>
+              <table className={styles.table}>
               <thead>
                 <tr>
                   <th>Title</th>
@@ -342,7 +383,7 @@ export default function ManageBlogPage() {
                       Loading...
                     </td>
                   </tr>
-                ) : filteredPosts.length === 0 ? (
+                ) : paginatedPosts.length === 0 ? (
                   <tr>
                     <td
                       colSpan={7}
@@ -352,13 +393,18 @@ export default function ManageBlogPage() {
                     </td>
                   </tr>
                 ) : (
-                  filteredPosts.map((post) => (
+                  paginatedPosts.map((post) => (
                     <tr key={post.id}>
                       <td>
-                        <div style={{ fontWeight: 600 }}>{post.title}</div>
-                        <div style={{ fontSize: "0.875rem", color: "#64748b" }}>
-                          {post.slug}
-                        </div>
+                        <Link
+                          href={`/blog/${post.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={styles.postTitleLink}
+                        >
+                          {post.title}
+                        </Link>
+                        <div className={styles.postSlug}>{post.slug}</div>
                       </td>
                       <td>
                         <div>{post.author}</div>
@@ -418,9 +464,62 @@ export default function ManageBlogPage() {
                 )}
               </tbody>
             </table>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className={styles.pagination}>
+                <div className={styles.paginationInfo}>
+                  Showing {startIndex + 1}-{Math.min(endIndex, filteredPosts.length)} of{" "}
+                  {filteredPosts.length} posts
+                </div>
+                <div className={styles.paginationControls}>
+                  <button
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className={styles.pageBtn}
+                  >
+                    <ChevronLeft size={16} />
+                    Previous
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                    // Show first, last, current, and adjacent pages
+                    if (
+                      page === 1 ||
+                      page === totalPages ||
+                      (page >= currentPage - 1 && page <= currentPage + 1)
+                    ) {
+                      return (
+                        <button
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          className={`${styles.pageBtn} ${
+                            currentPage === page ? styles.active : ""
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      );
+                    } else if (page === currentPage - 2 || page === currentPage + 2) {
+                      return <span key={page}>...</span>;
+                    }
+                    return null;
+                  })}
+                  <button
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className={styles.pageBtn}
+                  >
+                    Next
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </main>
       </div>
+
+      <Footer />
 
       {/* Add/Edit Modal */}
       {(showEditModal || showAddModal) && (
@@ -450,7 +549,8 @@ export default function ManageBlogPage() {
             </div>
 
             <form onSubmit={handleSavePost}>
-              <div className={styles.formGroup}>
+              <div className={styles.modalBody}>
+                <div className={styles.formGroup}>
                 <label>Title *</label>
                 <input
                   type="text"
@@ -683,6 +783,7 @@ export default function ManageBlogPage() {
                   />
                   Publish immediately
                 </label>
+              </div>
               </div>
 
               <div className={styles.modalActions}>

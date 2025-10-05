@@ -144,15 +144,18 @@ export default function BlogPostPage() {
     }
   }
 
-  async function fetchCategoryRelatedPosts(category: string, currentSlug: string) {
+  async function fetchCategoryRelatedPosts(
+    category: string,
+    currentSlug: string
+  ) {
     try {
-      const relatedRes = await fetch(
-        `/api/blog?category=${category}&limit=3`
-      );
+      const relatedRes = await fetch(`/api/blog?category=${category}&limit=3`);
       if (relatedRes.ok) {
         const relatedData = await relatedRes.json();
         // Filter out current post
-        setRelatedPosts(relatedData.filter((p: BlogPost) => p.slug !== currentSlug));
+        setRelatedPosts(
+          relatedData.filter((p: BlogPost) => p.slug !== currentSlug)
+        );
       }
     } catch (error) {
       console.error("Error fetching category-related posts:", error);
