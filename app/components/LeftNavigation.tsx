@@ -58,6 +58,7 @@ const marketplaceMenuItems = [
 const adminMenuItems = [
   { href: "/admin/users", label: "Manage Users", icon: Users },
   { href: "/admin/families", label: "Manage Families", icon: UsersRound },
+  { href: "/admin/blog", label: "Blog Management", icon: BookOpen },
   { href: "/admin/content", label: "Content Management", icon: FileText },
   { href: "/admin/database", label: "Database Tools", icon: Database },
   { href: "/admin/settings", label: "System Settings", icon: Settings },
