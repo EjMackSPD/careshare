@@ -366,7 +366,24 @@ export default function ManageFamiliesPage() {
     totalEvents: families.reduce((sum, f) => sum + f.eventsCount, 0),
   };
 
-  if (status === "loading" || !isAdmin) {
+  if (status === "loading") {
+    return (
+      <div className={styles.container}>
+        <Navigation showAuthLinks={true} />
+        <div className={styles.layout}>
+          <LeftNavigation />
+          <main className={styles.main}>
+            <div style={{ textAlign: "center", padding: "3rem" }}>
+              Loading...
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    router.push("/dashboard");
     return null;
   }
 

@@ -15,6 +15,146 @@
   padding: 1rem 0 1rem 0;
 }
 
+/* Family Selector */
+.familySelector {
+  padding: 0.5rem 1rem 1rem 1rem;
+  position: relative;
+}
+
+.familySelectorButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: white;
+  border: 2px solid #e1e8ed;
+  border-radius: 0.75rem;
+  padding: 0.875rem 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.familySelectorButton:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+.familyInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.familyAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 0.5rem;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.125rem;
+  flex-shrink: 0;
+}
+
+.familyDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  text-align: left;
+}
+
+.familyDetails strong {
+  font-size: 0.9375rem;
+  color: #1e293b;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.familyDetails span {
+  font-size: 0.75rem;
+  color: #64748b;
+  line-height: 1.2;
+}
+
+.familyDropdown {
+  position: absolute;
+  top: 100%;
+  left: 1rem;
+  right: 1rem;
+  background: white;
+  border: 2px solid #e1e8ed;
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  margin-top: 0.5rem;
+  z-index: 100;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.familyOption {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border: none;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.familyOption:last-child {
+  border-bottom: none;
+}
+
+.familyOption:hover {
+  background: #f8fafc;
+}
+
+.familyOption.selected {
+  background: #f0f4ff;
+}
+
+.familyOptionAvatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 0.5rem;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.familyOptionInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  text-align: left;
+}
+
+.familyOptionInfo strong {
+  font-size: 0.875rem;
+  color: #1e293b;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.familyOptionInfo span {
+  font-size: 0.75rem;
+  color: #64748b;
+  line-height: 1.2;
+}
+
 .menuSection {
   margin-bottom: 0.5rem;
 }

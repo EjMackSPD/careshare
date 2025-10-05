@@ -68,15 +68,47 @@ const accountMenuItems = [
   { href: "/api/auth/signout", label: "Sign Out", icon: LogOut },
 ];
 
+type Family = {
+  id: string;
+  name: string;
+  elderName: string | null;
+  membersCount?: number;
+};
+
 export default function LeftNavigation() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
+  const [families, setFamilies] = useState<Family[]>([]);
+  const [selectedFamilyId, setSelectedFamilyId] = useState<string | null>(null);
+  const [showFamilyDropdown, setShowFamilyDropdown] = useState(false);
 
   // Check if user is admin
   const isAdmin =
     session?.user?.email === "admin@careshare.app" ||
     session?.user?.email === "demo@careshare.app";
+
+  // Fetch user's families
+  useEffect(() => {
+    async function fetchFamilies() {
+      try {
+        const res = await fetch("/api/families");
+        if (res.ok) {
+          const data = await res.json();
+          setFamilies(data);
+          // Set first family as default if none selected
+          if (data.length > 0 && !selectedFamilyId) {
+            setSelectedFamilyId(data[0].id);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching families:", error);
+      }
+    }
+    if (session) {
+      fetchFamilies();
+    }
+  }, [session, selectedFamilyId]);
 
   // Determine which sections should be expanded based on current page
   const isFamilyPage =
@@ -155,6 +187,67 @@ export default function LeftNavigation() {
       {/* Sidebar */}
       <aside className={`${styles.sidebar} ${isOpen ? styles.open : ""}`}>
         <nav className={styles.nav}>
+          {/* Family Selector */}
+          {families.length > 0 && (
+            <div className={styles.familySelector}>
+              <button
+                className={styles.familySelectorButton}
+                onClick={() => setShowFamilyDropdown(!showFamilyDropdown)}
+              >
+                <div className={styles.familyInfo}>
+                  <div className={styles.familyAvatar}>
+                    {families.find((f) => f.id === selectedFamilyId)?.name?.[0]?.toUpperCase() || "F"}
+                  </div>
+                  <div className={styles.familyDetails}>
+                    <strong>
+                      {families.find((f) => f.id === selectedFamilyId)?.name || "Select Family"}
+                    </strong>
+                    <span>
+                      {families.find((f) => f.id === selectedFamilyId)?.elderName || "Care Family"}
+                    </span>
+                  </div>
+                </div>
+                {families.length > 1 && (
+                  <ChevronDown
+                    size={18}
+                    style={{
+                      transform: showFamilyDropdown ? "rotate(180deg)" : "rotate(0)",
+                      transition: "transform 0.2s",
+                    }}
+                  />
+                )}
+              </button>
+
+              {/* Family Dropdown */}
+              {showFamilyDropdown && families.length > 1 && (
+                <div className={styles.familyDropdown}>
+                  {families.map((family) => (
+                    <button
+                      key={family.id}
+                      className={`${styles.familyOption} ${
+                        selectedFamilyId === family.id ? styles.selected : ""
+                      }`}
+                      onClick={() => {
+                        setSelectedFamilyId(family.id);
+                        setShowFamilyDropdown(false);
+                      }}
+                    >
+                      <div className={styles.familyOptionAvatar}>
+                        {family.name[0].toUpperCase()}
+                      </div>
+                      <div className={styles.familyOptionInfo}>
+                        <strong>{family.name}</strong>
+                        <span>{family.elderName || "Care Family"}</span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {families.length > 0 && <div className={styles.divider} />}
+
           {/* Main Menu Section */}
           <div className={styles.menuSection}>
             <button
