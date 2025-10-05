@@ -180,17 +180,49 @@
   }
 
   .footerGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 2rem;
+  }
+
+  .footerBrand {
+    grid-column: span 2;
   }
 
   .footerBottom {
     flex-direction: column;
+    gap: 1rem;
     text-align: center;
   }
 
   .brandDescription {
     max-width: 100%;
+  }
+
+  .bottomLinks {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .footerGrid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .footerBrand {
+    grid-column: span 1;
+  }
+
+  .footerColumn h4 {
+    font-size: 0.9375rem;
+  }
+
+  .footerColumn ul li a {
+    font-size: 0.8125rem;
+  }
+
+  .socialLinks {
+    justify-content: center;
   }
 }
 
