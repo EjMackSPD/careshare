@@ -93,6 +93,7 @@ model Family {
   elderBirthday DateTime? // Birthday for reminders
   emergencyContact String? // Emergency contact info
   medicalNotes String?  // Medical notes/allergies
+  notificationPreferences Json? // Notification and alert settings
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   createdBy   String

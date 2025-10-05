@@ -65,23 +65,25 @@ export default function FamilySettings() {
 
   const fetchFamily = async () => {
     try {
-      const response = await fetch("/api/families");
+      const response = await fetch(`/api/families/${familyId}`);
       if (response.ok) {
-        const families = await response.json();
-        const family = families.find((f: Family) => f.id === familyId);
-        if (family) {
-          setFormData({
-            name: family.name || "",
-            elderName: family.elderName || "",
-            elderPhone: family.elderPhone || "",
-            elderAddress: family.elderAddress || "",
-            elderBirthday: family.elderBirthday
-              ? new Date(family.elderBirthday).toISOString().split("T")[0]
-              : "",
-            emergencyContact: family.emergencyContact || "",
-            medicalNotes: family.medicalNotes || "",
-            description: family.description || "",
-          });
+        const family = await response.json();
+        setFormData({
+          name: family.name || "",
+          elderName: family.elderName || "",
+          elderPhone: family.elderPhone || "",
+          elderAddress: family.elderAddress || "",
+          elderBirthday: family.elderBirthday
+            ? new Date(family.elderBirthday).toISOString().split("T")[0]
+            : "",
+          emergencyContact: family.emergencyContact || "",
+          medicalNotes: family.medicalNotes || "",
+          description: family.description || "",
+        });
+
+        // Load notification preferences if they exist
+        if (family.notificationPreferences) {
+          setNotificationPrefs(family.notificationPreferences);
         }
       }
       setLoading(false);
@@ -97,20 +99,24 @@ export default function FamilySettings() {
     setMessage("");
 
     try {
-      // TODO: Create a PATCH endpoint for updating family
       const response = await fetch(`/api/families/${familyId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          notificationPreferences: notificationPrefs,
+        }),
       });
 
       if (response.ok) {
         setMessage("Settings saved successfully!");
         setTimeout(() => router.push(`/family/${familyId}`), 1500);
       } else {
-        setMessage("Failed to save settings");
+        const error = await response.json();
+        setMessage(error.error || "Failed to save settings");
       }
     } catch (error) {
+      console.error("Error saving settings:", error);
       setMessage("Error saving settings");
     } finally {
       setSaving(false);
