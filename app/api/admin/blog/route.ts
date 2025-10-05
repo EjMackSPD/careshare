@@ -97,7 +97,12 @@ export async function POST(request: NextRequest) {
         coverImage: coverImage || null,
         readTime: readTime || 5,
         published: published || false,
-        publishedAt: published && publishedAt ? new Date(publishedAt) : published ? new Date() : null,
+        publishedAt:
+          published && publishedAt
+            ? new Date(publishedAt)
+            : published
+            ? new Date()
+            : null,
       },
     });
 
@@ -110,4 +115,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

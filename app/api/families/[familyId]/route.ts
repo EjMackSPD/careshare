@@ -5,11 +5,11 @@ import { requireAuth } from "@/lib/auth-utils";
 // PATCH /api/families/[familyId] - Update family settings
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { familyId: string } }
+  { params }: { params: Promise<{ familyId: string }> }
 ) {
   try {
     const user = await requireAuth();
-    const { familyId } = params;
+    const { familyId } = await params;
 
     // Verify user is a member of this family
     const familyMember = await prisma.familyMember.findFirst({
@@ -68,11 +68,11 @@ export async function PATCH(
 // GET /api/families/[familyId] - Get single family details
 export async function GET(
   request: NextRequest,
-  { params }: { params: { familyId: string } }
+  { params }: { params: Promise<{ familyId: string }> }
 ) {
   try {
     const user = await requireAuth();
-    const { familyId } = params;
+    const { familyId } = await params;
 
     // Verify user is a member of this family
     const familyMember = await prisma.familyMember.findFirst({

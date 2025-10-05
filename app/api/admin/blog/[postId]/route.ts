@@ -6,7 +6,7 @@ import { BlogCategory } from "@prisma/client";
 // PUT /api/admin/blog/[postId] - Update a blog post (admin only)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { postId: string } }
+  { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
     const user = await requireAuth();
@@ -22,7 +22,7 @@ export async function PUT(
       );
     }
 
-    const { postId } = params;
+    const { postId } = await params;
     const body = await request.json();
     const {
       title,
@@ -78,7 +78,14 @@ export async function PUT(
         coverImage: coverImage || null,
         readTime: readTime || 5,
         published: published || false,
-        publishedAt: published && publishedAt ? new Date(publishedAt) : published && !existingPost.publishedAt ? new Date() : publishedAt ? new Date(publishedAt) : null,
+        publishedAt:
+          published && publishedAt
+            ? new Date(publishedAt)
+            : published && !existingPost.publishedAt
+            ? new Date()
+            : publishedAt
+            ? new Date(publishedAt)
+            : null,
       },
     });
 
@@ -95,7 +102,7 @@ export async function PUT(
 // DELETE /api/admin/blog/[postId] - Delete a blog post (admin only)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { postId: string } }
+  { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
     const user = await requireAuth();
@@ -111,7 +118,7 @@ export async function DELETE(
       );
     }
 
-    const { postId } = params;
+    const { postId } = await params;
 
     // Check if post exists
     const existingPost = await prisma.blogPost.findUnique({
@@ -142,4 +149,3 @@ export async function DELETE(
     );
   }
 }
-

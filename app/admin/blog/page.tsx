@@ -330,13 +330,19 @@ export default function ManageBlogPage() {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={7} style={{ textAlign: "center", padding: "2rem" }}>
+                    <td
+                      colSpan={7}
+                      style={{ textAlign: "center", padding: "2rem" }}
+                    >
                       Loading...
                     </td>
                   </tr>
                 ) : filteredPosts.length === 0 ? (
                   <tr>
-                    <td colSpan={7} style={{ textAlign: "center", padding: "2rem" }}>
+                    <td
+                      colSpan={7}
+                      style={{ textAlign: "center", padding: "2rem" }}
+                    >
                       No blog posts found
                     </td>
                   </tr>
@@ -352,14 +358,20 @@ export default function ManageBlogPage() {
                       <td>
                         <div>{post.author}</div>
                         {post.authorTitle && (
-                          <div style={{ fontSize: "0.875rem", color: "#64748b" }}>
+                          <div
+                            style={{ fontSize: "0.875rem", color: "#64748b" }}
+                          >
                             {post.authorTitle}
                           </div>
                         )}
                       </td>
                       <td>
                         <span className={styles.badge}>
-                          {categoryOptions.find((c) => c.value === post.category)?.label}
+                          {
+                            categoryOptions.find(
+                              (c) => c.value === post.category
+                            )?.label
+                          }
                         </span>
                       </td>
                       <td>
@@ -407,13 +419,26 @@ export default function ManageBlogPage() {
 
       {/* Add/Edit Modal */}
       {(showEditModal || showAddModal) && (
-        <div className={styles.modal} onClick={() => { setShowEditModal(false); setShowAddModal(false); }}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: "900px" }}>
+        <div
+          className={styles.modal}
+          onClick={() => {
+            setShowEditModal(false);
+            setShowAddModal(false);
+          }}
+        >
+          <div
+            className={styles.modalContent}
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: "900px" }}
+          >
             <div className={styles.modalHeader}>
               <h2>{editingPost ? "Edit Blog Post" : "New Blog Post"}</h2>
               <button
                 className={styles.closeBtn}
-                onClick={() => { setShowEditModal(false); setShowAddModal(false); }}
+                onClick={() => {
+                  setShowEditModal(false);
+                  setShowAddModal(false);
+                }}
               >
                 <X size={24} />
               </button>
@@ -486,7 +511,13 @@ export default function ManageBlogPage() {
                 />
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "1rem",
+                }}
+              >
                 <div className={styles.formGroup}>
                   <label>Category *</label>
                   <select
@@ -524,7 +555,13 @@ export default function ManageBlogPage() {
                 </div>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "1rem",
+                }}
+              >
                 <div className={styles.formGroup}>
                   <label>Author *</label>
                   <input
@@ -570,7 +607,13 @@ export default function ManageBlogPage() {
               </div>
 
               <div className={styles.formGroup}>
-                <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <label
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                  }}
+                >
                   <input
                     type="checkbox"
                     checked={formData.published}
@@ -585,7 +628,10 @@ export default function ManageBlogPage() {
               <div className={styles.modalActions}>
                 <button
                   type="button"
-                  onClick={() => { setShowEditModal(false); setShowAddModal(false); }}
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setShowAddModal(false);
+                  }}
                   className={styles.cancelBtn}
                 >
                   Cancel
@@ -603,4 +649,3 @@ export default function ManageBlogPage() {
     </div>
   );
 }
-
