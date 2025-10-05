@@ -124,6 +124,8 @@ model Family {
 enum FamilyRole {
   CARE_MANAGER    // Primary family member responsible for care coordination
   FAMILY_MEMBER   // Regular family member
+  CONTRIBUTOR     // Family member who contributes financially
+  CARE_RECIPIENT  // The person receiving care
 }
 
 model FamilyMember {
