@@ -196,14 +196,18 @@ export default function LeftNavigation() {
               >
                 <div className={styles.familyInfo}>
                   <div className={styles.familyAvatar}>
-                    {families.find((f) => f.id === selectedFamilyId)?.name?.[0]?.toUpperCase() || "F"}
+                    {families
+                      .find((f) => f.id === selectedFamilyId)
+                      ?.name?.[0]?.toUpperCase() || "F"}
                   </div>
                   <div className={styles.familyDetails}>
                     <strong>
-                      {families.find((f) => f.id === selectedFamilyId)?.name || "Select Family"}
+                      {families.find((f) => f.id === selectedFamilyId)?.name ||
+                        "Select Family"}
                     </strong>
                     <span>
-                      {families.find((f) => f.id === selectedFamilyId)?.elderName || "Care Family"}
+                      {families.find((f) => f.id === selectedFamilyId)
+                        ?.elderName || "Care Family"}
                     </span>
                   </div>
                 </div>
@@ -211,7 +215,9 @@ export default function LeftNavigation() {
                   <ChevronDown
                     size={18}
                     style={{
-                      transform: showFamilyDropdown ? "rotate(180deg)" : "rotate(0)",
+                      transform: showFamilyDropdown
+                        ? "rotate(180deg)"
+                        : "rotate(0)",
                       transition: "transform 0.2s",
                     }}
                   />
