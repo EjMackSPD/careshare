@@ -267,31 +267,31 @@ export default function BlogPage() {
                   <div className={styles.postContent}>
                     <h3>{post.title}</h3>
                     <p>{post.excerpt}</p>
-                  <div className={styles.postFooter}>
-                    <div className={styles.author}>
-                      <div className={styles.authorAvatar}>
-                        {post.author[0]}
+                    <div className={styles.postFooter}>
+                      <div className={styles.author}>
+                        <div className={styles.authorAvatar}>
+                          {post.author[0]}
+                        </div>
+                        <div className={styles.authorInfo}>
+                          <div className={styles.authorName}>{post.author}</div>
+                          {post.authorTitle && (
+                            <div className={styles.authorTitle}>
+                              {post.authorTitle}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <div className={styles.authorInfo}>
-                        <div className={styles.authorName}>{post.author}</div>
-                        {post.authorTitle && (
-                          <div className={styles.authorTitle}>
-                            {post.authorTitle}
-                          </div>
-                        )}
+                      <div className={styles.postStats}>
+                        <div className={styles.metaItem}>
+                          <Clock size={14} />
+                          <span>{post.readTime} min</span>
+                        </div>
+                        <div className={styles.metaItem}>
+                          <TrendingUp size={14} />
+                          <span>{post.views}</span>
+                        </div>
                       </div>
                     </div>
-                    <div className={styles.postStats}>
-                      <div className={styles.metaItem}>
-                        <Clock size={14} />
-                        <span>{post.readTime} min</span>
-                      </div>
-                      <div className={styles.metaItem}>
-                        <TrendingUp size={14} />
-                        <span>{post.views}</span>
-                      </div>
-                    </div>
-                  </div>
                   </div>
                 </Link>
               ))}

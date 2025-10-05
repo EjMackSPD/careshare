@@ -1,11 +1,43 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import styles from "./page.module.css";
 import ImageCarousel from "./components/ImageCarousel";
 import Footer from "./components/Footer";
 import MarketingNav from "./components/MarketingNav";
-import { Wallet, CalendarDays, Users, Building2 } from "lucide-react";
+import { Wallet, CalendarDays, Users, Building2, ArrowRight, BookOpen } from "lucide-react";
+
+type BlogPost = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  author: string;
+  coverImage: string | null;
+  readTime: number;
+  category: string;
+};
 
 export default function Home() {
+  const [latestPosts, setLatestPosts] = useState<BlogPost[]>([]);
+
+  useEffect(() => {
+    async function fetchLatestPosts() {
+      try {
+        const res = await fetch("/api/blog?limit=3");
+        if (res.ok) {
+          const data = await res.json();
+          setLatestPosts(data);
+        }
+      } catch (error) {
+        console.error("Error fetching blog posts:", error);
+      }
+    }
+    fetchLatestPosts();
+  }, []);
+
   return (
     <main className={styles.main}>
       <MarketingNav />
@@ -103,6 +135,56 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Latest Blog Articles */}
+      {latestPosts.length > 0 && (
+        <section className={styles.blogSection}>
+          <div className={styles.blogHeader}>
+            <div>
+              <h2 className={styles.sectionTitle}>
+                <BookOpen size={32} />
+                Latest from Our Blog
+              </h2>
+              <p className={styles.blogSubtitle}>
+                Expert advice and insights for family caregivers
+              </p>
+            </div>
+            <Link href="/blog" className={styles.viewAllBtn}>
+              View All Articles
+              <ArrowRight size={20} />
+            </Link>
+          </div>
+          <div className={styles.blogGrid}>
+            {latestPosts.map((post) => (
+              <Link
+                key={post.id}
+                href={`/blog/${post.slug}`}
+                className={styles.blogCard}
+              >
+                {post.coverImage && (
+                  <div className={styles.blogCardImage}>
+                    <Image
+                      src={post.coverImage}
+                      alt={post.title}
+                      fill
+                      style={{ objectFit: "cover" }}
+                    />
+                  </div>
+                )}
+                <div className={styles.blogCardContent}>
+                  <h3>{post.title}</h3>
+                  <p>{post.excerpt}</p>
+                  <div className={styles.blogCardMeta}>
+                    <span>{post.author}</span>
+                    <span>•</span>
+                    <span>{post.readTime} min read</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className={styles.cta}>
         <h2>Ready to get started?</h2>

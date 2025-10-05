@@ -55,6 +55,7 @@ export default function BlogPostPage() {
   const params = useParams();
   const router = useRouter();
   const [post, setPost] = useState<BlogPost | null>(null);
+  const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -69,6 +70,14 @@ export default function BlogPostPage() {
       if (res.ok) {
         const data = await res.json();
         setPost(data);
+        
+        // Fetch related posts from same category
+        const relatedRes = await fetch(`/api/blog?category=${data.category}&limit=3`);
+        if (relatedRes.ok) {
+          const relatedData = await relatedRes.json();
+          // Filter out current post
+          setRelatedPosts(relatedData.filter((p: BlogPost) => p.slug !== slug));
+        }
       } else {
         router.push("/blog");
       }
@@ -97,8 +106,39 @@ export default function BlogPostPage() {
     return null;
   }
 
+  // Generate structured data for SEO
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.title,
+    description: post.excerpt,
+    image: post.coverImage || "https://careshare.vercel.app/careshare-logo.png",
+    datePublished: post.publishedAt,
+    author: {
+      "@type": "Person",
+      name: post.author,
+      jobTitle: post.authorTitle,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "CareShare",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://careshare.vercel.app/careshare-logo.png",
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `https://careshare.vercel.app/blog/${post.slug}`,
+    },
+  };
+
   return (
     <div className={styles.container}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <MarketingNav />
 
       <main className={styles.main}>
@@ -201,6 +241,64 @@ export default function BlogPostPage() {
             </div>
           </footer>
         </article>
+
+        {/* CTA Section */}
+        <div className={styles.ctaSection}>
+          <h3>Start Coordinating Care Today</h3>
+          <p>
+            Join thousands of families using CareShare to organize care, share
+            costs, and stay connected.
+          </p>
+          <div className={styles.ctaButtons}>
+            <Link href="/signup" className={styles.ctaPrimary}>
+              Get Started Free
+            </Link>
+            <Link href="/features" className={styles.ctaSecondary}>
+              Explore Features
+            </Link>
+          </div>
+        </div>
+
+        {/* Related Posts */}
+        {relatedPosts.length > 0 && (
+          <div className={styles.relatedSection}>
+            <h3>Related Articles</h3>
+            <div className={styles.relatedGrid}>
+              {relatedPosts.slice(0, 3).map((relatedPost) => (
+                <Link
+                  key={relatedPost.id}
+                  href={`/blog/${relatedPost.slug}`}
+                  className={styles.relatedCard}
+                >
+                  {relatedPost.coverImage && (
+                    <div className={styles.relatedImage}>
+                      <Image
+                        src={relatedPost.coverImage}
+                        alt={relatedPost.title}
+                        fill
+                        style={{ objectFit: "cover" }}
+                      />
+                    </div>
+                  )}
+                  <div className={styles.relatedContent}>
+                    <span
+                      className={styles.relatedCategory}
+                      style={{ background: categoryColors[relatedPost.category] }}
+                    >
+                      {categoryLabels[relatedPost.category]}
+                    </span>
+                    <h4>{relatedPost.title}</h4>
+                    <div className={styles.relatedMeta}>
+                      <span>{relatedPost.author}</span>
+                      <span>•</span>
+                      <span>{relatedPost.readTime} min read</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </main>
 
       <Footer />

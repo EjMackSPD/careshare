@@ -360,6 +360,115 @@
   }
 }
 
+/* Blog Section */
+.blogSection {
+  max-width: 1200px;
+  margin: 0 auto 4rem auto;
+  padding: 4rem 2rem;
+}
+
+.blogHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.blogHeader .sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #1e293b;
+}
+
+.blogSubtitle {
+  color: #64748b;
+  font-size: 1.125rem;
+  margin: 0.5rem 0 0 0;
+}
+
+.viewAllBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: #6366f1;
+  color: white;
+  text-decoration: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.viewAllBtn:hover {
+  background: #4f46e5;
+  transform: translateY(-2px);
+}
+
+.blogGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.blogCard {
+  background: white;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s;
+  display: flex;
+  flex-direction: column;
+}
+
+.blogCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-color: #cbd5e1;
+}
+
+.blogCardImage {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  background: #f1f5f9;
+}
+
+.blogCardContent {
+  padding: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.blogCard h3 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.4;
+}
+
+.blogCard p {
+  margin: 0 0 1rem 0;
+  font-size: 0.9375rem;
+  color: #64748b;
+  line-height: 1.6;
+  flex: 1;
+}
+
+.blogCardMeta {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #94a3b8;
+}
+
 .cta {
   background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   color: white;
@@ -470,14 +579,28 @@
   .benefitsGrid {
     grid-template-columns: 1fr;
   }
-
+  
   .heroButtons {
     flex-direction: column;
     gap: 0.75rem;
   }
-
+  
   .logo img {
     width: 150px;
     height: auto;
+  }
+
+  .blogGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .blogHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .viewAllBtn {
+    width: 100%;
+    justify-content: center;
   }
 }
