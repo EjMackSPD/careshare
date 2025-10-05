@@ -5,7 +5,6 @@ import Link from "next/link";
 import Navigation from "../components/Navigation";
 import LeftNavigation from "../components/LeftNavigation";
 import DemoInitButton from "../components/DemoInitButton";
-import DemoModeBanner from "../components/DemoModeBanner";
 import Footer from "../components/Footer";
 import CareRecipientWidget from "../components/widgets/CareRecipientWidget";
 import TasksWidget from "../components/widgets/TasksWidget";
@@ -57,7 +56,6 @@ export default async function Dashboard() {
 
   return (
     <div className={styles.container}>
-      <DemoModeBanner userEmail={user.email} />
       <Navigation showAuthLinks={true} />
 
       <div className={styles.layout}>
