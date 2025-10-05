@@ -107,14 +107,31 @@ export default function BlogPostPage() {
         const data = await res.json();
         setPost(data);
 
-        // Fetch related posts from same category
-        const relatedRes = await fetch(
-          `/api/blog?category=${data.category}&limit=3`
-        );
-        if (relatedRes.ok) {
-          const relatedData = await relatedRes.json();
-          // Filter out current post
-          setRelatedPosts(relatedData.filter((p: BlogPost) => p.slug !== slug));
+        // First, try to fetch manually selected related posts
+        if (data.relatedPostIds && data.relatedPostIds.length > 0) {
+          const relatedPostsData: BlogPost[] = [];
+          for (const postId of data.relatedPostIds) {
+            try {
+              const postRes = await fetch(`/api/blog?id=${postId}`);
+              if (postRes.ok) {
+                const posts = await postRes.json();
+                if (posts && posts.length > 0) {
+                  relatedPostsData.push(posts[0]);
+                }
+              }
+            } catch (err) {
+              console.error("Error fetching related post:", err);
+            }
+          }
+          if (relatedPostsData.length > 0) {
+            setRelatedPosts(relatedPostsData);
+          } else {
+            // Fallback to category-based if no manual selections found
+            await fetchCategoryRelatedPosts(data.category, slug);
+          }
+        } else {
+          // Fallback to category-based if no manual selections
+          await fetchCategoryRelatedPosts(data.category, slug);
         }
       } else {
         router.push("/blog");
@@ -124,6 +141,21 @@ export default function BlogPostPage() {
       router.push("/blog");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function fetchCategoryRelatedPosts(category: string, currentSlug: string) {
+    try {
+      const relatedRes = await fetch(
+        `/api/blog?category=${category}&limit=3`
+      );
+      if (relatedRes.ok) {
+        const relatedData = await relatedRes.json();
+        // Filter out current post
+        setRelatedPosts(relatedData.filter((p: BlogPost) => p.slug !== currentSlug));
+      }
+    } catch (error) {
+      console.error("Error fetching category-related posts:", error);
     }
   }
 
@@ -240,9 +272,17 @@ export default function BlogPostPage() {
           <div className={styles.content}>
             {post.content.split("\n").map((paragraph, index) => {
               if (paragraph.startsWith("## ")) {
-                return <h2 key={index}>{renderMarkdownText(paragraph.replace("## ", ""))}</h2>;
+                return (
+                  <h2 key={index}>
+                    {renderMarkdownText(paragraph.replace("## ", ""))}
+                  </h2>
+                );
               } else if (paragraph.startsWith("### ")) {
-                return <h3 key={index}>{renderMarkdownText(paragraph.replace("### ", ""))}</h3>;
+                return (
+                  <h3 key={index}>
+                    {renderMarkdownText(paragraph.replace("### ", ""))}
+                  </h3>
+                );
               } else if (paragraph.startsWith("| ")) {
                 // Skip table rows (would need more complex parsing)
                 return null;

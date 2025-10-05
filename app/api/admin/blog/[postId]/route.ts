@@ -36,6 +36,7 @@ export async function PUT(
       readTime,
       published,
       publishedAt,
+      relatedPostIds,
     } = body;
 
     // Check if post exists
@@ -86,6 +87,7 @@ export async function PUT(
             : publishedAt
             ? new Date(publishedAt)
             : null,
+        relatedPostIds: relatedPostIds || [],
       },
     });
 

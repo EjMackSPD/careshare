@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import Navigation from "@/app/components/Navigation";
 import LeftNavigation from "@/app/components/LeftNavigation";
 import Footer from "@/app/components/Footer";
+import RichTextEditor from "@/app/components/RichTextEditor";
 import {
   FileText,
   Search,
@@ -17,6 +18,7 @@ import {
   TrendingUp,
   Calendar,
   User,
+  Link as LinkIcon,
 } from "lucide-react";
 import styles from "../users/page.module.css";
 
@@ -34,6 +36,7 @@ type BlogPost = {
   published: boolean;
   publishedAt: Date | null;
   views: number;
+  relatedPostIds: string[];
   createdAt: Date;
 };
 
@@ -67,6 +70,7 @@ export default function ManageBlogPage() {
     coverImage: "",
     readTime: 5,
     published: false,
+    relatedPostIds: [] as string[],
   });
 
   const isAdmin =
@@ -130,6 +134,7 @@ export default function ManageBlogPage() {
       coverImage: post.coverImage || "",
       readTime: post.readTime,
       published: post.published,
+      relatedPostIds: post.relatedPostIds || [],
     });
     setShowEditModal(true);
   };
@@ -497,18 +502,73 @@ export default function ManageBlogPage() {
               </div>
 
               <div className={styles.formGroup}>
-                <label>Content (Markdown) *</label>
-                <textarea
+                <label>Content *</label>
+                <RichTextEditor
                   value={formData.content}
-                  onChange={(e) =>
-                    setFormData({ ...formData, content: e.target.value })
+                  onChange={(value) =>
+                    setFormData({ ...formData, content: value })
                   }
-                  required
-                  rows={12}
-                  placeholder="Full blog post content using markdown..."
-                  className={styles.input}
-                  style={{ resize: "vertical", fontFamily: "monospace" }}
+                  placeholder="Write your blog post content here..."
                 />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>
+                  <LinkIcon size={16} style={{ display: "inline", marginRight: "0.5rem" }} />
+                  Related Posts (Cross-Reference)
+                </label>
+                <p style={{ fontSize: "0.875rem", color: "#64748b", marginBottom: "0.75rem" }}>
+                  Select up to 3 related blog posts to display at the end of this article
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                  {posts
+                    .filter((p) => p.id !== editingPost?.id)
+                    .map((post) => (
+                      <label
+                        key={post.id}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          padding: "0.75rem",
+                          border: "1px solid #e2e8f0",
+                          borderRadius: "0.5rem",
+                          cursor: "pointer",
+                          background: formData.relatedPostIds.includes(post.id)
+                            ? "#f0f9ff"
+                            : "white",
+                          transition: "all 0.2s",
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={formData.relatedPostIds.includes(post.id)}
+                          onChange={(e) => {
+                            const isChecked = e.target.checked;
+                            setFormData({
+                              ...formData,
+                              relatedPostIds: isChecked
+                                ? [...formData.relatedPostIds, post.id].slice(0, 3)
+                                : formData.relatedPostIds.filter((id) => id !== post.id),
+                            });
+                          }}
+                          disabled={
+                            !formData.relatedPostIds.includes(post.id) &&
+                            formData.relatedPostIds.length >= 3
+                          }
+                          style={{ marginRight: "0.75rem" }}
+                        />
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 600, color: "#1e293b" }}>
+                            {post.title}
+                          </div>
+                          <div style={{ fontSize: "0.875rem", color: "#64748b" }}>
+                            {categoryOptions.find((c) => c.value === post.category)?.label} •{" "}
+                            {post.readTime} min read
+                          </div>
+                        </div>
+                      </label>
+                    ))}
+                </div>
               </div>
 
               <div

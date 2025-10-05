@@ -62,6 +62,7 @@ export async function POST(request: NextRequest) {
       readTime,
       published,
       publishedAt,
+      relatedPostIds,
     } = body;
 
     // Validate required fields
@@ -103,6 +104,7 @@ export async function POST(request: NextRequest) {
             : published
             ? new Date()
             : null,
+        relatedPostIds: relatedPostIds || [],
       },
     });
 
