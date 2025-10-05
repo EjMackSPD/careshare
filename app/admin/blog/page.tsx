@@ -808,6 +808,6 @@ export default function ManageBlogPage() {
       )}
 
       <Footer />
-    </div>
+    </>
   );
 }
