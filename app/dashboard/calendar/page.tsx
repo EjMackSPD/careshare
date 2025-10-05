@@ -17,14 +17,10 @@ type Event = {
 
 const eventTypeColors: { [key: string]: string } = {
   Healthcare: "#3b82f6", // Blue
-  Medication: "#ef4444", // Red
   Social: "#10b981", // Green
   Shopping: "#f59e0b", // Amber
+  Birthday: "#ec4899", // Pink
   Other: "#8b5cf6", // Purple
-  APPOINTMENT: "#3b82f6", // Blue (maps to Healthcare)
-  VISIT: "#10b981", // Green (maps to Social)
-  FOOD_DELIVERY: "#f59e0b", // Amber (maps to Shopping)
-  BIRTHDAY: "#ec4899", // Pink
 };
 
 // Map database EventType to display type
@@ -33,7 +29,7 @@ const mapEventType = (dbType: string): string => {
     APPOINTMENT: "Healthcare",
     VISIT: "Social",
     FOOD_DELIVERY: "Shopping",
-    BIRTHDAY: "Social",
+    BIRTHDAY: "Birthday",
     OTHER: "Other",
   };
   return typeMap[dbType] || dbType;
@@ -43,9 +39,9 @@ const mapEventType = (dbType: string): string => {
 const mapDisplayTypeToDb = (displayType: string): string => {
   const reverseMap: { [key: string]: string } = {
     Healthcare: "APPOINTMENT",
-    Medication: "APPOINTMENT", // Medical appointments
     Social: "VISIT",
     Shopping: "FOOD_DELIVERY",
+    Birthday: "BIRTHDAY",
     Other: "OTHER",
   };
   return reverseMap[displayType] || "OTHER";
@@ -442,9 +438,9 @@ export default function CalendarPage() {
                       required
                     >
                       <option value="Healthcare">Healthcare</option>
-                      <option value="Medication">Medication</option>
-                      <option value="Social">Social Visit</option>
+                      <option value="Social">Social</option>
                       <option value="Shopping">Shopping</option>
+                      <option value="Birthday">Birthday</option>
                       <option value="Other">Other</option>
                     </select>
                   </div>
