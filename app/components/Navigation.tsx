@@ -3,7 +3,6 @@
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
-import ResetDemoButton from "./ResetDemoButton";
 import styles from "./Navigation.module.css";
 
 type NavigationProps = {
@@ -47,7 +46,6 @@ export default function Navigation({
                 </>
               )}
             </div>
-            {(banner?.showReset || isDemoMode) && <ResetDemoButton />}
           </div>
         </div>
       )}
