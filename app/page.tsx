@@ -7,7 +7,14 @@ import styles from "./page.module.css";
 import ImageCarousel from "./components/ImageCarousel";
 import Footer from "./components/Footer";
 import MarketingNav from "./components/MarketingNav";
-import { Wallet, CalendarDays, Users, Building2, ArrowRight, BookOpen } from "lucide-react";
+import {
+  Wallet,
+  CalendarDays,
+  Users,
+  Building2,
+  ArrowRight,
+  BookOpen,
+} from "lucide-react";
 
 type BlogPost = {
   id: string;

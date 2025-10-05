@@ -51,6 +51,42 @@ const categoryColors: { [key: string]: string } = {
   COMPANY_NEWS: "#06b6d4",
 };
 
+// Helper function to render markdown text with bold and italic
+const renderMarkdownText = (text: string) => {
+  const parts: (string | JSX.Element)[] = [];
+  let lastIndex = 0;
+  let key = 0;
+
+  // Combined regex to match **bold** first, then *italic* (order matters)
+  const markdownRegex = /(\*\*(.+?)\*\*)|(\*(.+?)\*)/g;
+  let match;
+
+  while ((match = markdownRegex.exec(text)) !== null) {
+    // Add text before the match
+    if (match.index > lastIndex) {
+      parts.push(text.substring(lastIndex, match.index));
+    }
+
+    // Check if it's bold or italic
+    if (match[1]) {
+      // Bold match (**text**)
+      parts.push(<strong key={`strong-${key++}`}>{match[2]}</strong>);
+    } else if (match[3]) {
+      // Italic match (*text*)
+      parts.push(<em key={`em-${key++}`}>{match[4]}</em>);
+    }
+
+    lastIndex = markdownRegex.lastIndex;
+  }
+
+  // Add remaining text
+  if (lastIndex < text.length) {
+    parts.push(text.substring(lastIndex));
+  }
+
+  return parts.length > 0 ? <>{parts}</> : text;
+};
+
 export default function BlogPostPage() {
   const params = useParams();
   const router = useRouter();
@@ -70,9 +106,11 @@ export default function BlogPostPage() {
       if (res.ok) {
         const data = await res.json();
         setPost(data);
-        
+
         // Fetch related posts from same category
-        const relatedRes = await fetch(`/api/blog?category=${data.category}&limit=3`);
+        const relatedRes = await fetch(
+          `/api/blog?category=${data.category}&limit=3`
+        );
         if (relatedRes.ok) {
           const relatedData = await relatedRes.json();
           // Filter out current post
@@ -202,9 +240,9 @@ export default function BlogPostPage() {
           <div className={styles.content}>
             {post.content.split("\n").map((paragraph, index) => {
               if (paragraph.startsWith("## ")) {
-                return <h2 key={index}>{paragraph.replace("## ", "")}</h2>;
+                return <h2 key={index}>{renderMarkdownText(paragraph.replace("## ", ""))}</h2>;
               } else if (paragraph.startsWith("### ")) {
-                return <h3 key={index}>{paragraph.replace("### ", "")}</h3>;
+                return <h3 key={index}>{renderMarkdownText(paragraph.replace("### ", ""))}</h3>;
               } else if (paragraph.startsWith("| ")) {
                 // Skip table rows (would need more complex parsing)
                 return null;
@@ -213,7 +251,7 @@ export default function BlogPostPage() {
               } else if (paragraph.startsWith("- ")) {
                 return (
                   <li key={index} style={{ marginLeft: "2rem" }}>
-                    {paragraph.replace("- ", "")}
+                    {renderMarkdownText(paragraph.replace("- ", ""))}
                   </li>
                 );
               } else if (/^\d+\./.test(paragraph)) {
@@ -222,11 +260,11 @@ export default function BlogPostPage() {
                     key={index}
                     style={{ marginLeft: "2rem", listStyleType: "decimal" }}
                   >
-                    {paragraph.replace(/^\d+\.\s*/, "")}
+                    {renderMarkdownText(paragraph.replace(/^\d+\.\s*/, ""))}
                   </li>
                 );
               } else {
-                return <p key={index}>{paragraph}</p>;
+                return <p key={index}>{renderMarkdownText(paragraph)}</p>;
               }
             })}
           </div>
@@ -283,7 +321,9 @@ export default function BlogPostPage() {
                   <div className={styles.relatedContent}>
                     <span
                       className={styles.relatedCategory}
-                      style={{ background: categoryColors[relatedPost.category] }}
+                      style={{
+                        background: categoryColors[relatedPost.category],
+                      }}
                     >
                       {categoryLabels[relatedPost.category]}
                     </span>
