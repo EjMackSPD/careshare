@@ -12,9 +12,9 @@
 .main {
   flex: 1;
   max-width: 1200px;
-  margin: 0 auto;
+  
   padding: 2rem;
-  margin-left: 260px;
+  
   width: 100%;
 }
 
