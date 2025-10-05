@@ -312,8 +312,8 @@ export default function CalendarPage() {
                       );
                       const isSelected = isSameDay(date, selectedDate);
                       const isTodayDate = isToday(date);
-                      const hasEvent = hasEvents(date);
-                      const eventTypes = getEventTypesForDate(date);
+                      const dayEvents = getEventsForDate(date);
+                      const hasEvent = dayEvents.length > 0;
 
                       return (
                         <div
@@ -326,18 +326,12 @@ export default function CalendarPage() {
                           onClick={() => handleDateClick(day)}
                         >
                           <span className={styles.dayNumber}>{day}</span>
+                          {isTodayDate && (
+                            <span className={styles.todayBadge}>Today</span>
+                          )}
                           {hasEvent && (
-                            <div className={styles.eventIndicators}>
-                              {eventTypes.map((type) => (
-                                <div
-                                  key={type}
-                                  className={styles.eventDot}
-                                  style={{
-                                    backgroundColor: eventTypeColors[type],
-                                  }}
-                                  title={type}
-                                ></div>
-                              ))}
+                            <div className={styles.eventCount}>
+                              {dayEvents.length} {dayEvents.length === 1 ? "event" : "events"}
                             </div>
                           )}
                         </div>
