@@ -38,7 +38,7 @@ export default function Home() {
               Get Started Free
             </Link>
             <Link href="/login" className={styles.demoBtn}>
-              🎮 Quick Demo
+              Quick Demo
             </Link>
           </div>
         </div>

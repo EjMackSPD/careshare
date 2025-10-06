@@ -206,11 +206,11 @@ export default function Login() {
                 disabled={loading}
                 className={styles.demoBtn}
               >
-                🎮 Quick Demo
+                Quick Demo
               </button>
 
               <Link href="/onboarding" className={styles.onboardingBtn}>
-                🚀 Get Started
+                Get Started
               </Link>
             </div>
 
