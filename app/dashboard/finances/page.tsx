@@ -33,6 +33,7 @@ type Bill = {
   amount: number;
   amountPaid: number;
   dueDate: string;
+  datePaid?: string; // Date when the bill was fully paid
   frequency: string;
   category: string;
   status: "pending" | "paid" | "partial";
@@ -701,6 +702,7 @@ export default function FinancesPage() {
       amount: 1200.0,
       amountPaid: 1200.0,
       dueDate: "2025-06-01",
+      datePaid: "2025-06-02",
       frequency: "Monthly",
       category: "Housing",
       status: "paid",
@@ -783,6 +785,7 @@ export default function FinancesPage() {
       amount: 1200.0,
       amountPaid: 1200.0,
       dueDate: "2025-07-01",
+      datePaid: "2025-07-02",
       frequency: "Monthly",
       category: "Housing",
       status: "paid",
@@ -1586,10 +1589,11 @@ export default function FinancesPage() {
   // Handler for marking bill as paid
   const handleMarkAsPaid = (bill: Bill) => {
     if (confirm(`Mark "${bill.name}" as paid ($${bill.amount.toFixed(2)})?`)) {
+      const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
       setBills(
         bills.map((b) =>
           b.id === bill.id
-            ? { ...b, amountPaid: b.amount, status: "paid" as const }
+            ? { ...b, amountPaid: b.amount, status: "paid" as const, datePaid: today }
             : b
         )
       );
@@ -3385,7 +3389,12 @@ export default function FinancesPage() {
                         <p className={styles.billCardDue}>
                           Due: {new Date(bill.dueDate).toLocaleDateString()}
                         </p>
-                        {bill.amountPaid > 0 && (
+                        {bill.status === "paid" && bill.datePaid && (
+                          <p className={styles.billCardPaid}>
+                            Paid: {new Date(bill.datePaid).toLocaleDateString()}
+                          </p>
+                        )}
+                        {bill.amountPaid > 0 && bill.status !== "paid" && (
                           <div className={styles.paymentProgress}>
                             <div className={styles.progressBar}>
                               <div
