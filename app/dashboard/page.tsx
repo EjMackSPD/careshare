@@ -194,18 +194,14 @@ export default async function Dashboard() {
                     </div>
                     <h3>Calendar Overview</h3>
                   </div>
-                  <Link href="/dashboard/calendar" className={styles.viewAllLink}>
-                    View All →
+                  <Link href="/dashboard/calendar" className={styles.addEventBtn}>
+                    + Add Event
                   </Link>
                 </div>
                 <div className={styles.miniStats}>
                   <div className={styles.miniStatCard}>
                     <div className={styles.miniStatNumber}>{families.reduce((sum, f) => sum + f.events.length, 0)}</div>
                     <div className={styles.miniStatLabel}>Upcoming Events</div>
-                  </div>
-                  <div className={styles.miniStatCard}>
-                    <div className={styles.miniStatNumber}>{families.length}</div>
-                    <div className={styles.miniStatLabel}>Families</div>
                   </div>
                 </div>
               </div>
