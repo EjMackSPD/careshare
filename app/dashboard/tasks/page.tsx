@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Navigation from "@/app/components/Navigation";
 import LeftNavigation from "@/app/components/LeftNavigation";
@@ -48,7 +48,7 @@ type Family = {
 // MAIN COMPONENT
 // ============================================
 
-export default function TasksPage() {
+function TasksPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -1038,3 +1038,27 @@ export default function TasksPage() {
     </div>
   );
 }
+
+// Wrap in Suspense for useSearchParams
+export default function TasksPage() {
+  return (
+    <Suspense fallback={
+      <div className={styles.container}>
+        <Navigation showAuthLinks={true} />
+        <div className={styles.layout}>
+          <LeftNavigation />
+          <main className={styles.main}>
+            <div className={styles.loadingState}>
+              <div className={styles.spinner}></div>
+              <p>Loading tasks...</p>
+            </div>
+          </main>
+        </div>
+        <Footer />
+      </div>
+    }>
+      <TasksPageContent />
+    </Suspense>
+  );
+}
+
