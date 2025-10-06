@@ -135,28 +135,26 @@ export default async function Dashboard() {
                     View All →
                   </Link>
                 </div>
-                <div className={styles.miniStats}>
-                  <div className={styles.miniStatCard}>
-                    <div className={styles.miniStatNumber}>{totalTasks}</div>
-                    <div className={styles.miniStatLabel}>Total</div>
-                  </div>
-                  <div className={styles.miniStatCard}>
-                    <div className={styles.miniStatNumber} style={{ color: '#3b82f6' }}>{openTasks}</div>
-                    <div className={styles.miniStatLabel}>Open</div>
-                  </div>
-                  <div className={`${styles.miniStatCard} ${unassignedTasks > 0 ? styles.warning : ''}`}>
-                    <div className={styles.miniStatNumber} style={{ color: '#f59e0b' }}>{unassignedTasks}</div>
-                    <div className={styles.miniStatLabel}>Unassigned</div>
-                    {unassignedTasks > 0 && (
-                      <Link href="/dashboard/tasks?tab=unassigned" className={styles.miniAssignBtn}>
-                        Assign
-                      </Link>
-                    )}
-                  </div>
-                  <div className={styles.miniStatCard}>
-                    <div className={styles.miniStatNumber} style={{ color: '#10b981' }}>{completedTasks}</div>
-                    <div className={styles.miniStatLabel}>Done</div>
-                  </div>
+                <div className={styles.inlineStats}>
+                  <Link href="/dashboard/tasks" className={styles.inlineStatLink}>
+                    <span className={styles.inlineStatNumber}>{totalTasks}</span>
+                    <span className={styles.inlineStatLabel}>Total</span>
+                  </Link>
+                  <div className={styles.statDivider}></div>
+                  <Link href="/dashboard/tasks?tab=open" className={styles.inlineStatLink}>
+                    <span className={styles.inlineStatNumber} style={{ color: '#3b82f6' }}>{openTasks}</span>
+                    <span className={styles.inlineStatLabel}>Open</span>
+                  </Link>
+                  <div className={styles.statDivider}></div>
+                  <Link href="/dashboard/tasks?tab=unassigned" className={`${styles.inlineStatLink} ${unassignedTasks > 0 ? styles.warningLink : ''}`}>
+                    <span className={styles.inlineStatNumber} style={{ color: '#f59e0b' }}>{unassignedTasks}</span>
+                    <span className={styles.inlineStatLabel}>Unassigned</span>
+                  </Link>
+                  <div className={styles.statDivider}></div>
+                  <Link href="/dashboard/tasks?tab=completed" className={styles.inlineStatLink}>
+                    <span className={styles.inlineStatNumber} style={{ color: '#10b981' }}>{completedTasks}</span>
+                    <span className={styles.inlineStatLabel}>Completed</span>
+                  </Link>
                 </div>
               </div>
 

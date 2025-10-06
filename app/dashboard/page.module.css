@@ -459,6 +459,67 @@
   transform: translateX(2px);
 }
 
+/* Inline Stats for Tasks */
+.inlineStats {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 0;
+}
+
+.inlineStatLink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
+  background: #f8f9fa;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+  min-width: 90px;
+}
+
+.inlineStatLink:hover {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.inlineStatLink.warningLink {
+  background: #fffbeb;
+  border-color: #fef3c7;
+}
+
+.inlineStatLink.warningLink:hover {
+  background: #fef3c7;
+  border-color: #fde68a;
+}
+
+.inlineStatNumber {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #212529;
+  line-height: 1;
+}
+
+.inlineStatLabel {
+  font-size: 0.6875rem;
+  color: #6c757d;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.statDivider {
+  width: 1px;
+  height: 40px;
+  background: #e2e8f0;
+}
+
+/* Mini Stats for other groups */
 .miniStats {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
