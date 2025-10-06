@@ -123,6 +123,7 @@ export default function ManageBlogPage() {
       coverImage: "",
       readTime: 5,
       published: false,
+      relatedPostIds: [],
     });
     setShowAddModal(true);
   };
