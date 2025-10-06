@@ -6,7 +6,17 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Navigation from "@/app/components/Navigation";
 import LeftNavigation from "@/app/components/LeftNavigation";
 import Footer from "@/app/components/Footer";
-import { Search, Trash2, UserPlus, X, Edit, Upload, FileText, Image as ImageIcon, Lightbulb } from "lucide-react";
+import {
+  Search,
+  Trash2,
+  UserPlus,
+  X,
+  Edit,
+  Upload,
+  FileText,
+  Image as ImageIcon,
+  Lightbulb,
+} from "lucide-react";
 import styles from "./page.module.css";
 
 // ============================================
@@ -59,31 +69,36 @@ function TasksPageContent() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
-  const [activeTab, setActiveTab] = useState<"open" | "unassigned" | "completed">("open");
+  const [activeTab, setActiveTab] = useState<
+    "open" | "unassigned" | "completed"
+  >("open");
   const [sortBy, setSortBy] = useState<"alpha" | "date">("date");
-  
+
   // State: Families and Members
   const [families, setFamilies] = useState<Family[]>([]);
   const [selectedFamily, setSelectedFamily] = useState<string>("");
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
-  
+
   // State: UI Controls
   const [loading, setLoading] = useState(true);
   const [showAddTask, setShowAddTask] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [showProviderTip, setShowProviderTip] = useState<string | null>(null);
-  
+
   // State: Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-  
+
   // State: File Upload
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-  
+
   // State: Toast Notifications
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-  
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
+
   // State: Task Form Data
   const [newTask, setNewTask] = useState({
     title: "",
@@ -100,8 +115,12 @@ function TasksPageContent() {
 
   // Check URL params for initial tab selection
   useEffect(() => {
-    const tabParam = searchParams.get('tab');
-    if (tabParam === 'unassigned' || tabParam === 'completed' || tabParam === 'open') {
+    const tabParam = searchParams.get("tab");
+    if (
+      tabParam === "unassigned" ||
+      tabParam === "completed" ||
+      tabParam === "open"
+    ) {
       setActiveTab(tabParam);
     }
   }, [searchParams]);
@@ -117,7 +136,9 @@ function TasksPageContent() {
         // Fetch members for each family
         const familiesWithMembers = await Promise.all(
           data.map(async (family: any) => {
-            const membersRes = await fetch(`/api/families/${family.id}/members`);
+            const membersRes = await fetch(
+              `/api/families/${family.id}/members`
+            );
             const members = membersRes.ok ? await membersRes.json() : [];
             return { ...family, members };
           })
@@ -157,7 +178,7 @@ function TasksPageContent() {
       const res = await fetch(`/api/families/${selectedFamily}/tasks`);
       if (res.ok) {
         const data = await res.json();
-        
+
         // Convert database format to display format
         const formattedTasks = data.map((t: any) => ({
           id: t.id,
@@ -166,14 +187,17 @@ function TasksPageContent() {
           category: "General",
           priority: t.priority,
           assignedTo: t.assignments?.map((a: any) => a.userId).join(",") || "",
-          assignedToName: t.assignments?.map((a: any) => a.user.name || a.user.email).join(", ") || "",
+          assignedToName:
+            t.assignments
+              ?.map((a: any) => a.user.name || a.user.email)
+              .join(", ") || "",
           dueDate: t.dueDate ? new Date(t.dueDate).toLocaleString() : "",
           completed: t.status === "COMPLETED",
           attachmentUrl: t.attachmentUrl,
           fileName: t.fileName,
           fileType: t.fileType,
         }));
-        
+
         setTasks(formattedTasks);
       }
     } catch (error) {
@@ -192,17 +216,20 @@ function TasksPageContent() {
       const matchesSearch =
         task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         task.description.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = filterCategory === "all" || task.category === filterCategory;
-      
+      const matchesCategory =
+        filterCategory === "all" || task.category === filterCategory;
+
       let matchesTab = false;
       if (activeTab === "completed") {
         matchesTab = task.completed;
       } else if (activeTab === "unassigned") {
-        matchesTab = !task.completed && (!task.assignedTo || task.assignedTo.trim() === "");
+        matchesTab =
+          !task.completed &&
+          (!task.assignedTo || task.assignedTo.trim() === "");
       } else {
         matchesTab = !task.completed; // "open" tab
       }
-      
+
       return matchesSearch && matchesCategory && matchesTab;
     })
     .sort((a, b) => {
@@ -234,10 +261,10 @@ function TasksPageContent() {
       const res = await fetch(`/api/tasks/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          status: newStatus, 
+        body: JSON.stringify({
+          status: newStatus,
           completedAt,
-          autoAssignUserId: currentUserId // Pass current user ID for auto-assignment
+          autoAssignUserId: currentUserId, // Pass current user ID for auto-assignment
         }),
       });
 
@@ -246,30 +273,40 @@ function TasksPageContent() {
       const updatedTask = await res.json();
 
       // Update local state with the returned task data (which may have new assignments)
-      setTasks(tasks.map((t) => {
-        if (t.id === id) {
-          return {
-            ...t,
-            completed: !t.completed,
-            assignedTo: updatedTask.assignments?.map((a: any) => a.userId).join(",") || t.assignedTo,
-            assignedToName: updatedTask.assignments?.map((a: any) => a.user.name || a.user.email).join(", ") || t.assignedToName,
-          };
-        }
-        return t;
-      }));
+      setTasks(
+        tasks.map((t) => {
+          if (t.id === id) {
+            return {
+              ...t,
+              completed: !t.completed,
+              assignedTo:
+                updatedTask.assignments?.map((a: any) => a.userId).join(",") ||
+                t.assignedTo,
+              assignedToName:
+                updatedTask.assignments
+                  ?.map((a: any) => a.user.name || a.user.email)
+                  .join(", ") || t.assignedToName,
+            };
+          }
+          return t;
+        })
+      );
 
       // Show success toast
       if (!task.completed) {
-        const wasUnassigned = !task.assignedTo || task.assignedTo === '';
+        const wasUnassigned = !task.assignedTo || task.assignedTo === "";
         if (wasUnassigned && currentUserId) {
-          showToast(`✓ Task "${task.title}" marked as complete and assigned to you!`, 'success');
+          showToast(
+            `✓ Task "${task.title}" marked as complete and assigned to you!`,
+            "success"
+          );
         } else {
-          showToast(`✓ Task "${task.title}" marked as complete!`, 'success');
+          showToast(`✓ Task "${task.title}" marked as complete!`, "success");
         }
       }
     } catch (error) {
       console.error("Error updating task:", error);
-      showToast("Failed to update task", 'error');
+      showToast("Failed to update task", "error");
     }
   };
 
@@ -281,10 +318,10 @@ function TasksPageContent() {
       if (!res.ok) throw new Error("Failed to delete task");
 
       setTasks(tasks.filter((task) => task.id !== id));
-      showToast("Task deleted successfully", 'success');
+      showToast("Task deleted successfully", "success");
     } catch (error) {
       console.error("Error deleting task:", error);
-      showToast("Failed to delete task", 'error');
+      showToast("Failed to delete task", "error");
     }
   };
 
@@ -298,13 +335,13 @@ function TasksPageContent() {
 
     try {
       let fileData = null;
-      
+
       // Upload file if one was selected
       if (uploadedFile) {
         setUploading(true);
         fileData = await uploadFile(uploadedFile);
         setUploading(false);
-        
+
         if (!fileData) return; // Upload failed
       }
 
@@ -341,7 +378,10 @@ function TasksPageContent() {
       // Refresh tasks list
       await fetchTasks();
 
-      showToast(editingTask ? "Task updated successfully" : "Task created successfully", 'success');
+      showToast(
+        editingTask ? "Task updated successfully" : "Task created successfully",
+        "success"
+      );
 
       // Reset form
       setShowAddTask(false);
@@ -358,7 +398,10 @@ function TasksPageContent() {
       });
     } catch (error) {
       console.error("Error saving task:", error);
-      showToast(error instanceof Error ? error.message : "Failed to save task", 'error');
+      showToast(
+        error instanceof Error ? error.message : "Failed to save task",
+        "error"
+      );
     }
   };
 
@@ -366,7 +409,9 @@ function TasksPageContent() {
     setEditingTask(task);
 
     // Parse assigned members from assignedTo field (comma-separated IDs)
-    const assignedIds = task.assignedTo ? task.assignedTo.split(",").filter((id) => id.trim()) : [];
+    const assignedIds = task.assignedTo
+      ? task.assignedTo.split(",").filter((id) => id.trim())
+      : [];
     setSelectedMembers(assignedIds);
 
     setNewTask({
@@ -375,9 +420,11 @@ function TasksPageContent() {
       category: task.category,
       priority: task.priority,
       assignedTo: task.assignedTo,
-      dueDate: task.dueDate ? new Date(task.dueDate).toISOString().slice(0, 16) : "",
+      dueDate: task.dueDate
+        ? new Date(task.dueDate).toISOString().slice(0, 16)
+        : "",
     });
-    
+
     setShowAddTask(true);
   };
 
@@ -391,17 +438,19 @@ function TasksPageContent() {
     setUploadedFile(file);
   };
 
-  const uploadFile = async (file: File): Promise<{ url: string; fileName: string; fileType: string } | null> => {
+  const uploadFile = async (
+    file: File
+  ): Promise<{ url: string; fileName: string; fileType: string } | null> => {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
 
     try {
-      const res = await fetch('/api/upload', {
-        method: 'POST',
+      const res = await fetch("/api/upload", {
+        method: "POST",
         body: formData,
       });
 
-      if (!res.ok) throw new Error('Failed to upload file');
+      if (!res.ok) throw new Error("Failed to upload file");
 
       const data = await res.json();
       return {
@@ -410,8 +459,8 @@ function TasksPageContent() {
         fileType: file.type,
       };
     } catch (error) {
-      console.error('Error uploading file:', error);
-      showToast('Failed to upload file', 'error');
+      console.error("Error uploading file:", error);
+      showToast("Failed to upload file", "error");
       return null;
     }
   };
@@ -420,23 +469,29 @@ function TasksPageContent() {
   // HELPER FUNCTIONS
   // ============================================
 
-  const showToast = (message: string, type: 'success' | 'error') => {
+  const showToast = (message: string, type: "success" | "error") => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case "HIGH": return styles.highPriority;
-      case "MEDIUM": return styles.mediumPriority;
-      case "LOW": return styles.lowPriority;
-      default: return "";
+      case "HIGH":
+        return styles.highPriority;
+      case "MEDIUM":
+        return styles.mediumPriority;
+      case "LOW":
+        return styles.lowPriority;
+      default:
+        return "";
     }
   };
 
   const toggleMemberSelection = (userId: string) => {
     setSelectedMembers((prev) =>
-      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId]
     );
   };
 
@@ -451,41 +506,89 @@ function TasksPageContent() {
 
   // Check if task category might need 3rd party services
   const getProviderSuggestions = (category: string) => {
-    const suggestions: { [key: string]: { title: string; providers: string[] } } = {
-      'Medical': {
-        title: 'Medical Care Providers',
-        providers: ['Home Health Aides', 'Visiting Nurses', 'Physical Therapists', 'Medical Equipment Suppliers']
+    const suggestions: {
+      [key: string]: { title: string; providers: string[] };
+    } = {
+      Medical: {
+        title: "Medical Care Providers",
+        providers: [
+          "Home Health Aides",
+          "Visiting Nurses",
+          "Physical Therapists",
+          "Medical Equipment Suppliers",
+        ],
       },
-      'Transportation': {
-        title: 'Transportation Services',
-        providers: ['GoGoGrandparent', 'Senior Ride Services', 'Medical Transport', 'Uber/Lyft', 'Local Taxi Services']
+      Transportation: {
+        title: "Transportation Services",
+        providers: [
+          "GoGoGrandparent",
+          "Senior Ride Services",
+          "Medical Transport",
+          "Uber/Lyft",
+          "Local Taxi Services",
+        ],
       },
-      'Home Care': {
-        title: 'Home Care Services',
-        providers: ['Visiting Angels', 'Home Instead', 'Comfort Keepers', 'Right at Home', 'Local Home Care Agencies']
+      "Home Care": {
+        title: "Home Care Services",
+        providers: [
+          "Visiting Angels",
+          "Home Instead",
+          "Comfort Keepers",
+          "Right at Home",
+          "Local Home Care Agencies",
+        ],
       },
-      'Meal Prep': {
-        title: 'Meal Services',
-        providers: ['Meals on Wheels', 'Home Chef', 'HelloFresh', 'Magic Kitchen', 'Mom\'s Meals (Senior-focused)']
+      "Meal Prep": {
+        title: "Meal Services",
+        providers: [
+          "Meals on Wheels",
+          "Home Chef",
+          "HelloFresh",
+          "Magic Kitchen",
+          "Mom's Meals (Senior-focused)",
+        ],
       },
-      'Cleaning': {
-        title: 'Cleaning Services',
-        providers: ['Handy', 'TaskRabbit', 'The Maids', 'Molly Maid', 'Local Cleaning Services']
+      Cleaning: {
+        title: "Cleaning Services",
+        providers: [
+          "Handy",
+          "TaskRabbit",
+          "The Maids",
+          "Molly Maid",
+          "Local Cleaning Services",
+        ],
       },
-      'Yard Work': {
-        title: 'Yard & Outdoor Services',
-        providers: ['LawnStarter', 'TaskRabbit', 'Local Landscaping Services', 'Handy']
+      "Yard Work": {
+        title: "Yard & Outdoor Services",
+        providers: [
+          "LawnStarter",
+          "TaskRabbit",
+          "Local Landscaping Services",
+          "Handy",
+        ],
       },
-      'Personal Care': {
-        title: 'Personal Care Services',
-        providers: ['In-home Salon Services', 'Mobile Barber/Stylist', 'Senior Personal Care Aides']
-      }
+      "Personal Care": {
+        title: "Personal Care Services",
+        providers: [
+          "In-home Salon Services",
+          "Mobile Barber/Stylist",
+          "Senior Personal Care Aides",
+        ],
+      },
     };
     return suggestions[category];
   };
 
   const needsThirdParty = (category: string) => {
-    return ['Medical', 'Transportation', 'Home Care', 'Meal Prep', 'Cleaning', 'Yard Work', 'Personal Care'].includes(category);
+    return [
+      "Medical",
+      "Transportation",
+      "Home Care",
+      "Meal Prep",
+      "Cleaning",
+      "Yard Work",
+      "Personal Care",
+    ].includes(category);
   };
 
   // ============================================
@@ -510,42 +613,40 @@ function TasksPageContent() {
           <div className={styles.heroHeader}>
             <div className={styles.heroOverlay}>
               <div className={styles.heroContent}>
-                <h1>Tasks & Responsibilities</h1>
-                <p className={styles.subtitle}>
-                  Manage and track tasks for your loved ones
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Header Actions */}
-          <div className={styles.headerActionsWrapper}>
-            <div className={styles.headerActions}>
-              {/* Family Selector (if multiple families) */}
-              {families.length > 1 && (
-                <div className={styles.familySelector}>
-                  <label htmlFor="familySelect">Family:</label>
-                  <select
-                    id="familySelect"
-                    value={selectedFamily}
-                    onChange={(e) => setSelectedFamily(e.target.value)}
-                    className={styles.familySelect}
-                  >
-                    {families.map((family) => (
-                      <option key={family.id} value={family.id}>
-                        {family.name}
-                      </option>
-                    ))}
-                  </select>
+                <div className={styles.heroText}>
+                  <h1>Tasks & Responsibilities</h1>
+                  <p className={styles.subtitle}>
+                    Manage and track tasks for your loved ones
+                  </p>
                 </div>
-              )}
-              <button
-                className={styles.addTaskBtn}
-                onClick={() => setShowAddTask(!showAddTask)}
-                disabled={!selectedFamily}
-              >
-                + Add Task
-              </button>
+                <div className={styles.heroActions}>
+                  {/* Family Selector (if multiple families) */}
+                  {families.length > 1 && (
+                    <div className={styles.familySelector}>
+                      <label htmlFor="familySelect">Family:</label>
+                      <select
+                        id="familySelect"
+                        value={selectedFamily}
+                        onChange={(e) => setSelectedFamily(e.target.value)}
+                        className={styles.familySelect}
+                      >
+                        {families.map((family) => (
+                          <option key={family.id} value={family.id}>
+                            {family.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                  <button
+                    className={styles.addTaskBtn}
+                    onClick={() => setShowAddTask(!showAddTask)}
+                    disabled={!selectedFamily}
+                  >
+                    + Add Task
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -553,34 +654,46 @@ function TasksPageContent() {
           <div className={styles.tabsContainer}>
             <div className={styles.tabs}>
               <button
-                className={`${styles.tab} ${activeTab === "open" ? styles.activeTab : ""}`}
+                className={`${styles.tab} ${
+                  activeTab === "open" ? styles.activeTab : ""
+                }`}
                 onClick={() => setActiveTab("open")}
               >
                 Open Tasks
                 <span className={styles.tabCount}>
-                  {tasks.filter(t => !t.completed).length}
+                  {tasks.filter((t) => !t.completed).length}
                 </span>
               </button>
               <button
-                className={`${styles.tab} ${activeTab === "unassigned" ? styles.activeTab : ""} ${styles.unassignedTab}`}
+                className={`${styles.tab} ${
+                  activeTab === "unassigned" ? styles.activeTab : ""
+                } ${styles.unassignedTab}`}
                 onClick={() => setActiveTab("unassigned")}
               >
                 Unassigned
                 <span className={`${styles.tabCount} ${styles.warningCount}`}>
-                  {tasks.filter(t => !t.completed && (!t.assignedTo || t.assignedTo.trim() === "")).length}
+                  {
+                    tasks.filter(
+                      (t) =>
+                        !t.completed &&
+                        (!t.assignedTo || t.assignedTo.trim() === "")
+                    ).length
+                  }
                 </span>
               </button>
               <button
-                className={`${styles.tab} ${activeTab === "completed" ? styles.activeTab : ""}`}
+                className={`${styles.tab} ${
+                  activeTab === "completed" ? styles.activeTab : ""
+                }`}
                 onClick={() => setActiveTab("completed")}
               >
                 Completed
                 <span className={styles.tabCount}>
-                  {tasks.filter(t => t.completed).length}
+                  {tasks.filter((t) => t.completed).length}
                 </span>
               </button>
             </div>
-            
+
             {/* Sort Control */}
             <div className={styles.sortControl}>
               <label htmlFor="sortBy">Sort by:</label>
@@ -631,7 +744,10 @@ function TasksPageContent() {
           {/* Add/Edit Task Modal */}
           {showAddTask && (
             <div className={styles.modal} onClick={() => setShowAddTask(false)}>
-              <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+              <div
+                className={styles.modalContent}
+                onClick={(e) => e.stopPropagation()}
+              >
                 <div className={styles.modalHeader}>
                   <div>
                     <h2>{editingTask ? "Edit Task" : "Add New Task"}</h2>
@@ -641,7 +757,10 @@ function TasksPageContent() {
                       </p>
                     )}
                   </div>
-                  <button className={styles.closeBtn} onClick={() => setShowAddTask(false)}>
+                  <button
+                    className={styles.closeBtn}
+                    onClick={() => setShowAddTask(false)}
+                  >
                     ✕
                   </button>
                 </div>
@@ -653,7 +772,9 @@ function TasksPageContent() {
                     <input
                       type="text"
                       value={newTask.title}
-                      onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+                      onChange={(e) =>
+                        setNewTask({ ...newTask, title: e.target.value })
+                      }
                       placeholder="e.g., Pick up prescriptions"
                       required
                     />
@@ -664,7 +785,9 @@ function TasksPageContent() {
                     <label>Description</label>
                     <textarea
                       value={newTask.description}
-                      onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+                      onChange={(e) =>
+                        setNewTask({ ...newTask, description: e.target.value })
+                      }
                       placeholder="Additional details about the task..."
                       rows={3}
                     />
@@ -679,7 +802,10 @@ function TasksPageContent() {
                         onChange={(e) =>
                           setNewTask({
                             ...newTask,
-                            priority: e.target.value as "HIGH" | "MEDIUM" | "LOW",
+                            priority: e.target.value as
+                              | "HIGH"
+                              | "MEDIUM"
+                              | "LOW",
                           })
                         }
                         required
@@ -709,22 +835,33 @@ function TasksPageContent() {
                     </div>
 
                     {loading ? (
-                      <div className={styles.loadingText}>Loading family members...</div>
+                      <div className={styles.loadingText}>
+                        Loading family members...
+                      </div>
                     ) : familyMembers.length === 0 ? (
                       <div className={styles.noMembers}>
-                        <p>No family members found. Add members to assign tasks.</p>
+                        <p>
+                          No family members found. Add members to assign tasks.
+                        </p>
                       </div>
                     ) : (
                       <div className={styles.memberSelector}>
                         {familyMembers.map((member) => {
-                          const isSelected = selectedMembers.includes(member.userId);
-                          const displayName = member.user.name || member.user.email;
+                          const isSelected = selectedMembers.includes(
+                            member.userId
+                          );
+                          const displayName =
+                            member.user.name || member.user.email;
 
                           return (
                             <div
                               key={member.userId}
-                              className={`${styles.memberOption} ${isSelected ? styles.selected : ""}`}
-                              onClick={() => toggleMemberSelection(member.userId)}
+                              className={`${styles.memberOption} ${
+                                isSelected ? styles.selected : ""
+                              }`}
+                              onClick={() =>
+                                toggleMemberSelection(member.userId)
+                              }
                             >
                               <input
                                 type="checkbox"
@@ -743,9 +880,14 @@ function TasksPageContent() {
                     {selectedMembers.length > 0 && (
                       <div className={styles.selectedMembers}>
                         {selectedMembers.map((userId) => {
-                          const member = familyMembers.find((m) => m.userId === userId);
-                          const displayName = member?.user.name || member?.user.email || "Unknown";
-                          
+                          const member = familyMembers.find(
+                            (m) => m.userId === userId
+                          );
+                          const displayName =
+                            member?.user.name ||
+                            member?.user.email ||
+                            "Unknown";
+
                           return (
                             <span key={userId} className={styles.memberTag}>
                               {displayName}
@@ -769,14 +911,22 @@ function TasksPageContent() {
                     <input
                       type="datetime-local"
                       value={newTask.dueDate}
-                      onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
+                      onChange={(e) =>
+                        setNewTask({ ...newTask, dueDate: e.target.value })
+                      }
                     />
                   </div>
 
                   {/* File Attachment */}
                   <div className={styles.formGroup}>
                     <label>
-                      <Upload size={16} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} />
+                      <Upload
+                        size={16}
+                        style={{
+                          marginRight: "0.5rem",
+                          verticalAlign: "middle",
+                        }}
+                      />
                       Attachment (optional)
                     </label>
                     <input
@@ -787,7 +937,7 @@ function TasksPageContent() {
                     />
                     {uploadedFile && (
                       <div className={styles.filePreview}>
-                        {uploadedFile.type.startsWith('image/') ? (
+                        {uploadedFile.type.startsWith("image/") ? (
                           <ImageIcon size={16} />
                         ) : (
                           <FileText size={16} />
@@ -813,8 +963,16 @@ function TasksPageContent() {
                     >
                       Cancel
                     </button>
-                    <button type="submit" className={styles.submitBtn} disabled={uploading}>
-                      {uploading ? "Uploading..." : editingTask ? "Save Task" : "Add Task"}
+                    <button
+                      type="submit"
+                      className={styles.submitBtn}
+                      disabled={uploading}
+                    >
+                      {uploading
+                        ? "Uploading..."
+                        : editingTask
+                        ? "Save Task"
+                        : "Add Task"}
                     </button>
                   </div>
                 </form>
@@ -855,12 +1013,19 @@ function TasksPageContent() {
                 {/* Tasks List */}
                 <div className={styles.tasksList}>
                   {paginatedTasks.map((task, index) => {
-                    const isUnassigned = !task.assignedTo || task.assignedTo.trim() === "";
-                    
+                    const isUnassigned =
+                      !task.assignedTo || task.assignedTo.trim() === "";
+
                     return (
                       <div
                         key={task.id}
-                        className={`${styles.taskCard} ${task.completed ? styles.completed : ""} ${isUnassigned && !task.completed ? styles.unassigned : ""}`}
+                        className={`${styles.taskCard} ${
+                          task.completed ? styles.completed : ""
+                        } ${
+                          isUnassigned && !task.completed
+                            ? styles.unassigned
+                            : ""
+                        }`}
                         style={{ animationDelay: `${index * 0.05}s` }}
                       >
                         {/* Checkbox */}
@@ -869,53 +1034,77 @@ function TasksPageContent() {
                           checked={task.completed}
                           onChange={() => toggleTask(task.id, currentUserId)}
                           className={styles.taskCheckbox}
-                          title={task.completed ? "Unmark as complete" : "Mark as complete"}
+                          title={
+                            task.completed
+                              ? "Unmark as complete"
+                              : "Mark as complete"
+                          }
                         />
 
                         {/* Task Content */}
                         <div className={styles.taskContent}>
                           <h3>{task.title}</h3>
                           <p>{task.description}</p>
-                          
+
                           {/* Attachment Display */}
                           {task.attachmentUrl && (
                             <div className={styles.taskAttachment}>
-                              {task.fileType?.startsWith('image/') ? (
-                                <a href={task.attachmentUrl} target="_blank" rel="noopener noreferrer" className={styles.attachmentLink}>
-                                  <img 
-                                    src={task.attachmentUrl} 
-                                    alt={task.fileName || 'Attachment'} 
+                              {task.fileType?.startsWith("image/") ? (
+                                <a
+                                  href={task.attachmentUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={styles.attachmentLink}
+                                >
+                                  <img
+                                    src={task.attachmentUrl}
+                                    alt={task.fileName || "Attachment"}
                                     className={styles.attachmentImage}
                                   />
                                 </a>
                               ) : (
-                                <a href={task.attachmentUrl} target="_blank" rel="noopener noreferrer" className={styles.attachmentLink}>
+                                <a
+                                  href={task.attachmentUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className={styles.attachmentLink}
+                                >
                                   <FileText size={16} />
-                                  <span>{task.fileName || 'Attachment'}</span>
+                                  <span>{task.fileName || "Attachment"}</span>
                                 </a>
                               )}
                             </div>
                           )}
-                          
+
                           {/* Due Date */}
                           <div className={styles.taskMeta}>
-                            <span className={styles.dueDate}>Due: {task.dueDate}</span>
+                            <span className={styles.dueDate}>
+                              Due: {task.dueDate}
+                            </span>
                           </div>
-                          
+
                           {/* Tags and Badges */}
                           <div className={styles.taskTags}>
-                            <span className={styles.categoryBadge}>{task.category}</span>
-                            <span className={`${styles.priorityBadge} ${getPriorityColor(task.priority)}`}>
-                              {task.priority.charAt(0) + task.priority.slice(1).toLowerCase()} Priority
+                            <span className={styles.categoryBadge}>
+                              {task.category}
                             </span>
-                            
+                            <span
+                              className={`${
+                                styles.priorityBadge
+                              } ${getPriorityColor(task.priority)}`}
+                            >
+                              {task.priority.charAt(0) +
+                                task.priority.slice(1).toLowerCase()}{" "}
+                              Priority
+                            </span>
+
                             {/* Assignment Status */}
                             {task.assignedToName ? (
                               <span className={styles.assignedBadge}>
                                 Assigned to: {task.assignedToName}
                               </span>
                             ) : (
-                              <span 
+                              <span
                                 className={styles.unassignedBadge}
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -925,7 +1114,7 @@ function TasksPageContent() {
                                 ⚠ Unassigned - Click to assign
                               </span>
                             )}
-                            
+
                             {/* Provider Suggestions */}
                             {needsThirdParty(task.category) && (
                               <button
@@ -968,7 +1157,9 @@ function TasksPageContent() {
                     <div className={styles.paginationControls}>
                       <button
                         className={styles.pageBtn}
-                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                        onClick={() =>
+                          setCurrentPage(Math.max(1, currentPage - 1))
+                        }
                         disabled={currentPage === 1}
                       >
                         Previous
@@ -988,7 +1179,9 @@ function TasksPageContent() {
                                 <span className={styles.ellipsis}>...</span>
                               )}
                               <button
-                                className={`${styles.pageNumber} ${currentPage === page ? styles.active : ""}`}
+                                className={`${styles.pageNumber} ${
+                                  currentPage === page ? styles.active : ""
+                                }`}
                                 onClick={() => setCurrentPage(page)}
                               >
                                 {page}
@@ -998,7 +1191,9 @@ function TasksPageContent() {
                       </div>
                       <button
                         className={styles.pageBtn}
-                        onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                        onClick={() =>
+                          setCurrentPage(Math.min(totalPages, currentPage + 1))
+                        }
                         disabled={currentPage === totalPages}
                       >
                         Next
@@ -1015,7 +1210,7 @@ function TasksPageContent() {
         </main>
       </div>
       <Footer />
-      
+
       {/* Toast Notification */}
       {toast && (
         <div className={`${styles.toast} ${styles[toast.type]}`}>
@@ -1024,44 +1219,58 @@ function TasksPageContent() {
       )}
 
       {/* Provider Suggestions Modal */}
-      {showProviderTip && (() => {
-        const task = tasks.find(t => t.id === showProviderTip);
-        const suggestions = task ? getProviderSuggestions(task.category) : null;
-        
-        return suggestions ? (
-          <div className={styles.modalOverlay} onClick={() => setShowProviderTip(null)}>
-            <div className={styles.providerModal} onClick={(e) => e.stopPropagation()}>
-              <div className={styles.providerModalHeader}>
-                <div className={styles.providerModalTitle}>
-                  <Lightbulb size={24} className={styles.lightbulbIcon} />
-                  <h3>{suggestions.title}</h3>
+      {showProviderTip &&
+        (() => {
+          const task = tasks.find((t) => t.id === showProviderTip);
+          const suggestions = task
+            ? getProviderSuggestions(task.category)
+            : null;
+
+          return suggestions ? (
+            <div
+              className={styles.modalOverlay}
+              onClick={() => setShowProviderTip(null)}
+            >
+              <div
+                className={styles.providerModal}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className={styles.providerModalHeader}>
+                  <div className={styles.providerModalTitle}>
+                    <Lightbulb size={24} className={styles.lightbulbIcon} />
+                    <h3>{suggestions.title}</h3>
+                  </div>
+                  <button
+                    onClick={() => setShowProviderTip(null)}
+                    className={styles.closeModalBtn}
+                  >
+                    <X size={20} />
+                  </button>
                 </div>
-                <button onClick={() => setShowProviderTip(null)} className={styles.closeModalBtn}>
-                  <X size={20} />
-                </button>
-              </div>
-              <div className={styles.providerModalBody}>
-                <p className={styles.providerIntro}>
-                  Here are some trusted service providers that can help with this task:
-                </p>
-                <ul className={styles.providerList}>
-                  {suggestions.providers.map((provider, index) => (
-                    <li key={index} className={styles.providerItem}>
-                      <span className={styles.providerBullet}>•</span>
-                      <span>{provider}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className={styles.providerFooter}>
-                  <p className={styles.providerNote}>
-                    💡 <strong>Tip:</strong> Always verify credentials and read reviews before hiring any service provider.
+                <div className={styles.providerModalBody}>
+                  <p className={styles.providerIntro}>
+                    Here are some trusted service providers that can help with
+                    this task:
                   </p>
+                  <ul className={styles.providerList}>
+                    {suggestions.providers.map((provider, index) => (
+                      <li key={index} className={styles.providerItem}>
+                        <span className={styles.providerBullet}>•</span>
+                        <span>{provider}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className={styles.providerFooter}>
+                    <p className={styles.providerNote}>
+                      💡 <strong>Tip:</strong> Always verify credentials and
+                      read reviews before hiring any service provider.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        ) : null;
-      })()}
+          ) : null;
+        })()}
     </div>
   );
 }
@@ -1069,23 +1278,24 @@ function TasksPageContent() {
 // Wrap in Suspense for useSearchParams
 export default function TasksPage() {
   return (
-    <Suspense fallback={
-      <div className={styles.container}>
-        <Navigation showAuthLinks={true} />
-        <div className={styles.layout}>
-          <LeftNavigation />
-          <main className={styles.main}>
-            <div className={styles.loadingState}>
-              <div className={styles.spinner}></div>
-              <p>Loading tasks...</p>
-            </div>
-          </main>
+    <Suspense
+      fallback={
+        <div className={styles.container}>
+          <Navigation showAuthLinks={true} />
+          <div className={styles.layout}>
+            <LeftNavigation />
+            <main className={styles.main}>
+              <div className={styles.loadingState}>
+                <div className={styles.spinner}></div>
+                <p>Loading tasks...</p>
+              </div>
+            </main>
+          </div>
+          <Footer />
         </div>
-        <Footer />
-      </div>
-    }>
+      }
+    >
       <TasksPageContent />
     </Suspense>
   );
 }
-
