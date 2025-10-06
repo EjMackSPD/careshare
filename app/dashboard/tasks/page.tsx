@@ -825,14 +825,25 @@ export default function TasksPage() {
             </div>
 
             {loading ? (
-              <div className={styles.loadingState}>
-                <div className={styles.spinner}></div>
-                <p>Loading tasks...</p>
+              <div className={styles.skeletonContainer}>
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <div key={i} className={styles.skeletonCard}>
+                    <div className={styles.skeletonCheckbox}></div>
+                    <div className={styles.skeletonContent}>
+                      <div className={styles.skeletonTitle}></div>
+                      <div className={styles.skeletonText}></div>
+                      <div className={styles.skeletonBadges}>
+                        <div className={styles.skeletonBadge}></div>
+                        <div className={styles.skeletonBadge}></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : (
               <>
                 <div className={styles.tasksList}>
-                  {paginatedTasks.map((task) => {
+                  {paginatedTasks.map((task, index) => {
                     const isUnassigned = !task.assignedTo || task.assignedTo.trim() === "";
                     return (
                     <div
@@ -840,6 +851,7 @@ export default function TasksPage() {
                       className={`${styles.taskCard} ${
                         task.completed ? styles.completed : ""
                       } ${isUnassigned && !task.completed ? styles.unassigned : ""}`}
+                      style={{ animationDelay: `${index * 0.05}s` }}
                     >
                       <input
                         type="checkbox"
