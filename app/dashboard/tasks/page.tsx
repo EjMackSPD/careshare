@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Navigation from "@/app/components/Navigation";
 import LeftNavigation from "@/app/components/LeftNavigation";
 import Footer from "@/app/components/Footer";
@@ -42,12 +42,21 @@ type Family = {
 
 export default function TasksPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [activeTab, setActiveTab] = useState<"open" | "unassigned" | "completed">("open");
   const [sortBy, setSortBy] = useState<"alpha" | "date">("date");
   const [showAddTask, setShowAddTask] = useState(false);
+
+  // Check URL params for initial tab
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam === 'unassigned' || tabParam === 'completed' || tabParam === 'open') {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
   const [families, setFamilies] = useState<Family[]>([]);
   const [selectedFamily, setSelectedFamily] = useState<string>("");
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
