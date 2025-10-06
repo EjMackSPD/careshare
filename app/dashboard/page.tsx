@@ -13,6 +13,7 @@ import CalendarWidget from "../components/widgets/CalendarWidget";
 import CollaborationWidget from "../components/widgets/CollaborationWidget";
 import ResourcesWidget from "../components/widgets/ResourcesWidget";
 import CarePlanWidget from "../components/widgets/CarePlanWidget";
+import { CheckSquare, Calendar, Wallet, Heart, Gift, UtensilsCrossed } from "lucide-react";
 import styles from "./page.module.css";
 
 export default async function Dashboard() {
@@ -182,27 +183,39 @@ export default async function Dashboard() {
               <h2>Quick Actions</h2>
               <div className={styles.linksGrid}>
                 <Link href="/dashboard/tasks" className={styles.quickLink}>
-                  <span className={styles.linkIcon}>✓</span>
+                  <div className={styles.linkIcon}>
+                    <CheckSquare size={20} />
+                  </div>
                   <span>Manage Tasks</span>
                 </Link>
                 <Link href="/dashboard/calendar" className={styles.quickLink}>
-                  <span className={styles.linkIcon}>📅</span>
+                  <div className={styles.linkIcon}>
+                    <Calendar size={20} />
+                  </div>
                   <span>View Calendar</span>
                 </Link>
                 <Link href="/dashboard/finances" className={styles.quickLink}>
-                  <span className={styles.linkIcon}>💰</span>
+                  <div className={styles.linkIcon}>
+                    <Wallet size={20} />
+                  </div>
                   <span>Track Finances</span>
                 </Link>
                 <Link href="/dashboard/care-plan" className={styles.quickLink}>
-                  <span className={styles.linkIcon}>❤️</span>
+                  <div className={styles.linkIcon}>
+                    <Heart size={20} />
+                  </div>
                   <span>Care Plan</span>
                 </Link>
                 <Link href="/dashboard/gifts" className={styles.quickLink}>
-                  <span className={styles.linkIcon}>🎁</span>
+                  <div className={styles.linkIcon}>
+                    <Gift size={20} />
+                  </div>
                   <span>Send Gift</span>
                 </Link>
                 <Link href="/dashboard/food" className={styles.quickLink}>
-                  <span className={styles.linkIcon}>🍽️</span>
+                  <div className={styles.linkIcon}>
+                    <UtensilsCrossed size={20} />
+                  </div>
                   <span>Order Food</span>
                 </Link>
               </div>
