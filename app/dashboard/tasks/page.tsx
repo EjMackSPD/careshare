@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Navigation from "@/app/components/Navigation";
 import LeftNavigation from "@/app/components/LeftNavigation";
 import Footer from "@/app/components/Footer";
-import { Search, Trash2, UserPlus, X, Edit } from "lucide-react";
+import { Search, Trash2, UserPlus, X, Edit, Upload, FileText, Image as ImageIcon } from "lucide-react";
 import styles from "./page.module.css";
 
 type Task = {
@@ -18,6 +18,9 @@ type Task = {
   assignedToName?: string;
   dueDate: string;
   completed: boolean;
+  attachmentUrl?: string;
+  fileName?: string;
+  fileType?: string;
 };
 
 type FamilyMember = {
@@ -59,6 +62,9 @@ export default function TasksPage() {
     assignedTo: "",
     dueDate: "",
   });
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   // Fetch families with members
   useEffect(() => {
@@ -157,12 +163,45 @@ export default function TasksPage() {
     setCurrentPage(1);
   }, [searchQuery, filterCategory, showCompleted]);
 
-  const toggleTask = (id: string) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === id ? { ...task, completed: !task.completed } : task
-      )
-    );
+  const toggleTask = async (id: string) => {
+    const task = tasks.find((t) => t.id === id);
+    if (!task) return;
+
+    const newStatus = task.completed ? "TODO" : "COMPLETED";
+    const completedAt = !task.completed ? new Date().toISOString() : null;
+
+    try {
+      const res = await fetch(`/api/tasks/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: newStatus,
+          completedAt,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to update task");
+
+      // Update local state
+      setTasks(
+        tasks.map((t) =>
+          t.id === id ? { ...t, completed: !t.completed } : t
+        )
+      );
+
+      // Show success toast
+      if (!task.completed) {
+        showToast(`✓ Task "${task.title}" marked as complete!`, 'success');
+      }
+    } catch (error) {
+      console.error("Error updating task:", error);
+      showToast("Failed to update task", 'error');
+    }
+  };
+
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
   };
 
   const deleteTask = async (id: string) => {
@@ -181,9 +220,42 @@ export default function TasksPage() {
 
       // Remove task from local state
       setTasks(tasks.filter((task) => task.id !== id));
+      showToast("Task deleted successfully", 'success');
     } catch (error) {
       console.error("Error deleting task:", error);
-      alert("Failed to delete task. Please try again.");
+      showToast("Failed to delete task", 'error');
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadedFile(file);
+  };
+
+  const uploadFile = async (file: File): Promise<{ url: string; fileName: string; fileType: string } | null> => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error('Failed to upload file');
+
+      const data = await res.json();
+      return {
+        url: data.url,
+        fileName: file.name,
+        fileType: file.type,
+      };
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      showToast('Failed to upload file', 'error');
+      return null;
     }
   };
 
@@ -229,6 +301,19 @@ export default function TasksPage() {
     }
 
     try {
+      let fileData = null;
+      
+      // Upload file if one was selected
+      if (uploadedFile) {
+        setUploading(true);
+        fileData = await uploadFile(uploadedFile);
+        setUploading(false);
+        
+        if (!fileData) {
+          return; // Upload failed, don't continue
+        }
+      }
+
       const taskData = {
         title: newTask.title,
         description: newTask.description,
@@ -236,6 +321,11 @@ export default function TasksPage() {
         assignedMembers: selectedMembers, // Send array of all selected member IDs
         dueDate: newTask.dueDate || null,
         status: editingTask ? undefined : "TODO", // Don't override status when editing
+        ...(fileData && {
+          attachmentUrl: fileData.url,
+          fileName: fileData.fileName,
+          fileType: fileData.fileType,
+        }),
       };
 
       const url = editingTask
@@ -263,9 +353,12 @@ export default function TasksPage() {
       // Refresh tasks list
       await fetchTasks();
 
+      showToast(editingTask ? "Task updated successfully" : "Task created successfully", 'success');
+
       setShowAddTask(false);
       setEditingTask(null);
       setSelectedMembers([]);
+      setUploadedFile(null);
       setNewTask({
         title: "",
         description: "",
@@ -276,7 +369,7 @@ export default function TasksPage() {
       });
     } catch (error) {
       console.error("Error saving task:", error);
-      alert(error instanceof Error ? error.message : "Failed to save task");
+      showToast(error instanceof Error ? error.message : "Failed to save task", 'error');
     }
   };
 
@@ -541,6 +634,36 @@ export default function TasksPage() {
                     />
                   </div>
 
+                  <div className={styles.formGroup}>
+                    <label>
+                      <Upload size={16} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} />
+                      Attachment (optional)
+                    </label>
+                    <input
+                      type="file"
+                      onChange={handleFileUpload}
+                      accept="image/*,.pdf,.doc,.docx"
+                      className={styles.fileInput}
+                    />
+                    {uploadedFile && (
+                      <div className={styles.filePreview}>
+                        {uploadedFile.type.startsWith('image/') ? (
+                          <ImageIcon size={16} />
+                        ) : (
+                          <FileText size={16} />
+                        )}
+                        <span>{uploadedFile.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => setUploadedFile(null)}
+                          className={styles.removeFileBtn}
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
                   <div className={styles.formActions}>
                     <button
                       type="button"
@@ -586,11 +709,30 @@ export default function TasksPage() {
                         checked={task.completed}
                         onChange={() => toggleTask(task.id)}
                         className={styles.taskCheckbox}
+                        title={task.completed ? "Unmark as complete" : "Mark as complete"}
                       />
 
                       <div className={styles.taskContent}>
                         <h3>{task.title}</h3>
                         <p>{task.description}</p>
+                        {task.attachmentUrl && (
+                          <div className={styles.taskAttachment}>
+                            {task.fileType?.startsWith('image/') ? (
+                              <a href={task.attachmentUrl} target="_blank" rel="noopener noreferrer" className={styles.attachmentLink}>
+                                <img 
+                                  src={task.attachmentUrl} 
+                                  alt={task.fileName || 'Attachment'} 
+                                  className={styles.attachmentImage}
+                                />
+                              </a>
+                            ) : (
+                              <a href={task.attachmentUrl} target="_blank" rel="noopener noreferrer" className={styles.attachmentLink}>
+                                <FileText size={16} />
+                                <span>{task.fileName || 'Attachment'}</span>
+                              </a>
+                            )}
+                          </div>
+                        )}
                         <div className={styles.taskMeta}>
                           <span className={styles.dueDate}>
                             Due: {task.dueDate}
@@ -699,6 +841,13 @@ export default function TasksPage() {
         </main>
       </div>
       <Footer />
+      
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`${styles.toast} ${styles[toast.type]}`}>
+          {toast.message}
+        </div>
+      )}
     </div>
   );
 }
