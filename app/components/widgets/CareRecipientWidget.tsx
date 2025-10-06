@@ -98,76 +98,56 @@ export default function CareRecipientWidget({
   return (
     <div className={styles.widget}>
       <div className={styles.widgetHeader}>
-        <div className={styles.careRecipientInfo}>
-          <div className={styles.avatar}>
-            {elderName?.charAt(0) || 'M'}
-          </div>
-          <div>
-            <h3>{elderName}</h3>
-            <p>{elderAge} years old</p>
-          </div>
-        </div>
+        <h3>Care Notes</h3>
+        <button 
+          className={styles.addButton}
+          onClick={() => setShowAddNote(!showAddNote)}
+          title="Add note"
+        >
+          <Plus size={16} />
+          Add Note
+        </button>
       </div>
       
       <div className={styles.widgetContent}>
-        <div className={styles.statusBadges}>
-          <span className={styles.badge}>Wellness: {wellness}</span>
-          <span className={styles.badge}>{medications} Medications Today</span>
-          <span className={styles.badge}>Doctor Appt: {nextAppointment}</span>
-        </div>
-
-        <div className={styles.infoGrid}>
-          <div className={styles.infoItem}>
-            <div className={styles.noteHeader}>
-              <strong>Recent Notes</strong>
-              <button 
-                className={styles.addNoteBtn}
-                onClick={() => setShowAddNote(!showAddNote)}
-                title="Add note"
-              >
-                <Plus size={16} />
+        
+        {showAddNote && (
+          <form onSubmit={handleAddNote} className={styles.addNoteForm}>
+            <textarea
+              value={newNote}
+              onChange={(e) => setNewNote(e.target.value)}
+              placeholder="Add a quick note about care, health, or observations..."
+              rows={3}
+              className={styles.noteInput}
+            />
+            <div className={styles.noteActions}>
+              <button type="button" onClick={() => setShowAddNote(false)} className={styles.noteCancelBtn}>
+                Cancel
               </button>
+              <button type="submit" className={styles.noteSaveBtn}>Save</button>
             </div>
-            
-            {showAddNote && (
-              <form onSubmit={handleAddNote} className={styles.addNoteForm}>
-                <textarea
-                  value={newNote}
-                  onChange={(e) => setNewNote(e.target.value)}
-                  placeholder="Add a quick note about care, health, or observations..."
-                  rows={3}
-                  className={styles.noteInput}
-                />
-                <div className={styles.noteActions}>
-                  <button type="button" onClick={() => setShowAddNote(false)} className={styles.noteCancelBtn}>
-                    Cancel
-                  </button>
-                  <button type="submit" className={styles.noteSaveBtn}>Save</button>
-                </div>
-              </form>
-            )}
-            
-            {notes.length === 0 ? (
-              <p className={styles.emptyText}>No recent notes.</p>
-            ) : (
-              <div className={styles.notesList}>
-                {notes.map(note => (
-                  <div key={note.id} className={styles.noteItem}>
-                    <p className={styles.noteContent}>{note.content.substring(0, 80)}{note.content.length > 80 ? '...' : ''}</p>
-                    <span className={styles.noteAuthor}>
-                      - {note.user.name || note.user.email}
-                    </span>
-                  </div>
-                ))}
+          </form>
+        )}
+        
+        {notes.length === 0 ? (
+          <p className={styles.emptyText}>No recent notes.</p>
+        ) : (
+          <div className={styles.notesList}>
+            {notes.map(note => (
+              <div key={note.id} className={styles.noteItem}>
+                <p className={styles.noteContent}>{note.content.substring(0, 80)}{note.content.length > 80 ? '...' : ''}</p>
+                <span className={styles.noteAuthor}>
+                  - {note.user.name || note.user.email}
+                </span>
               </div>
-            )}
-            {familyId && (
-              <Link href={`/family/${familyId}/notes`} className={styles.viewAllLink}>
-                View all notes →
-              </Link>
-            )}
+            ))}
           </div>
-        </div>
+        )}
+        {familyId && (
+          <Link href={`/family/${familyId}/notes`} className={styles.viewAllLink}>
+            View all notes →
+          </Link>
+        )}
       </div>
     </div>
   )
