@@ -51,7 +51,7 @@ export default function Navigation({
               <Link href="/family">My Families</Link>
               <Link href="/blog">Blog</Link>
               <Link href="/profile">My Profile</Link>
-              <Link href="/api/auth/signout">Sign out</Link>
+              <Link href="/signout">Sign out</Link>
             </div>
           ) : (
             !backLink && (
