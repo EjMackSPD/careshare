@@ -73,10 +73,17 @@ export default async function Dashboard() {
   const unassignedTasks = allTasks.filter(t => {
     // Task is unassigned if it's not completed AND has no assignments
     const hasNoAssignments = !t.assignments || t.assignments.length === 0;
-    const hasNoLegacyAssignment = !t.assignedTo || t.assignedTo.trim() === '';
-    return t.status !== 'COMPLETED' && hasNoAssignments && hasNoLegacyAssignment;
+    return t.status !== 'COMPLETED' && hasNoAssignments;
   }).length;
   const openTasks = allTasks.filter(t => t.status !== 'COMPLETED').length;
+
+  console.log('Dashboard Task Stats:', {
+    totalTasks,
+    completedTasks,
+    unassignedTasks,
+    openTasks,
+    sampleTask: allTasks[0],
+  });
 
   return (
     <div className={styles.container}>
