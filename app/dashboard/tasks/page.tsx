@@ -893,7 +893,13 @@ export default function TasksPage() {
                               Assigned to: {task.assignedToName}
                             </span>
                           ) : (
-                            <span className={styles.unassignedBadge}>
+                            <span 
+                              className={styles.unassignedBadge}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleEditTask(task);
+                              }}
+                            >
                               ⚠ Unassigned - Click to assign
                             </span>
                           )}
