@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Navigation from '@/app/components/Navigation'
+import MarketingNav from '@/app/components/MarketingNav'
 import Footer from '@/app/components/Footer'
 import { Heart, Calendar, Users, MessageCircle, ArrowRight, Sparkles } from 'lucide-react'
 import styles from './page.module.css'
@@ -25,7 +25,7 @@ export default function SignOutPage() {
 
   return (
     <div className={styles.pageContainer}>
-      <Navigation showAuthLinks={false} />
+      <MarketingNav />
       
       <main className={styles.main}>
         <div className={styles.signoutCard}>
