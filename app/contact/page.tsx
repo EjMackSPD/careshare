@@ -211,7 +211,7 @@ export default function ContactPage() {
                 <Link href="/blog">Visit Our Blog</Link>
                 <Link href="/partnerships">Partnership Inquiries</Link>
                 <Link href="/login">Try Demo Account</Link>
-                <Link href="/signup">Create Account</Link>
+                <Link href="/onboarding">Create Account</Link>
               </div>
             </div>
           </div>

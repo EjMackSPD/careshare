@@ -191,7 +191,7 @@ export default function AboutPage() {
             CareShare community.
           </p>
           <div className={styles.ctaButtons}>
-            <Link href="/signup" className={styles.ctaPrimaryBtn}>
+            <Link href="/onboarding" className={styles.ctaPrimaryBtn}>
               Start Your Family Group
             </Link>
             <Link href="/partnerships" className={styles.ctaSecondaryBtn}>

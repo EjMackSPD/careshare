@@ -331,7 +331,7 @@ export default function BlogPostPage() {
             costs, and stay connected.
           </p>
           <div className={styles.ctaButtons}>
-            <Link href="/signup" className={styles.ctaPrimary}>
+            <Link href="/onboarding" className={styles.ctaPrimary}>
               Get Started Free
             </Link>
             <Link href="/features" className={styles.ctaSecondary}>

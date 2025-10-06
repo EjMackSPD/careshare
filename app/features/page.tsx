@@ -49,7 +49,7 @@ export default function Features() {
               caregiving easier.
             </p>
             <div className={styles.heroButtons}>
-              <Link href="/signup" className={styles.heroPrimaryBtn}>
+              <Link href="/onboarding" className={styles.heroPrimaryBtn}>
                 Start Free Trial
                 <Zap size={20} />
               </Link>
@@ -378,7 +378,7 @@ export default function Features() {
             <h2>Ready to Transform Family Caregiving?</h2>
             <p>Join thousands of families who are caring better, together.</p>
             <div className={styles.ctaButtons}>
-              <Link href="/signup" className={styles.ctaPrimaryBtn}>
+              <Link href="/onboarding" className={styles.ctaPrimaryBtn}>
                 Get Started Free
                 <Sparkles size={20} />
               </Link>

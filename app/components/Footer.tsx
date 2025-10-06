@@ -86,7 +86,7 @@ export default function Footer() {
                 <Link href="/dashboard/subscription">Pricing</Link>
               </li>
               <li>
-                <Link href="/signup">Sign Up</Link>
+                <Link href="/onboarding">Get Started</Link>
               </li>
             </ul>
           </div>
