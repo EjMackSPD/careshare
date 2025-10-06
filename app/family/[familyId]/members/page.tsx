@@ -123,7 +123,17 @@ export default function FamilyMembers() {
   if (loading) {
     return (
       <div className={styles.container}>
-        <div className={styles.loading}>Loading...</div>
+        <Navigation showAuthLinks={true} />
+        <div className={styles.layout}>
+          <LeftNavigation />
+          <main className={styles.main}>
+            <div className={styles.loadingState}>
+              <div className={styles.spinner}></div>
+              <p>Loading family members...</p>
+            </div>
+          </main>
+        </div>
+        <Footer />
       </div>
     )
   }
@@ -131,7 +141,20 @@ export default function FamilyMembers() {
   if (!family) {
     return (
       <div className={styles.container}>
-        <div className={styles.error}>Family not found</div>
+        <Navigation showAuthLinks={true} />
+        <div className={styles.layout}>
+          <LeftNavigation />
+          <main className={styles.main}>
+            <div className={styles.errorState}>
+              <h2>Family not found</h2>
+              <p>The family you're looking for doesn't exist or you don't have access to it.</p>
+              <Link href="/family" className={styles.backBtn}>
+                View All Families
+              </Link>
+            </div>
+          </main>
+        </div>
+        <Footer />
       </div>
     )
   }
@@ -173,10 +196,10 @@ export default function FamilyMembers() {
           {family.members.map((member) => (
             <div key={member.id} className={styles.memberCard}>
               <div className={styles.memberAvatar}>
-                {member.user.name.charAt(0).toUpperCase()}
+                {(member.user.name || member.user.email).charAt(0).toUpperCase()}
               </div>
               <div className={styles.memberInfo}>
-                <h3>{member.user.name}</h3>
+                <h3>{member.user.name || member.user.email}</h3>
                 <p className={styles.memberEmail}>{member.user.email}</p>
                 <p className={styles.joinedDate}>
                   Joined {new Date(member.joinedAt).toLocaleDateString()}
