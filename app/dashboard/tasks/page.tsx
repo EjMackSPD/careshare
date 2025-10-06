@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Navigation from "@/app/components/Navigation";
 import LeftNavigation from "@/app/components/LeftNavigation";
 import Footer from "@/app/components/Footer";
-import { Search, Trash2, UserPlus, X, Edit, Upload, FileText, Image as ImageIcon } from "lucide-react";
+import { Search, Trash2, UserPlus, X, Edit, Upload, FileText, Image as ImageIcon, Lightbulb } from "lucide-react";
 import styles from "./page.module.css";
 
 type Task = {
@@ -65,6 +65,7 @@ export default function TasksPage() {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [showProviderTip, setShowProviderTip] = useState<string | null>(null);
 
   // Fetch families with members
   useEffect(() => {
@@ -270,6 +271,45 @@ export default function TasksPage() {
       default:
         return "";
     }
+  };
+
+  // Check if task category might need 3rd party services
+  const getProviderSuggestions = (category: string) => {
+    const suggestions: { [key: string]: { title: string; providers: string[] } } = {
+      'Medical': {
+        title: 'Medical Care Providers',
+        providers: ['Home Health Aides', 'Visiting Nurses', 'Physical Therapists', 'Medical Equipment Suppliers']
+      },
+      'Transportation': {
+        title: 'Transportation Services',
+        providers: ['GoGoGrandparent', 'Senior Ride Services', 'Medical Transport', 'Uber/Lyft', 'Local Taxi Services']
+      },
+      'Home Care': {
+        title: 'Home Care Services',
+        providers: ['Visiting Angels', 'Home Instead', 'Comfort Keepers', 'Right at Home', 'Local Home Care Agencies']
+      },
+      'Meal Prep': {
+        title: 'Meal Services',
+        providers: ['Meals on Wheels', 'Home Chef', 'HelloFresh', 'Magic Kitchen', 'Mom\'s Meals (Senior-focused)']
+      },
+      'Cleaning': {
+        title: 'Cleaning Services',
+        providers: ['Handy', 'TaskRabbit', 'The Maids', 'Molly Maid', 'Local Cleaning Services']
+      },
+      'Yard Work': {
+        title: 'Yard & Outdoor Services',
+        providers: ['LawnStarter', 'TaskRabbit', 'Local Landscaping Services', 'Handy']
+      },
+      'Personal Care': {
+        title: 'Personal Care Services',
+        providers: ['In-home Salon Services', 'Mobile Barber/Stylist', 'Senior Personal Care Aides']
+      }
+    };
+    return suggestions[category];
+  };
+
+  const needsThirdParty = (category: string) => {
+    return ['Medical', 'Transportation', 'Home Care', 'Meal Prep', 'Cleaning', 'Yard Work', 'Personal Care'].includes(category);
   };
 
   const currentFamily = families.find((f) => f.id === selectedFamily);
@@ -756,6 +796,16 @@ export default function TasksPage() {
                               Assigned to: {task.assignedToName}
                             </span>
                           )}
+                          {needsThirdParty(task.category) && (
+                            <button
+                              className={styles.providerTipBtn}
+                              onClick={() => setShowProviderTip(task.id)}
+                              title="View service provider suggestions"
+                            >
+                              <Lightbulb size={16} />
+                              <span>Need Help?</span>
+                            </button>
+                          )}
                         </div>
                       </div>
 
@@ -848,6 +898,49 @@ export default function TasksPage() {
           {toast.message}
         </div>
       )}
+
+      {/* Provider Suggestions Modal */}
+      {showProviderTip && (() => {
+        const task = tasks.find(t => t.id === showProviderTip);
+        const suggestions = task ? getProviderSuggestions(task.category) : null;
+        
+        return suggestions ? (
+          <div className={styles.modalOverlay} onClick={() => setShowProviderTip(null)}>
+            <div className={styles.providerModal} onClick={(e) => e.stopPropagation()}>
+              <div className={styles.providerModalHeader}>
+                <div className={styles.providerModalTitle}>
+                  <Lightbulb size={24} className={styles.lightbulbIcon} />
+                  <h3>{suggestions.title}</h3>
+                </div>
+                <button
+                  onClick={() => setShowProviderTip(null)}
+                  className={styles.closeModalBtn}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              <div className={styles.providerModalBody}>
+                <p className={styles.providerIntro}>
+                  Here are some trusted service providers that can help with this task:
+                </p>
+                <ul className={styles.providerList}>
+                  {suggestions.providers.map((provider, index) => (
+                    <li key={index} className={styles.providerItem}>
+                      <span className={styles.providerBullet}>•</span>
+                      <span>{provider}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className={styles.providerFooter}>
+                  <p className={styles.providerNote}>
+                    💡 <strong>Tip:</strong> Always verify credentials and read reviews before hiring any service provider.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : null;
+      })()}
     </div>
   );
 }

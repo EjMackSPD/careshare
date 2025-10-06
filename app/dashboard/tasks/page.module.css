@@ -874,3 +874,152 @@
 .taskCheckbox:hover {
   transform: scale(1.1);
 }
+
+/* Provider Tip Button */
+.providerTipBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.2);
+}
+
+.providerTipBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
+}
+
+.providerTipBtn svg {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Provider Suggestions Modal */
+.providerModal {
+  background: white;
+  border-radius: 1rem;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.providerModalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.providerModalTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.providerModalTitle h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.lightbulbIcon {
+  color: #f59e0b;
+  flex-shrink: 0;
+}
+
+.closeModalBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  color: #6b7280;
+  border-radius: 0.375rem;
+  transition: all 0.2s;
+}
+
+.closeModalBtn:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.providerModalBody {
+  padding: 1.5rem;
+}
+
+.providerIntro {
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.providerList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+}
+
+.providerItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background: #f9fafb;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+}
+
+.providerItem:hover {
+  background: #f3f4f6;
+  transform: translateX(4px);
+}
+
+.providerBullet {
+  color: #f59e0b;
+  font-size: 1.5rem;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.providerItem span:last-child {
+  color: #374151;
+  font-weight: 500;
+}
+
+.providerFooter {
+  background: #fef3c7;
+  border: 1px solid #fde68a;
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+.providerNote {
+  margin: 0;
+  color: #92400e;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.providerNote strong {
+  color: #78350f;
+}
