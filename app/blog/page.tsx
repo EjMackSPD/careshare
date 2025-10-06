@@ -70,20 +70,8 @@ export default function BlogPage() {
 
   async function fetchPosts() {
     try {
-      const url =
-        selectedCategory === "all"
-          ? "/api/blog"
-          : `/api/blog?category=${selectedCategory}`;
-      console.log("Fetching blog posts from:", url);
-      const res = await fetch(url);
-      console.log("Response status:", res.status);
-      if (res.ok) {
-        const data = await res.json();
-        console.log("Fetched posts:", data.length);
-        setPosts(data);
-      } else {
-        console.error("Failed to fetch posts:", res.status);
-      }
+      // Blog system coming soon - using placeholder for now
+      setPosts([]);
     } catch (error) {
       console.error("Error fetching blog posts:", error);
     } finally {
