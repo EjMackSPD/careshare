@@ -8,6 +8,10 @@ import Footer from "@/app/components/Footer";
 import { Search, Trash2, UserPlus, X, Edit, Upload, FileText, Image as ImageIcon, Lightbulb } from "lucide-react";
 import styles from "./page.module.css";
 
+// ============================================
+// TYPE DEFINITIONS
+// ============================================
+
 type Task = {
   id: string;
   title: string;
@@ -40,30 +44,44 @@ type Family = {
   members: FamilyMember[];
 };
 
+// ============================================
+// MAIN COMPONENT
+// ============================================
+
 export default function TasksPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  // State: Tasks and Filters
   const [tasks, setTasks] = useState<Task[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [activeTab, setActiveTab] = useState<"open" | "unassigned" | "completed">("open");
   const [sortBy, setSortBy] = useState<"alpha" | "date">("date");
-  const [showAddTask, setShowAddTask] = useState(false);
-
-  // Check URL params for initial tab
-  useEffect(() => {
-    const tabParam = searchParams.get('tab');
-    if (tabParam === 'unassigned' || tabParam === 'completed' || tabParam === 'open') {
-      setActiveTab(tabParam);
-    }
-  }, [searchParams]);
+  
+  // State: Families and Members
   const [families, setFamilies] = useState<Family[]>([]);
   const [selectedFamily, setSelectedFamily] = useState<string>("");
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+  
+  // State: UI Controls
   const [loading, setLoading] = useState(true);
+  const [showAddTask, setShowAddTask] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [showProviderTip, setShowProviderTip] = useState<string | null>(null);
+  
+  // State: Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  
+  // State: File Upload
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  
+  // State: Toast Notifications
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  
+  // State: Task Form Data
   const [newTask, setNewTask] = useState({
     title: "",
     description: "",
@@ -72,12 +90,20 @@ export default function TasksPage() {
     assignedTo: "",
     dueDate: "",
   });
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-  const [showProviderTip, setShowProviderTip] = useState<string | null>(null);
 
-  // Fetch families with members
+  // ============================================
+  // EFFECTS
+  // ============================================
+
+  // Check URL params for initial tab selection
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam === 'unassigned' || tabParam === 'completed' || tabParam === 'open') {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
+
+  // Fetch families with members on mount
   useEffect(() => {
     async function fetchFamilies() {
       try {
@@ -88,9 +114,7 @@ export default function TasksPage() {
         // Fetch members for each family
         const familiesWithMembers = await Promise.all(
           data.map(async (family: any) => {
-            const membersRes = await fetch(
-              `/api/families/${family.id}/members`
-            );
+            const membersRes = await fetch(`/api/families/${family.id}/members`);
             const members = membersRes.ok ? await membersRes.json() : [];
             return { ...family, members };
           })
@@ -115,12 +139,22 @@ export default function TasksPage() {
     fetchTasks();
   }, [selectedFamily]);
 
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterCategory, activeTab]);
+
+  // ============================================
+  // DATA FETCHING
+  // ============================================
+
   async function fetchTasks() {
     setLoading(true);
     try {
       const res = await fetch(`/api/families/${selectedFamily}/tasks`);
       if (res.ok) {
         const data = await res.json();
+        
         // Convert database format to display format
         const formattedTasks = data.map((t: any) => ({
           id: t.id,
@@ -128,14 +162,15 @@ export default function TasksPage() {
           description: t.description || "",
           category: "General",
           priority: t.priority,
-          assignedTo: t.assignments?.map((a: any) => a.userId).join(",") || "", // Store user IDs for editing
-          assignedToName:
-            t.assignments
-              ?.map((a: any) => a.user.name || a.user.email)
-              .join(", ") || "", // For display
+          assignedTo: t.assignments?.map((a: any) => a.userId).join(",") || "",
+          assignedToName: t.assignments?.map((a: any) => a.user.name || a.user.email).join(", ") || "",
           dueDate: t.dueDate ? new Date(t.dueDate).toLocaleString() : "",
           completed: t.status === "COMPLETED",
+          attachmentUrl: t.attachmentUrl,
+          fileName: t.fileName,
+          fileType: t.fileType,
         }));
+        
         setTasks(formattedTasks);
       }
     } catch (error) {
@@ -145,21 +180,16 @@ export default function TasksPage() {
     }
   }
 
-  const categories = [
-    "all",
-    "Medication",
-    "Healthcare",
-    "Shopping",
-    "Home Maintenance",
-  ];
+  // ============================================
+  // TASK FILTERING AND SORTING
+  // ============================================
 
   const filteredTasks = tasks
     .filter((task) => {
       const matchesSearch =
         task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         task.description.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory =
-        filterCategory === "all" || task.category === filterCategory;
+      const matchesCategory = filterCategory === "all" || task.category === filterCategory;
       
       let matchesTab = false;
       if (activeTab === "completed") {
@@ -167,8 +197,7 @@ export default function TasksPage() {
       } else if (activeTab === "unassigned") {
         matchesTab = !task.completed && (!task.assignedTo || task.assignedTo.trim() === "");
       } else {
-        // "open" tab - all non-completed tasks
-        matchesTab = !task.completed;
+        matchesTab = !task.completed; // "open" tab
       }
       
       return matchesSearch && matchesCategory && matchesTab;
@@ -177,7 +206,6 @@ export default function TasksPage() {
       if (sortBy === "alpha") {
         return a.title.localeCompare(b.title);
       } else {
-        // Sort by date (most recent first)
         return new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime();
       }
     });
@@ -188,10 +216,9 @@ export default function TasksPage() {
   const endIndex = startIndex + itemsPerPage;
   const paginatedTasks = filteredTasks.slice(startIndex, endIndex);
 
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, filterCategory, activeTab]);
+  // ============================================
+  // TASK ACTIONS
+  // ============================================
 
   const toggleTask = async (id: string) => {
     const task = tasks.find((t) => t.id === id);
@@ -204,20 +231,13 @@ export default function TasksPage() {
       const res = await fetch(`/api/tasks/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          status: newStatus,
-          completedAt,
-        }),
+        body: JSON.stringify({ status: newStatus, completedAt }),
       });
 
       if (!res.ok) throw new Error("Failed to update task");
 
       // Update local state
-      setTasks(
-        tasks.map((t) =>
-          t.id === id ? { ...t, completed: !t.completed } : t
-        )
-      );
+      setTasks(tasks.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
 
       // Show success toast
       if (!task.completed) {
@@ -229,26 +249,13 @@ export default function TasksPage() {
     }
   };
 
-  const showToast = (message: string, type: 'success' | 'error') => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), 3000);
-  };
-
   const deleteTask = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this task?")) {
-      return;
-    }
+    if (!confirm("Are you sure you want to delete this task?")) return;
 
     try {
-      const res = await fetch(`/api/tasks/${id}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(`/api/tasks/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete task");
 
-      if (!res.ok) {
-        throw new Error("Failed to delete task");
-      }
-
-      // Remove task from local state
       setTasks(tasks.filter((task) => task.id !== id));
       showToast("Task deleted successfully", 'success');
     } catch (error) {
@@ -257,10 +264,106 @@ export default function TasksPage() {
     }
   };
 
+  const handleAddTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!selectedFamily) {
+      alert("Please select a family first");
+      return;
+    }
+
+    try {
+      let fileData = null;
+      
+      // Upload file if one was selected
+      if (uploadedFile) {
+        setUploading(true);
+        fileData = await uploadFile(uploadedFile);
+        setUploading(false);
+        
+        if (!fileData) return; // Upload failed
+      }
+
+      const taskData = {
+        title: newTask.title,
+        description: newTask.description,
+        priority: newTask.priority,
+        assignedMembers: selectedMembers,
+        dueDate: newTask.dueDate || null,
+        status: editingTask ? undefined : "TODO",
+        ...(fileData && {
+          attachmentUrl: fileData.url,
+          fileName: fileData.fileName,
+          fileType: fileData.fileType,
+        }),
+      };
+
+      const url = editingTask
+        ? `/api/tasks/${editingTask.id}`
+        : `/api/families/${selectedFamily}/tasks`;
+      const method = editingTask ? "PATCH" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(taskData),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to save task");
+      }
+
+      // Refresh tasks list
+      await fetchTasks();
+
+      showToast(editingTask ? "Task updated successfully" : "Task created successfully", 'success');
+
+      // Reset form
+      setShowAddTask(false);
+      setEditingTask(null);
+      setSelectedMembers([]);
+      setUploadedFile(null);
+      setNewTask({
+        title: "",
+        description: "",
+        category: "Medication",
+        priority: "MEDIUM",
+        assignedTo: "",
+        dueDate: "",
+      });
+    } catch (error) {
+      console.error("Error saving task:", error);
+      showToast(error instanceof Error ? error.message : "Failed to save task", 'error');
+    }
+  };
+
+  const handleEditTask = (task: Task) => {
+    setEditingTask(task);
+
+    // Parse assigned members from assignedTo field (comma-separated IDs)
+    const assignedIds = task.assignedTo ? task.assignedTo.split(",").filter((id) => id.trim()) : [];
+    setSelectedMembers(assignedIds);
+
+    setNewTask({
+      title: task.title,
+      description: task.description,
+      category: task.category,
+      priority: task.priority,
+      assignedTo: task.assignedTo,
+      dueDate: task.dueDate ? new Date(task.dueDate).toISOString().slice(0, 16) : "",
+    });
+    
+    setShowAddTask(true);
+  };
+
+  // ============================================
+  // FILE UPLOAD
+  // ============================================
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     setUploadedFile(file);
   };
 
@@ -289,17 +392,37 @@ export default function TasksPage() {
     }
   };
 
+  // ============================================
+  // HELPER FUNCTIONS
+  // ============================================
+
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case "HIGH":
-        return styles.highPriority;
-      case "MEDIUM":
-        return styles.mediumPriority;
-      case "LOW":
-        return styles.lowPriority;
-      default:
-        return "";
+      case "HIGH": return styles.highPriority;
+      case "MEDIUM": return styles.mediumPriority;
+      case "LOW": return styles.lowPriority;
+      default: return "";
     }
+  };
+
+  const toggleMemberSelection = (userId: string) => {
+    setSelectedMembers((prev) =>
+      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
+    );
+  };
+
+  const getSelectedMemberNames = () => {
+    return selectedMembers
+      .map((userId) => {
+        const member = familyMembers.find((m) => m.userId === userId);
+        return member?.user.name || member?.user.email || "Unknown";
+      })
+      .join(", ");
   };
 
   // Check if task category might need 3rd party services
@@ -341,128 +464,16 @@ export default function TasksPage() {
     return ['Medical', 'Transportation', 'Home Care', 'Meal Prep', 'Cleaning', 'Yard Work', 'Personal Care'].includes(category);
   };
 
+  // ============================================
+  // COMPUTED VALUES
+  // ============================================
+
   const currentFamily = families.find((f) => f.id === selectedFamily);
   const familyMembers = currentFamily?.members || [];
 
-  const toggleMemberSelection = (userId: string) => {
-    setSelectedMembers((prev) =>
-      prev.includes(userId)
-        ? prev.filter((id) => id !== userId)
-        : [...prev, userId]
-    );
-  };
-
-  const getSelectedMemberNames = () => {
-    return selectedMembers
-      .map((userId) => {
-        const member = familyMembers.find((m) => m.userId === userId);
-        return member?.user.name || member?.user.email || "Unknown";
-      })
-      .join(", ");
-  };
-
-  const handleAddTask = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!selectedFamily) {
-      alert("Please select a family first");
-      return;
-    }
-
-    try {
-      let fileData = null;
-      
-      // Upload file if one was selected
-      if (uploadedFile) {
-        setUploading(true);
-        fileData = await uploadFile(uploadedFile);
-        setUploading(false);
-        
-        if (!fileData) {
-          return; // Upload failed, don't continue
-        }
-      }
-
-      const taskData = {
-        title: newTask.title,
-        description: newTask.description,
-        priority: newTask.priority,
-        assignedMembers: selectedMembers, // Send array of all selected member IDs
-        dueDate: newTask.dueDate || null,
-        status: editingTask ? undefined : "TODO", // Don't override status when editing
-        ...(fileData && {
-          attachmentUrl: fileData.url,
-          fileName: fileData.fileName,
-          fileType: fileData.fileType,
-        }),
-      };
-
-      const url = editingTask
-        ? `/api/tasks/${editingTask.id}`
-        : `/api/families/${selectedFamily}/tasks`;
-
-      const method = editingTask ? "PATCH" : "POST";
-
-      console.log("Saving task:", { url, method, taskData, selectedMembers });
-
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(taskData),
-      });
-
-      console.log("Task save response:", { status: res.status, ok: res.ok });
-
-      if (!res.ok) {
-        const error = await res.json();
-        console.error("Task save error:", error);
-        throw new Error(error.error || "Failed to save task");
-      }
-
-      // Refresh tasks list
-      await fetchTasks();
-
-      showToast(editingTask ? "Task updated successfully" : "Task created successfully", 'success');
-
-      setShowAddTask(false);
-      setEditingTask(null);
-      setSelectedMembers([]);
-      setUploadedFile(null);
-      setNewTask({
-        title: "",
-        description: "",
-        category: "Medication",
-        priority: "MEDIUM",
-        assignedTo: "",
-        dueDate: "",
-      });
-    } catch (error) {
-      console.error("Error saving task:", error);
-      showToast(error instanceof Error ? error.message : "Failed to save task", 'error');
-    }
-  };
-
-  const handleEditTask = (task: Task) => {
-    setEditingTask(task);
-
-    // Parse assigned members from assignedTo field (comma-separated IDs)
-    const assignedIds = task.assignedTo
-      ? task.assignedTo.split(",").filter((id) => id.trim())
-      : [];
-    setSelectedMembers(assignedIds);
-
-    setNewTask({
-      title: task.title,
-      description: task.description,
-      category: task.category,
-      priority: task.priority,
-      assignedTo: task.assignedTo,
-      dueDate: task.dueDate
-        ? new Date(task.dueDate).toISOString().slice(0, 16)
-        : "",
-    });
-    setShowAddTask(true);
-  };
+  // ============================================
+  // RENDER
+  // ============================================
 
   return (
     <div className={styles.container}>
@@ -471,6 +482,7 @@ export default function TasksPage() {
       <div className={styles.layout}>
         <LeftNavigation />
         <main className={styles.main}>
+          {/* Page Header */}
           <div className={styles.pageHeader}>
             <div>
               <h1>Tasks & Responsibilities</h1>
@@ -479,6 +491,7 @@ export default function TasksPage() {
               </p>
             </div>
             <div className={styles.headerActions}>
+              {/* Family Selector (if multiple families) */}
               {families.length > 1 && (
                 <div className={styles.familySelector}>
                   <label htmlFor="familySelect">Family:</label>
@@ -506,7 +519,7 @@ export default function TasksPage() {
             </div>
           </div>
 
-          {/* Tabs */}
+          {/* Tabs: Open, Unassigned, Completed */}
           <div className={styles.tabsContainer}>
             <div className={styles.tabs}>
               <button
@@ -537,6 +550,8 @@ export default function TasksPage() {
                 </span>
               </button>
             </div>
+            
+            {/* Sort Control */}
             <div className={styles.sortControl}>
               <label htmlFor="sortBy">Sort by:</label>
               <select
@@ -551,6 +566,7 @@ export default function TasksPage() {
             </div>
           </div>
 
+          {/* Search and Category Filter */}
           <div className={styles.controls}>
             <div className={styles.searchBox}>
               <Search size={18} />
@@ -585,10 +601,7 @@ export default function TasksPage() {
           {/* Add/Edit Task Modal */}
           {showAddTask && (
             <div className={styles.modal} onClick={() => setShowAddTask(false)}>
-              <div
-                className={styles.modalContent}
-                onClick={(e) => e.stopPropagation()}
-              >
+              <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
                 <div className={styles.modalHeader}>
                   <div>
                     <h2>{editingTask ? "Edit Task" : "Add New Task"}</h2>
@@ -598,59 +611,37 @@ export default function TasksPage() {
                       </p>
                     )}
                   </div>
-                  <button
-                    className={styles.closeBtn}
-                    onClick={() => setShowAddTask(false)}
-                  >
+                  <button className={styles.closeBtn} onClick={() => setShowAddTask(false)}>
                     ✕
                   </button>
                 </div>
 
                 <form onSubmit={handleAddTask} className={styles.taskForm}>
+                  {/* Task Title */}
                   <div className={styles.formGroup}>
                     <label>Task Title *</label>
                     <input
                       type="text"
                       value={newTask.title}
-                      onChange={(e) =>
-                        setNewTask({ ...newTask, title: e.target.value })
-                      }
+                      onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
                       placeholder="e.g., Pick up prescriptions"
                       required
                     />
                   </div>
 
+                  {/* Task Description */}
                   <div className={styles.formGroup}>
                     <label>Description</label>
                     <textarea
                       value={newTask.description}
-                      onChange={(e) =>
-                        setNewTask({ ...newTask, description: e.target.value })
-                      }
+                      onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
                       placeholder="Additional details about the task..."
                       rows={3}
                     />
                   </div>
 
+                  {/* Priority */}
                   <div className={styles.formRow}>
-                    <div className={styles.formGroup}>
-                      <label>Category *</label>
-                      <select
-                        value={newTask.category}
-                        onChange={(e) =>
-                          setNewTask({ ...newTask, category: e.target.value })
-                        }
-                        required
-                      >
-                        <option value="Medication">Medication</option>
-                        <option value="Healthcare">Healthcare</option>
-                        <option value="Shopping">Shopping</option>
-                        <option value="Home Maintenance">
-                          Home Maintenance
-                        </option>
-                      </select>
-                    </div>
-
                     <div className={styles.formGroup}>
                       <label>Priority *</label>
                       <select
@@ -658,10 +649,7 @@ export default function TasksPage() {
                         onChange={(e) =>
                           setNewTask({
                             ...newTask,
-                            priority: e.target.value as
-                              | "HIGH"
-                              | "MEDIUM"
-                              | "LOW",
+                            priority: e.target.value as "HIGH" | "MEDIUM" | "LOW",
                           })
                         }
                         required
@@ -673,6 +661,7 @@ export default function TasksPage() {
                     </div>
                   </div>
 
+                  {/* Assign To Family Members */}
                   <div className={styles.formGroup}>
                     <div className={styles.labelWithLink}>
                       <label>Assign To Family Members</label>
@@ -690,33 +679,22 @@ export default function TasksPage() {
                     </div>
 
                     {loading ? (
-                      <div className={styles.loadingText}>
-                        Loading family members...
-                      </div>
+                      <div className={styles.loadingText}>Loading family members...</div>
                     ) : familyMembers.length === 0 ? (
                       <div className={styles.noMembers}>
-                        <p>
-                          No family members found. Add members to assign tasks.
-                        </p>
+                        <p>No family members found. Add members to assign tasks.</p>
                       </div>
                     ) : (
                       <div className={styles.memberSelector}>
                         {familyMembers.map((member) => {
-                          const isSelected = selectedMembers.includes(
-                            member.userId
-                          );
-                          const displayName =
-                            member.user.name || member.user.email;
+                          const isSelected = selectedMembers.includes(member.userId);
+                          const displayName = member.user.name || member.user.email;
 
                           return (
                             <div
                               key={member.userId}
-                              className={`${styles.memberOption} ${
-                                isSelected ? styles.selected : ""
-                              }`}
-                              onClick={() =>
-                                toggleMemberSelection(member.userId)
-                              }
+                              className={`${styles.memberOption} ${isSelected ? styles.selected : ""}`}
+                              onClick={() => toggleMemberSelection(member.userId)}
                             >
                               <input
                                 type="checkbox"
@@ -731,25 +709,20 @@ export default function TasksPage() {
                       </div>
                     )}
 
+                    {/* Selected Members Display */}
                     {selectedMembers.length > 0 && (
                       <div className={styles.selectedMembers}>
-                        <span className={styles.selectedLabel}>Selected:</span>
                         {selectedMembers.map((userId) => {
-                          const member = familyMembers.find(
-                            (m) => m.userId === userId
-                          );
-                          const displayName =
-                            member?.user.name ||
-                            member?.user.email ||
-                            "Unknown";
-
+                          const member = familyMembers.find((m) => m.userId === userId);
+                          const displayName = member?.user.name || member?.user.email || "Unknown";
+                          
                           return (
-                            <span key={userId} className={styles.selectedTag}>
+                            <span key={userId} className={styles.memberTag}>
                               {displayName}
                               <button
                                 type="button"
                                 onClick={() => toggleMemberSelection(userId)}
-                                className={styles.removeTag}
+                                className={styles.removeMemberBtn}
                               >
                                 <X size={14} />
                               </button>
@@ -760,17 +733,17 @@ export default function TasksPage() {
                     )}
                   </div>
 
+                  {/* Due Date */}
                   <div className={styles.formGroup}>
                     <label>Due Date</label>
                     <input
                       type="datetime-local"
                       value={newTask.dueDate}
-                      onChange={(e) =>
-                        setNewTask({ ...newTask, dueDate: e.target.value })
-                      }
+                      onChange={(e) => setNewTask({ ...newTask, dueDate: e.target.value })}
                     />
                   </div>
 
+                  {/* File Attachment */}
                   <div className={styles.formGroup}>
                     <label>
                       <Upload size={16} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} />
@@ -801,6 +774,7 @@ export default function TasksPage() {
                     )}
                   </div>
 
+                  {/* Form Actions */}
                   <div className={styles.formActions}>
                     <button
                       type="button"
@@ -809,8 +783,8 @@ export default function TasksPage() {
                     >
                       Cancel
                     </button>
-                    <button type="submit" className={styles.submitBtn}>
-                      {editingTask ? "Save Task" : "Add Task"}
+                    <button type="submit" className={styles.submitBtn} disabled={uploading}>
+                      {uploading ? "Uploading..." : editingTask ? "Save Task" : "Add Task"}
                     </button>
                   </div>
                 </form>
@@ -818,10 +792,14 @@ export default function TasksPage() {
             </div>
           )}
 
+          {/* Tasks Section */}
           <div className={styles.tasksSection}>
             <div className={styles.tasksSectionHeader}>
               <div>
                 <h2>Tasks</h2>
+                {currentFamily && (
+                  <p className={styles.familyLabel}>{currentFamily.name}</p>
+                )}
               </div>
               <p className={styles.taskCount}>
                 Showing {filteredTasks.length} of {tasks.length} tasks
@@ -829,6 +807,7 @@ export default function TasksPage() {
             </div>
 
             {loading ? (
+              // Skeleton Loading State
               <div className={styles.skeletonContainer}>
                 {[1, 2, 3, 4, 5].map((i) => (
                   <div key={i} className={styles.skeletonCard}>
@@ -846,127 +825,123 @@ export default function TasksPage() {
               </div>
             ) : (
               <>
+                {/* Tasks List */}
                 <div className={styles.tasksList}>
                   {paginatedTasks.map((task, index) => {
                     const isUnassigned = !task.assignedTo || task.assignedTo.trim() === "";
+                    
                     return (
-                    <div
-                      key={task.id}
-                      className={`${styles.taskCard} ${
-                        task.completed ? styles.completed : ""
-                      } ${isUnassigned && !task.completed ? styles.unassigned : ""}`}
-                      style={{ animationDelay: `${index * 0.05}s` }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={task.completed}
-                        onChange={() => toggleTask(task.id)}
-                        className={styles.taskCheckbox}
-                        title={task.completed ? "Unmark as complete" : "Mark as complete"}
-                      />
+                      <div
+                        key={task.id}
+                        className={`${styles.taskCard} ${task.completed ? styles.completed : ""} ${isUnassigned && !task.completed ? styles.unassigned : ""}`}
+                        style={{ animationDelay: `${index * 0.05}s` }}
+                      >
+                        {/* Checkbox */}
+                        <input
+                          type="checkbox"
+                          checked={task.completed}
+                          onChange={() => toggleTask(task.id)}
+                          className={styles.taskCheckbox}
+                          title={task.completed ? "Unmark as complete" : "Mark as complete"}
+                        />
 
-                      <div className={styles.taskContent}>
-                        <h3>{task.title}</h3>
-                        <p>{task.description}</p>
-                        {task.attachmentUrl && (
-                          <div className={styles.taskAttachment}>
-                            {task.fileType?.startsWith('image/') ? (
-                              <a href={task.attachmentUrl} target="_blank" rel="noopener noreferrer" className={styles.attachmentLink}>
-                                <img 
-                                  src={task.attachmentUrl} 
-                                  alt={task.fileName || 'Attachment'} 
-                                  className={styles.attachmentImage}
-                                />
-                              </a>
+                        {/* Task Content */}
+                        <div className={styles.taskContent}>
+                          <h3>{task.title}</h3>
+                          <p>{task.description}</p>
+                          
+                          {/* Attachment Display */}
+                          {task.attachmentUrl && (
+                            <div className={styles.taskAttachment}>
+                              {task.fileType?.startsWith('image/') ? (
+                                <a href={task.attachmentUrl} target="_blank" rel="noopener noreferrer" className={styles.attachmentLink}>
+                                  <img 
+                                    src={task.attachmentUrl} 
+                                    alt={task.fileName || 'Attachment'} 
+                                    className={styles.attachmentImage}
+                                  />
+                                </a>
+                              ) : (
+                                <a href={task.attachmentUrl} target="_blank" rel="noopener noreferrer" className={styles.attachmentLink}>
+                                  <FileText size={16} />
+                                  <span>{task.fileName || 'Attachment'}</span>
+                                </a>
+                              )}
+                            </div>
+                          )}
+                          
+                          {/* Due Date */}
+                          <div className={styles.taskMeta}>
+                            <span className={styles.dueDate}>Due: {task.dueDate}</span>
+                          </div>
+                          
+                          {/* Tags and Badges */}
+                          <div className={styles.taskTags}>
+                            <span className={styles.categoryBadge}>{task.category}</span>
+                            <span className={`${styles.priorityBadge} ${getPriorityColor(task.priority)}`}>
+                              {task.priority.charAt(0) + task.priority.slice(1).toLowerCase()} Priority
+                            </span>
+                            
+                            {/* Assignment Status */}
+                            {task.assignedToName ? (
+                              <span className={styles.assignedBadge}>
+                                Assigned to: {task.assignedToName}
+                              </span>
                             ) : (
-                              <a href={task.attachmentUrl} target="_blank" rel="noopener noreferrer" className={styles.attachmentLink}>
-                                <FileText size={16} />
-                                <span>{task.fileName || 'Attachment'}</span>
-                              </a>
+                              <span 
+                                className={styles.unassignedBadge}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEditTask(task);
+                                }}
+                              >
+                                ⚠ Unassigned - Click to assign
+                              </span>
+                            )}
+                            
+                            {/* Provider Suggestions */}
+                            {needsThirdParty(task.category) && (
+                              <button
+                                className={styles.providerTipBtn}
+                                onClick={() => setShowProviderTip(task.id)}
+                                title="View service provider suggestions"
+                              >
+                                <Lightbulb size={16} />
+                                <span>Need Help?</span>
+                              </button>
                             )}
                           </div>
-                        )}
-                        <div className={styles.taskMeta}>
-                          <span className={styles.dueDate}>
-                            Due: {task.dueDate}
-                          </span>
                         </div>
-                        <div className={styles.taskTags}>
-                          <span className={styles.categoryBadge}>
-                            {task.category}
-                          </span>
-                          <span
-                            className={`${
-                              styles.priorityBadge
-                            } ${getPriorityColor(task.priority)}`}
-                          >
-                            {task.priority.charAt(0) +
-                              task.priority.slice(1).toLowerCase()}{" "}
-                            Priority
-                          </span>
-                          {task.assignedToName ? (
-                            <span className={styles.assignedBadge}>
-                              Assigned to: {task.assignedToName}
-                            </span>
-                          ) : (
-                            <span 
-                              className={styles.unassignedBadge}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleEditTask(task);
-                              }}
-                            >
-                              ⚠ Unassigned - Click to assign
-                            </span>
-                          )}
-                          {needsThirdParty(task.category) && (
-                            <button
-                              className={styles.providerTipBtn}
-                              onClick={() => setShowProviderTip(task.id)}
-                              title="View service provider suggestions"
-                            >
-                              <Lightbulb size={16} />
-                              <span>Need Help?</span>
-                            </button>
-                          )}
-                        </div>
-                      </div>
 
-                      <div className={styles.taskCardActions}>
-                        <button
-                          onClick={() => handleEditTask(task)}
-                          className={styles.editTaskBtn}
-                          title="Edit task"
-                        >
-                          <Edit size={18} />
-                        </button>
-                        <button
-                          onClick={() => deleteTask(task.id)}
-                          className={styles.deleteBtn}
-                          title="Delete task"
-                        >
-                          <Trash2 size={18} />
-                        </button>
+                        {/* Task Actions */}
+                        <div className={styles.taskCardActions}>
+                          <button
+                            onClick={() => handleEditTask(task)}
+                            className={styles.editTaskBtn}
+                            title="Edit task"
+                          >
+                            <Edit size={18} />
+                          </button>
+                          <button
+                            onClick={() => deleteTask(task.id)}
+                            className={styles.deleteBtn}
+                            title="Delete task"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  );
+                    );
                   })}
                 </div>
 
                 {/* Pagination */}
                 {filteredTasks.length > itemsPerPage && (
                   <div className={styles.pagination}>
-                    <div className={styles.paginationInfo}>
-                      Showing {startIndex + 1}-
-                      {Math.min(endIndex, filteredTasks.length)} of{" "}
-                      {filteredTasks.length} tasks
-                    </div>
                     <div className={styles.paginationControls}>
                       <button
                         className={styles.pageBtn}
-                        onClick={() =>
-                          setCurrentPage(Math.max(1, currentPage - 1))
-                        }
+                        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                         disabled={currentPage === 1}
                       >
                         Previous
@@ -974,7 +949,6 @@ export default function TasksPage() {
                       <div className={styles.pageNumbers}>
                         {Array.from({ length: totalPages }, (_, i) => i + 1)
                           .filter((page) => {
-                            // Show first page, last page, current page, and pages around current
                             return (
                               page === 1 ||
                               page === totalPages ||
@@ -987,9 +961,7 @@ export default function TasksPage() {
                                 <span className={styles.ellipsis}>...</span>
                               )}
                               <button
-                                className={`${styles.pageNumber} ${
-                                  currentPage === page ? styles.active : ""
-                                }`}
+                                className={`${styles.pageNumber} ${currentPage === page ? styles.active : ""}`}
                                 onClick={() => setCurrentPage(page)}
                               >
                                 {page}
@@ -999,13 +971,14 @@ export default function TasksPage() {
                       </div>
                       <button
                         className={styles.pageBtn}
-                        onClick={() =>
-                          setCurrentPage(Math.min(totalPages, currentPage + 1))
-                        }
+                        onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                         disabled={currentPage === totalPages}
                       >
                         Next
                       </button>
+                    </div>
+                    <div className={styles.paginationInfo}>
+                      Page {currentPage} of {totalPages}
                     </div>
                   </div>
                 )}
@@ -1036,10 +1009,7 @@ export default function TasksPage() {
                   <Lightbulb size={24} className={styles.lightbulbIcon} />
                   <h3>{suggestions.title}</h3>
                 </div>
-                <button
-                  onClick={() => setShowProviderTip(null)}
-                  className={styles.closeModalBtn}
-                >
+                <button onClick={() => setShowProviderTip(null)} className={styles.closeModalBtn}>
                   <X size={20} />
                 </button>
               </div>
