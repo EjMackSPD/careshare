@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
+import { LogOut } from "lucide-react";
 import styles from "./Navigation.module.css";
 
 type NavigationProps = {
@@ -51,7 +52,10 @@ export default function Navigation({
               <Link href="/family">My Families</Link>
               <Link href="/blog">Blog</Link>
               <Link href="/profile">My Profile</Link>
-              <Link href="/signout">Sign out</Link>
+              <Link href="/signout" className={styles.signOutLink}>
+                <LogOut size={16} />
+                <span>Sign out</span>
+              </Link>
             </div>
           ) : (
             !backLink && (
