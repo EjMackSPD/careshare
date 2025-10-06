@@ -62,21 +62,22 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts        Account[]
-  sessions        Session[]
-  familyMembers   FamilyMember[]
-  createdFamilies Family[]   @relation("FamilyCreator")
-  costs           Cost[]
-  costSplits      CostSplit[]
-  adminFamilies   AdminFamily[]
-  assignedTasks   Task[]     @relation("AssignedTasks")
-  taskAssignments TaskAssignment[]
-  orderedGifts    GiftOrder[] @relation("OrderedGifts")
-  orderedFood     FoodOrder[] @relation("OrderedFood")
-  messages        Message[]
-  lifeStories     LifeStory[]
-  medications     Medication[]
-  notes           Note[]
+  accounts          Account[]
+  sessions          Session[]
+  familyMembers     FamilyMember[]
+  sentInvitations   FamilyInvitation[]
+  createdFamilies   Family[]           @relation("FamilyCreator")
+  costs             Cost[]
+  costSplits        CostSplit[]
+  adminFamilies     AdminFamily[]
+  assignedTasks     Task[]             @relation("AssignedTasks")
+  taskAssignments   TaskAssignment[]
+  orderedGifts      GiftOrder[]        @relation("OrderedGifts")
+  orderedFood       FoodOrder[]        @relation("OrderedFood")
+  messages          Message[]
+  lifeStories       LifeStory[]
+  medications       Medication[]
+  notes             Note[]
   uploadedDocuments Document[]
 
   @@index([email])
@@ -98,8 +99,9 @@ model Family {
   updatedAt   DateTime @updatedAt
   createdBy   String
 
-  creator       User           @relation("FamilyCreator", fields: [createdBy], references: [id])
+  creator       User                 @relation("FamilyCreator", fields: [createdBy], references: [id])
   members       FamilyMember[]
+  invitations   FamilyInvitation[]
   events        Event[]
   costs         Cost[]
   adminFamilies AdminFamily[]
@@ -142,6 +144,33 @@ model FamilyMember {
   @@index([familyId])
   @@index([userId])
   @@index([role])
+}
+
+// Family invitations for pending members
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+model FamilyInvitation {
+  id        String           @id @default(cuid())
+  familyId  String
+  email     String
+  role      FamilyRole       @default(FAMILY_MEMBER)
+  invitedBy String
+  status    InvitationStatus @default(PENDING)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  family  Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  inviter User   @relation(fields: [invitedBy], references: [id], onDelete: Cascade)
+
+  @@unique([familyId, email])
+  @@index([familyId])
+  @@index([email])
+  @@index([status])
 }
 
 // Events (birthdays, appointments, food deliveries)
