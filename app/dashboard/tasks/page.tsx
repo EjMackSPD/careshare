@@ -144,15 +144,24 @@ export default function TasksPage() {
     "Home Maintenance",
   ];
 
-  const filteredTasks = tasks.filter((task) => {
-    const matchesSearch =
-      task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      task.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory =
-      filterCategory === "all" || task.category === filterCategory;
-    const matchesCompleted = showCompleted || !task.completed;
-    return matchesSearch && matchesCategory && matchesCompleted;
-  });
+  const filteredTasks = tasks
+    .filter((task) => {
+      const matchesSearch =
+        task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        task.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory =
+        filterCategory === "all" || task.category === filterCategory;
+      const matchesTab = activeTab === "completed" ? task.completed : !task.completed;
+      return matchesSearch && matchesCategory && matchesTab;
+    })
+    .sort((a, b) => {
+      if (sortBy === "alpha") {
+        return a.title.localeCompare(b.title);
+      } else {
+        // Sort by date (most recent first)
+        return new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime();
+      }
+    });
 
   // Pagination calculations
   const totalPages = Math.ceil(filteredTasks.length / itemsPerPage);
@@ -163,7 +172,7 @@ export default function TasksPage() {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, filterCategory, showCompleted]);
+  }, [searchQuery, filterCategory, activeTab]);
 
   const toggleTask = async (id: string) => {
     const task = tasks.find((t) => t.id === id);
@@ -458,6 +467,42 @@ export default function TasksPage() {
             </button>
           </div>
 
+          {/* Tabs */}
+          <div className={styles.tabsContainer}>
+            <div className={styles.tabs}>
+              <button
+                className={`${styles.tab} ${activeTab === "open" ? styles.activeTab : ""}`}
+                onClick={() => setActiveTab("open")}
+              >
+                Open Tasks
+                <span className={styles.tabCount}>
+                  {tasks.filter(t => !t.completed).length}
+                </span>
+              </button>
+              <button
+                className={`${styles.tab} ${activeTab === "completed" ? styles.activeTab : ""}`}
+                onClick={() => setActiveTab("completed")}
+              >
+                Completed
+                <span className={styles.tabCount}>
+                  {tasks.filter(t => t.completed).length}
+                </span>
+              </button>
+            </div>
+            <div className={styles.sortControl}>
+              <label htmlFor="sortBy">Sort by:</label>
+              <select
+                id="sortBy"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as "alpha" | "date")}
+                className={styles.sortSelect}
+              >
+                <option value="date">Due Date</option>
+                <option value="alpha">Alphabetical</option>
+              </select>
+            </div>
+          </div>
+
           <div className={styles.controls}>
             <div className={styles.searchBox}>
               <Search size={18} />
@@ -475,21 +520,17 @@ export default function TasksPage() {
                 onChange={(e) => setFilterCategory(e.target.value)}
                 className={styles.filterSelect}
               >
-                {categories.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat === "all" ? "Filter by category" : cat}
-                  </option>
-                ))}
+                <option value="all">All Categories</option>
+                <option value="Medication">Medication</option>
+                <option value="Medical">Medical</option>
+                <option value="Transportation">Transportation</option>
+                <option value="Home Care">Home Care</option>
+                <option value="Meal Prep">Meal Prep</option>
+                <option value="Cleaning">Cleaning</option>
+                <option value="Yard Work">Yard Work</option>
+                <option value="Personal Care">Personal Care</option>
+                <option value="Other">Other</option>
               </select>
-
-              <label className={styles.checkbox}>
-                <input
-                  type="checkbox"
-                  checked={showCompleted}
-                  onChange={(e) => setShowCompleted(e.target.checked)}
-                />
-                Show completed
-              </label>
             </div>
           </div>
 
