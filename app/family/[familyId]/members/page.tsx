@@ -49,6 +49,7 @@ export default function FamilyMembers() {
 
   useEffect(() => {
     fetchFamily()
+    fetchInvitations()
   }, [familyId])
 
   const fetchFamily = async () => {
@@ -56,13 +57,66 @@ export default function FamilyMembers() {
       const response = await fetch('/api/families')
       if (response.ok) {
         const families = await response.json()
-        const currentFamily = families.find((f: Family) => f.id === familyId)
-        setFamily(currentFamily || null)
+        const familiesArray = Array.isArray(families) ? families : []
+        const currentFamily = familiesArray.find((f: any) => f.id === familyId)
+        
+        if (currentFamily) {
+          // Fetch members separately
+          const membersRes = await fetch(`/api/families/${familyId}/members`)
+          if (membersRes.ok) {
+            const members = await membersRes.json()
+            setFamily({
+              ...currentFamily,
+              members
+            })
+          }
+        }
       }
-      setLoading(false)
     } catch (error) {
       console.error('Error fetching family:', error)
+    } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchInvitations = async () => {
+    try {
+      const response = await fetch(`/api/families/${familyId}/invitations`)
+      if (response.ok) {
+        const data = await response.json()
+        setInvitations(data)
+      }
+    } catch (error) {
+      console.error('Error fetching invitations:', error)
+    }
+  }
+
+  const handleInvite = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!inviteEmail) return
+
+    setInviting(true)
+    try {
+      const response = await fetch(`/api/families/${familyId}/invitations`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: inviteEmail, role: 'FAMILY_MEMBER' }),
+      })
+
+      if (response.ok) {
+        setInviteEmail('')
+        setShowInviteForm(false)
+        fetchInvitations()
+        alert('Invitation sent successfully!')
+      } else {
+        const error = await response.json()
+        alert(error.error || 'Failed to send invitation')
+      }
+    } catch (error) {
+      console.error('Error sending invitation:', error)
+      alert('Failed to send invitation')
+    } finally {
+      setInviting(false)
     }
   }
 
