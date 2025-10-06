@@ -117,59 +117,27 @@ export default function Home() {
       </section>
 
       {/* Latest Blog Articles */}
-      {latestPosts.length > 0 && (
-        <section className={styles.blogSection}>
-          <div className={styles.blogHeader}>
-            <div>
-              <h2 className={styles.sectionTitle}>
-                <BookOpen size={32} />
-                Latest from Our Blog
-              </h2>
-              <p className={styles.blogSubtitle}>
-                Expert advice and insights for family caregivers
-              </p>
-            </div>
-            <Link href="/blog" className={styles.viewAllBtn}>
-              View All Articles
-              <ArrowRight size={20} />
-            </Link>
-          </div>
-          <div className={styles.blogGrid}>
-            {latestPosts.map((post) => (
-              <Link
-                key={post.id}
-                href={`/blog/${post.slug}`}
-                className={styles.blogCard}
-              >
-                {post.coverImage && (
-                  <div className={styles.blogCardImage}>
-                    <Image
-                      src={post.coverImage}
-                      alt={post.title}
-                      fill
-                      style={{ objectFit: "cover" }}
-                    />
-                  </div>
-                )}
-                <div className={styles.blogCardContent}>
-                  <h3>{post.title}</h3>
-                  <p>{post.excerpt}</p>
-                  <div className={styles.blogCardMeta}>
-                    <span>{post.author}</span>
-                    <span>•</span>
-                    <span>{post.readTime} min read</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
+      <section className={styles.blogSection}>
+        <div className={styles.blogHeader}>
+          <h2>Latest from Our Blog</h2>
+          <Link href="/blog" className={styles.viewAllLink}>
+            View All Posts <ArrowRight size={18} />
+          </Link>
+        </div>
+        <div className={styles.blogPreview}>
+          <p className={styles.blogComingSoon}>
+            📰 Blog posts coming soon! We'll be sharing caregiving tips, family stories, and helpful resources.
+          </p>
+          <Link href="/blog" className={styles.blogCta}>
+            Explore Blog →
+          </Link>
+        </div>
+      </section>
 
       <section className={styles.cta}>
         <h2>Ready to get started?</h2>
         <p>Join families who are caring better, together.</p>
-        <Link href="/signup" className={styles.primaryBtn}>
+        <Link href="/onboarding" className={styles.primaryBtn}>
           Create Your Family Group
         </Link>
       </section>
