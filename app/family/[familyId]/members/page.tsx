@@ -120,14 +120,6 @@ export default function FamilyMembers() {
     }
   }
 
-  const handleInvite = async (e: React.FormEvent) => {
-    e.preventDefault()
-    // TODO: Implement invite functionality
-    alert('Invite feature coming soon! Share the family link with your family members.')
-    setInviteEmail('')
-    setShowInviteForm(false)
-  }
-
   if (loading) {
     return (
       <div className={styles.container}>
