@@ -47,12 +47,28 @@ export default async function Dashboard() {
               eventDate: "asc",
             },
           },
+          tasks: {
+            select: {
+              id: true,
+              status: true,
+              assignedTo: true,
+            },
+          },
         },
       },
     },
   });
 
   const families = familyMembers.map((fm) => fm.family);
+
+  // Calculate task statistics
+  const allTasks = families.flatMap(f => f.tasks);
+  const totalTasks = allTasks.length;
+  const completedTasks = allTasks.filter(t => t.status === 'COMPLETED').length;
+  const unassignedTasks = allTasks.filter(t => 
+    t.status !== 'COMPLETED' && (!t.assignedTo || t.assignedTo.trim() === '')
+  ).length;
+  const openTasks = allTasks.filter(t => t.status !== 'COMPLETED').length;
 
   return (
     <div className={styles.container}>
@@ -74,33 +90,81 @@ export default async function Dashboard() {
           </div>
 
           {families.length > 0 && (
-            <div className={styles.quickStats}>
-              <div className={styles.statCard}>
-                <h3>{families.length}</h3>
-                <p>Active Families</p>
+            <>
+              {/* Task Statistics Row */}
+              <div className={styles.taskStats}>
+                <div className={styles.taskStatCard}>
+                  <div className={styles.statIcon} style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}>
+                    <span className={styles.statEmoji}>📋</span>
+                  </div>
+                  <div className={styles.statInfo}>
+                    <h3>{totalTasks}</h3>
+                    <p>Total Tasks</p>
+                  </div>
+                </div>
+                <div className={styles.taskStatCard}>
+                  <div className={styles.statIcon} style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' }}>
+                    <span className={styles.statEmoji}>🔄</span>
+                  </div>
+                  <div className={styles.statInfo}>
+                    <h3>{openTasks}</h3>
+                    <p>Open Tasks</p>
+                  </div>
+                </div>
+                <div className={styles.taskStatCard}>
+                  <div className={styles.statIcon} style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' }}>
+                    <span className={styles.statEmoji}>⚠️</span>
+                  </div>
+                  <div className={styles.statInfo}>
+                    <h3>{unassignedTasks}</h3>
+                    <p>Unassigned</p>
+                  </div>
+                  {unassignedTasks > 0 && (
+                    <Link href="/dashboard/tasks?tab=unassigned" className={styles.assignNowBtn}>
+                      Assign Now
+                    </Link>
+                  )}
+                </div>
+                <div className={styles.taskStatCard}>
+                  <div className={styles.statIcon} style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}>
+                    <span className={styles.statEmoji}>✓</span>
+                  </div>
+                  <div className={styles.statInfo}>
+                    <h3>{completedTasks}</h3>
+                    <p>Completed</p>
+                  </div>
+                </div>
               </div>
-              <div className={styles.statCard}>
-                <h3>{families.reduce((sum, f) => sum + f.events.length, 0)}</h3>
-                <p>Upcoming Events</p>
+
+              {/* Other Statistics */}
+              <div className={styles.quickStats}>
+                <div className={styles.statCard}>
+                  <h3>{families.length}</h3>
+                  <p>Active Families</p>
+                </div>
+                <div className={styles.statCard}>
+                  <h3>{families.reduce((sum, f) => sum + f.events.length, 0)}</h3>
+                  <p>Upcoming Events</p>
+                </div>
+                <div className={styles.statCard}>
+                  <h3>{families.reduce((sum, f) => sum + f.costs.length, 0)}</h3>
+                  <p>Pending Costs</p>
+                </div>
+                <div className={styles.statCard}>
+                  <h3>
+                    $
+                    {families
+                      .reduce(
+                        (sum, f) =>
+                          sum + f.costs.reduce((s, c) => s + c.amount, 0),
+                        0
+                      )
+                      .toFixed(2)}
+                  </h3>
+                  <p>Total Pending</p>
+                </div>
               </div>
-              <div className={styles.statCard}>
-                <h3>{families.reduce((sum, f) => sum + f.costs.length, 0)}</h3>
-                <p>Pending Costs</p>
-              </div>
-              <div className={styles.statCard}>
-                <h3>
-                  $
-                  {families
-                    .reduce(
-                      (sum, f) =>
-                        sum + f.costs.reduce((s, c) => s + c.amount, 0),
-                      0
-                    )
-                    .toFixed(2)}
-                </h3>
-                <p>Total Pending</p>
-              </div>
-            </div>
+            </>
           )}
 
           {/* Quick Links */}

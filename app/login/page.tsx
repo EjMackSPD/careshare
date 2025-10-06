@@ -208,13 +208,7 @@ export default function Login() {
               >
                 Quick Demo
               </button>
-
-              <Link href="/onboarding" className={styles.onboardingBtn}>
-                Get Started
-              </Link>
             </div>
-
-
             <div className={styles.formFooter}>
               <p>
                 Don&apos;t have an account? <Link href="/onboarding">Sign up</Link>
