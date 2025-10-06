@@ -57,8 +57,7 @@ export default function Navigation({
             !backLink && (
               <div className={styles.navLinks}>
                 <Link href="/blog">Blog</Link>
-                <Link href="/login">Demo</Link>
-                <Link href="/onboarding">Sign Up</Link>
+                <Link href="/login" className={styles.demoLink}>🎮 Try Demo</Link>
               </div>
             )
           )}
