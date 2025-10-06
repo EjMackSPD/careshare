@@ -43,10 +43,21 @@ export async function PATCH(
       )
     }
 
+    // Get current assignments
+    const currentAssignments = await prisma.taskAssignment.findMany({
+      where: { taskId }
+    })
+
     // Parse assignedMembers from body
     const assignedMembers = body.assignedMembers 
       ? (Array.isArray(body.assignedMembers) ? body.assignedMembers : body.assignedMembers.split(',').filter((id: string) => id.trim()))
       : []
+
+    // Auto-assign logic: if marking complete and task has no assignments, assign to current user
+    let finalAssignedMembers = assignedMembers
+    if (body.status === 'COMPLETED' && currentAssignments.length === 0 && assignedMembers.length === 0 && body.autoAssignUserId) {
+      finalAssignedMembers = [body.autoAssignUserId]
+    }
 
     // Delete existing assignments
     await prisma.taskAssignment.deleteMany({
@@ -64,7 +75,7 @@ export async function PATCH(
         dueDate: body.dueDate ? new Date(body.dueDate) : null,
         completedAt: body.status === 'COMPLETED' ? new Date() : null,
         assignments: {
-          create: assignedMembers.map((userId: string) => ({
+          create: finalAssignedMembers.map((userId: string) => ({
             userId: userId.trim()
           }))
         }

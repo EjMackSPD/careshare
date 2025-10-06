@@ -220,7 +220,7 @@ function TasksPageContent() {
   // TASK ACTIONS
   // ============================================
 
-  const toggleTask = async (id: string) => {
+  const toggleTask = async (id: string, currentUserId?: string) => {
     const task = tasks.find((t) => t.id === id);
     if (!task) return;
 
@@ -231,17 +231,38 @@ function TasksPageContent() {
       const res = await fetch(`/api/tasks/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus, completedAt }),
+        body: JSON.stringify({ 
+          status: newStatus, 
+          completedAt,
+          autoAssignUserId: currentUserId // Pass current user ID for auto-assignment
+        }),
       });
 
       if (!res.ok) throw new Error("Failed to update task");
 
-      // Update local state
-      setTasks(tasks.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
+      const updatedTask = await res.json();
+
+      // Update local state with the returned task data (which may have new assignments)
+      setTasks(tasks.map((t) => {
+        if (t.id === id) {
+          return {
+            ...t,
+            completed: !t.completed,
+            assignedTo: updatedTask.assignments?.map((a: any) => a.userId).join(",") || t.assignedTo,
+            assignedToName: updatedTask.assignments?.map((a: any) => a.user.name || a.user.email).join(", ") || t.assignedToName,
+          };
+        }
+        return t;
+      }));
 
       // Show success toast
       if (!task.completed) {
-        showToast(`✓ Task "${task.title}" marked as complete!`, 'success');
+        const wasUnassigned = !task.assignedTo || task.assignedTo === '';
+        if (wasUnassigned && currentUserId) {
+          showToast(`✓ Task "${task.title}" marked as complete and assigned to you!`, 'success');
+        } else {
+          showToast(`✓ Task "${task.title}" marked as complete!`, 'success');
+        }
       }
     } catch (error) {
       console.error("Error updating task:", error);
@@ -837,7 +858,7 @@ function TasksPageContent() {
                         <input
                           type="checkbox"
                           checked={task.completed}
-                          onChange={() => toggleTask(task.id)}
+                          onChange={() => toggleTask(task.id, currentUserId)}
                           className={styles.taskCheckbox}
                           title={task.completed ? "Unmark as complete" : "Mark as complete"}
                         />
