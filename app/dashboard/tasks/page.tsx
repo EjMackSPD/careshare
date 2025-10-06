@@ -469,12 +469,32 @@ export default function TasksPage() {
                 Manage and track tasks for your loved ones
               </p>
             </div>
-            <button
-              className={styles.addTaskBtn}
-              onClick={() => setShowAddTask(!showAddTask)}
-            >
-              + Add Task
-            </button>
+            <div className={styles.headerActions}>
+              {families.length > 1 && (
+                <div className={styles.familySelector}>
+                  <label htmlFor="familySelect">Family:</label>
+                  <select
+                    id="familySelect"
+                    value={selectedFamily}
+                    onChange={(e) => setSelectedFamily(e.target.value)}
+                    className={styles.familySelect}
+                  >
+                    {families.map((family) => (
+                      <option key={family.id} value={family.id}>
+                        {family.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              <button
+                className={styles.addTaskBtn}
+                onClick={() => setShowAddTask(!showAddTask)}
+                disabled={!selectedFamily}
+              >
+                + Add Task
+              </button>
+            </div>
           </div>
 
           {/* Tabs */}
@@ -561,7 +581,14 @@ export default function TasksPage() {
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className={styles.modalHeader}>
-                  <h2>{editingTask ? "Edit Task" : "Add New Task"}</h2>
+                  <div>
+                    <h2>{editingTask ? "Edit Task" : "Add New Task"}</h2>
+                    {currentFamily && (
+                      <p className={styles.modalFamilyName}>
+                        For: {currentFamily.name}
+                      </p>
+                    )}
+                  </div>
                   <button
                     className={styles.closeBtn}
                     onClick={() => setShowAddTask(false)}
@@ -784,7 +811,14 @@ export default function TasksPage() {
 
           <div className={styles.tasksSection}>
             <div className={styles.tasksSectionHeader}>
-              <h2>Tasks</h2>
+              <div>
+                <h2>Tasks</h2>
+                {currentFamily && (
+                  <p className={styles.familyLabel}>
+                    {currentFamily.name}
+                  </p>
+                )}
+              </div>
               <p className={styles.taskCount}>
                 Showing {filteredTasks.length} of {tasks.length} tasks
               </p>
