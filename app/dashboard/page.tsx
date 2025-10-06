@@ -52,6 +52,11 @@ export default async function Dashboard() {
               id: true,
               status: true,
               assignedTo: true,
+              assignments: {
+                select: {
+                  userId: true,
+                },
+              },
             },
           },
         },
@@ -65,9 +70,12 @@ export default async function Dashboard() {
   const allTasks = families.flatMap(f => f.tasks);
   const totalTasks = allTasks.length;
   const completedTasks = allTasks.filter(t => t.status === 'COMPLETED').length;
-  const unassignedTasks = allTasks.filter(t => 
-    t.status !== 'COMPLETED' && (!t.assignedTo || t.assignedTo.trim() === '')
-  ).length;
+  const unassignedTasks = allTasks.filter(t => {
+    // Task is unassigned if it's not completed AND has no assignments
+    const hasNoAssignments = !t.assignments || t.assignments.length === 0;
+    const hasNoLegacyAssignment = !t.assignedTo || t.assignedTo.trim() === '';
+    return t.status !== 'COMPLETED' && hasNoAssignments && hasNoLegacyAssignment;
+  }).length;
   const openTasks = allTasks.filter(t => t.status !== 'COMPLETED').length;
 
   return (
