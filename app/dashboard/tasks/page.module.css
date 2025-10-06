@@ -608,11 +608,26 @@
   border-bottom: 1px solid #e9ecef;
 }
 
+.modalHeader > div {
+  flex: 1;
+}
+
 .modalHeader h2 {
   font-size: 1.5rem;
   font-weight: 600;
   color: #212529;
+  margin: 0 0 0.25rem 0;
+}
+
+.modalFamilyName {
   margin: 0;
+  font-size: 0.875rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.modalFamilyName::before {
+  content: "📋 ";
 }
 
 .closeBtn {
