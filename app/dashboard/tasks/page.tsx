@@ -45,7 +45,8 @@ export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
-  const [showCompleted, setShowCompleted] = useState(false);
+  const [activeTab, setActiveTab] = useState<"open" | "completed">("open");
+  const [sortBy, setSortBy] = useState<"alpha" | "date">("date");
   const [showAddTask, setShowAddTask] = useState(false);
   const [families, setFamilies] = useState<Family[]>([]);
   const [selectedFamily, setSelectedFamily] = useState<string>("");
