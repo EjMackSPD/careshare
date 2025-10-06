@@ -822,11 +822,6 @@ export default function TasksPage() {
             <div className={styles.tasksSectionHeader}>
               <div>
                 <h2>Tasks</h2>
-                {currentFamily && (
-                  <p className={styles.familyLabel}>
-                    {currentFamily.name}
-                  </p>
-                )}
               </div>
               <p className={styles.taskCount}>
                 Showing {filteredTasks.length} of {tasks.length} tasks

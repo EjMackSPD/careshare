@@ -13,7 +13,7 @@ import CalendarWidget from "../components/widgets/CalendarWidget";
 import CollaborationWidget from "../components/widgets/CollaborationWidget";
 import ResourcesWidget from "../components/widgets/ResourcesWidget";
 import CarePlanWidget from "../components/widgets/CarePlanWidget";
-import { CheckSquare, Calendar as CalendarIcon, Wallet, Heart, Gift, UtensilsCrossed, Cake, Stethoscope, UserCheck, Clock } from "lucide-react";
+import { CheckSquare, Calendar as CalendarIcon, Wallet, Heart, Gift, UtensilsCrossed, Cake, Stethoscope, UserCheck, Clock, ClipboardList, DollarSign, CalendarDays } from "lucide-react";
 import styles from "./page.module.css";
 
 export default async function Dashboard() {
@@ -125,7 +125,12 @@ export default async function Dashboard() {
               {/* Task Statistics Group */}
               <div className={styles.statsGroup}>
                 <div className={styles.statsGroupHeader}>
-                  <h3>📋 Tasks Overview</h3>
+                  <div className={styles.groupHeaderTitle}>
+                    <div className={styles.groupIcon}>
+                      <ClipboardList size={18} />
+                    </div>
+                    <h3>Tasks Overview</h3>
+                  </div>
                   <Link href="/dashboard/tasks" className={styles.viewAllLink}>
                     View All →
                   </Link>
@@ -158,7 +163,12 @@ export default async function Dashboard() {
               {/* Financial Statistics Group */}
               <div className={styles.statsGroup}>
                 <div className={styles.statsGroupHeader}>
-                  <h3>💰 Financial Overview</h3>
+                  <div className={styles.groupHeaderTitle}>
+                    <div className={styles.groupIcon}>
+                      <DollarSign size={18} />
+                    </div>
+                    <h3>Financial Overview</h3>
+                  </div>
                   <Link href="/dashboard/finances" className={styles.viewAllLink}>
                     View All →
                   </Link>
@@ -180,7 +190,12 @@ export default async function Dashboard() {
               {/* Calendar Statistics Group */}
               <div className={styles.statsGroup}>
                 <div className={styles.statsGroupHeader}>
-                  <h3>📅 Calendar Overview</h3>
+                  <div className={styles.groupHeaderTitle}>
+                    <div className={styles.groupIcon}>
+                      <CalendarDays size={18} />
+                    </div>
+                    <h3>Calendar Overview</h3>
+                  </div>
                   <Link href="/dashboard/calendar" className={styles.viewAllLink}>
                     View All →
                   </Link>
