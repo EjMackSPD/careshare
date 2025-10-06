@@ -49,16 +49,18 @@
   color: #2563eb;
 }
 
-.signupBtn {
-  background: #2563eb;
+.demoBtn {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   color: white !important;
   padding: 0.5rem 1.5rem;
   border-radius: 0.5rem;
-  transition: background 0.2s;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
 }
 
-.signupBtn:hover {
-  background: #1d4ed8;
+.demoBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
 }
 
 /* Mobile Menu Styles */

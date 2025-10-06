@@ -36,8 +36,8 @@ export default function MarketingNav() {
           <Link href="/blog">Blog</Link>
           <Link href="/partnerships">Partnerships</Link>
           <Link href="/login">Login</Link>
-          <Link href="/signup" className={styles.signupBtn}>
-            Sign Up
+          <Link href="/login" className={styles.demoBtn}>
+            🎮 Try Demo
           </Link>
         </div>
 
@@ -66,11 +66,11 @@ export default function MarketingNav() {
               Login
             </Link>
             <Link
-              href="/signup"
+              href="/login"
               className={styles.mobileSignupBtn}
               onClick={closeMobileMenu}
             >
-              Sign Up
+              🎮 Try Demo
             </Link>
           </div>
         )}
