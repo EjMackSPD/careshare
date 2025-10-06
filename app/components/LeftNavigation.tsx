@@ -66,7 +66,7 @@ const adminMenuItems = [
 
 const accountMenuItems = [
   { href: "/profile", label: "My Profile", icon: UserCircle },
-  { href: "/api/auth/signout", label: "Sign Out", icon: LogOut },
+  { href: "/signout", label: "Sign Out", icon: LogOut },
 ];
 
 type Family = {
