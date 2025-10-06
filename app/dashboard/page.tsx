@@ -48,15 +48,8 @@ export default async function Dashboard() {
             },
           },
           tasks: {
-            select: {
-              id: true,
-              status: true,
-              assignedTo: true,
-              assignments: {
-                select: {
-                  userId: true,
-                },
-              },
+            include: {
+              assignments: true,
             },
           },
         },
