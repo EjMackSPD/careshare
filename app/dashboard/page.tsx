@@ -90,81 +90,82 @@ export default async function Dashboard() {
           </div>
 
           {families.length > 0 && (
-            <>
-              {/* Task Statistics Row */}
-              <div className={styles.taskStats}>
-                <div className={styles.taskStatCard}>
-                  <div className={styles.statIcon} style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' }}>
-                    <span className={styles.statEmoji}>📋</span>
-                  </div>
-                  <div className={styles.statInfo}>
-                    <h3>{totalTasks}</h3>
-                    <p>Total Tasks</p>
-                  </div>
+            <div className={styles.statsOverview}>
+              {/* Task Statistics Group */}
+              <div className={styles.statsGroup}>
+                <div className={styles.statsGroupHeader}>
+                  <h3>📋 Tasks Overview</h3>
+                  <Link href="/dashboard/tasks" className={styles.viewAllLink}>
+                    View All →
+                  </Link>
                 </div>
-                <div className={styles.taskStatCard}>
-                  <div className={styles.statIcon} style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' }}>
-                    <span className={styles.statEmoji}>🔄</span>
+                <div className={styles.miniStats}>
+                  <div className={styles.miniStatCard}>
+                    <div className={styles.miniStatNumber}>{totalTasks}</div>
+                    <div className={styles.miniStatLabel}>Total</div>
                   </div>
-                  <div className={styles.statInfo}>
-                    <h3>{openTasks}</h3>
-                    <p>Open Tasks</p>
+                  <div className={styles.miniStatCard}>
+                    <div className={styles.miniStatNumber} style={{ color: '#3b82f6' }}>{openTasks}</div>
+                    <div className={styles.miniStatLabel}>Open</div>
                   </div>
-                </div>
-                <div className={styles.taskStatCard}>
-                  <div className={styles.statIcon} style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' }}>
-                    <span className={styles.statEmoji}>⚠️</span>
+                  <div className={`${styles.miniStatCard} ${unassignedTasks > 0 ? styles.warning : ''}`}>
+                    <div className={styles.miniStatNumber} style={{ color: '#f59e0b' }}>{unassignedTasks}</div>
+                    <div className={styles.miniStatLabel}>Unassigned</div>
+                    {unassignedTasks > 0 && (
+                      <Link href="/dashboard/tasks?tab=unassigned" className={styles.miniAssignBtn}>
+                        Assign
+                      </Link>
+                    )}
                   </div>
-                  <div className={styles.statInfo}>
-                    <h3>{unassignedTasks}</h3>
-                    <p>Unassigned</p>
-                  </div>
-                  {unassignedTasks > 0 && (
-                    <Link href="/dashboard/tasks?tab=unassigned" className={styles.assignNowBtn}>
-                      Assign Now
-                    </Link>
-                  )}
-                </div>
-                <div className={styles.taskStatCard}>
-                  <div className={styles.statIcon} style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}>
-                    <span className={styles.statEmoji}>✓</span>
-                  </div>
-                  <div className={styles.statInfo}>
-                    <h3>{completedTasks}</h3>
-                    <p>Completed</p>
+                  <div className={styles.miniStatCard}>
+                    <div className={styles.miniStatNumber} style={{ color: '#10b981' }}>{completedTasks}</div>
+                    <div className={styles.miniStatLabel}>Done</div>
                   </div>
                 </div>
               </div>
 
-              {/* Other Statistics */}
-              <div className={styles.quickStats}>
-                <div className={styles.statCard}>
-                  <h3>{families.length}</h3>
-                  <p>Active Families</p>
+              {/* Financial Statistics Group */}
+              <div className={styles.statsGroup}>
+                <div className={styles.statsGroupHeader}>
+                  <h3>💰 Financial Overview</h3>
+                  <Link href="/dashboard/finances" className={styles.viewAllLink}>
+                    View All →
+                  </Link>
                 </div>
-                <div className={styles.statCard}>
-                  <h3>{families.reduce((sum, f) => sum + f.events.length, 0)}</h3>
-                  <p>Upcoming Events</p>
-                </div>
-                <div className={styles.statCard}>
-                  <h3>{families.reduce((sum, f) => sum + f.costs.length, 0)}</h3>
-                  <p>Pending Costs</p>
-                </div>
-                <div className={styles.statCard}>
-                  <h3>
-                    $
-                    {families
-                      .reduce(
-                        (sum, f) =>
-                          sum + f.costs.reduce((s, c) => s + c.amount, 0),
-                        0
-                      )
-                      .toFixed(2)}
-                  </h3>
-                  <p>Total Pending</p>
+                <div className={styles.miniStats}>
+                  <div className={styles.miniStatCard}>
+                    <div className={styles.miniStatNumber}>{families.reduce((sum, f) => sum + f.costs.length, 0)}</div>
+                    <div className={styles.miniStatLabel}>Pending Bills</div>
+                  </div>
+                  <div className={styles.miniStatCard}>
+                    <div className={styles.miniStatNumber} style={{ color: '#6366f1' }}>
+                      ${families.reduce((sum, f) => sum + f.costs.reduce((s, c) => s + c.amount, 0), 0).toFixed(0)}
+                    </div>
+                    <div className={styles.miniStatLabel}>Total Due</div>
+                  </div>
                 </div>
               </div>
-            </>
+
+              {/* Calendar Statistics Group */}
+              <div className={styles.statsGroup}>
+                <div className={styles.statsGroupHeader}>
+                  <h3>📅 Calendar Overview</h3>
+                  <Link href="/dashboard/calendar" className={styles.viewAllLink}>
+                    View All →
+                  </Link>
+                </div>
+                <div className={styles.miniStats}>
+                  <div className={styles.miniStatCard}>
+                    <div className={styles.miniStatNumber}>{families.reduce((sum, f) => sum + f.events.length, 0)}</div>
+                    <div className={styles.miniStatLabel}>Upcoming Events</div>
+                  </div>
+                  <div className={styles.miniStatCard}>
+                    <div className={styles.miniStatNumber}>{families.length}</div>
+                    <div className={styles.miniStatLabel}>Families</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
 
           {/* Quick Links */}
