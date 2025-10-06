@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
+import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Navigation from "@/app/components/Navigation";
 import LeftNavigation from "@/app/components/LeftNavigation";
@@ -51,6 +52,8 @@ type Family = {
 function TasksPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { data: session } = useSession();
+  const currentUserId = session?.user?.id;
 
   // State: Tasks and Filters
   const [tasks, setTasks] = useState<Task[]>([]);
