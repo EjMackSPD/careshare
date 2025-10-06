@@ -64,9 +64,6 @@ export default function Home() {
             <Link href="/signup" className={styles.primaryBtn}>
               Get Started Free
             </Link>
-            <Link href="/demo" className={styles.secondaryBtn}>
-              See How It Works
-            </Link>
           </div>
         </div>
       </section>
