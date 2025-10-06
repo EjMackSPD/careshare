@@ -221,7 +221,7 @@ export default function Login() {
 
             <div className={styles.formFooter}>
               <p>
-                Don&apos;t have an account? <Link href="/signup">Sign up</Link>
+                Don&apos;t have an account? <Link href="/onboarding">Sign up</Link>
               </p>
               <p className={styles.adminLink}>
                 <Link href="/admin/login">Care Provider Login →</Link>

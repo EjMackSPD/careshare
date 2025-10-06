@@ -61,7 +61,7 @@ export default function Home() {
             place.
           </p>
           <div className={styles.heroButtons}>
-            <Link href="/signup" className={styles.primaryBtn}>
+            <Link href="/onboarding" className={styles.primaryBtn}>
               Get Started Free
             </Link>
           </div>

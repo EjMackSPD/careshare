@@ -58,7 +58,7 @@ export default function Navigation({
               <div className={styles.navLinks}>
                 <Link href="/blog">Blog</Link>
                 <Link href="/login">Demo</Link>
-                <Link href="/signup">Sign Up</Link>
+                <Link href="/onboarding">Sign Up</Link>
               </div>
             )
           )}
