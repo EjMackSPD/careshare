@@ -45,7 +45,7 @@ export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
-  const [activeTab, setActiveTab] = useState<"open" | "completed">("open");
+  const [activeTab, setActiveTab] = useState<"open" | "unassigned" | "completed">("open");
   const [sortBy, setSortBy] = useState<"alpha" | "date">("date");
   const [showAddTask, setShowAddTask] = useState(false);
   const [families, setFamilies] = useState<Family[]>([]);
@@ -151,7 +151,17 @@ export default function TasksPage() {
         task.description.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesCategory =
         filterCategory === "all" || task.category === filterCategory;
-      const matchesTab = activeTab === "completed" ? task.completed : !task.completed;
+      
+      let matchesTab = false;
+      if (activeTab === "completed") {
+        matchesTab = task.completed;
+      } else if (activeTab === "unassigned") {
+        matchesTab = !task.completed && (!task.assignedTo || task.assignedTo.trim() === "");
+      } else {
+        // "open" tab - all non-completed tasks
+        matchesTab = !task.completed;
+      }
+      
       return matchesSearch && matchesCategory && matchesTab;
     })
     .sort((a, b) => {
@@ -480,6 +490,15 @@ export default function TasksPage() {
                 </span>
               </button>
               <button
+                className={`${styles.tab} ${activeTab === "unassigned" ? styles.activeTab : ""} ${styles.unassignedTab}`}
+                onClick={() => setActiveTab("unassigned")}
+              >
+                Unassigned
+                <span className={`${styles.tabCount} ${styles.warningCount}`}>
+                  {tasks.filter(t => !t.completed && (!t.assignedTo || t.assignedTo.trim() === "")).length}
+                </span>
+              </button>
+              <button
                 className={`${styles.tab} ${activeTab === "completed" ? styles.activeTab : ""}`}
                 onClick={() => setActiveTab("completed")}
               >
@@ -779,12 +798,14 @@ export default function TasksPage() {
             ) : (
               <>
                 <div className={styles.tasksList}>
-                  {paginatedTasks.map((task) => (
+                  {paginatedTasks.map((task) => {
+                    const isUnassigned = !task.assignedTo || task.assignedTo.trim() === "";
+                    return (
                     <div
                       key={task.id}
                       className={`${styles.taskCard} ${
                         task.completed ? styles.completed : ""
-                      }`}
+                      } ${isUnassigned && !task.completed ? styles.unassigned : ""}`}
                     >
                       <input
                         type="checkbox"
@@ -833,9 +854,13 @@ export default function TasksPage() {
                               task.priority.slice(1).toLowerCase()}{" "}
                             Priority
                           </span>
-                          {task.assignedToName && (
+                          {task.assignedToName ? (
                             <span className={styles.assignedBadge}>
                               Assigned to: {task.assignedToName}
+                            </span>
+                          ) : (
+                            <span className={styles.unassignedBadge}>
+                              ⚠ Unassigned - Click to assign
                             </span>
                           )}
                           {needsThirdParty(task.category) && (
@@ -868,7 +893,8 @@ export default function TasksPage() {
                         </button>
                       </div>
                     </div>
-                  ))}
+                  );
+                  })}
                 </div>
 
                 {/* Pagination */}

@@ -165,6 +165,36 @@
   color: #6c757d;
 }
 
+.unassignedTab:not(.activeTab) {
+  position: relative;
+}
+
+.unassignedTab:not(.activeTab)::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  background: #ef4444;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+.activeTab.unassignedTab {
+  color: #dc2626;
+}
+
+.warningCount {
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+}
+
+.activeTab .warningCount {
+  background: #dc2626 !important;
+  color: white !important;
+}
+
 .sortControl {
   display: flex;
   align-items: center;
