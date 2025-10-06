@@ -64,6 +64,9 @@ export default function Home() {
             <Link href="/onboarding" className={styles.primaryBtn}>
               Get Started Free
             </Link>
+            <Link href="/login" className={styles.demoBtn}>
+              🎮 Quick Demo
+            </Link>
           </div>
         </div>
       </section>
