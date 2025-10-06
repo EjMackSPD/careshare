@@ -13,7 +13,21 @@ import CalendarWidget from "../components/widgets/CalendarWidget";
 import CollaborationWidget from "../components/widgets/CollaborationWidget";
 import ResourcesWidget from "../components/widgets/ResourcesWidget";
 import CarePlanWidget from "../components/widgets/CarePlanWidget";
-import { CheckSquare, Calendar as CalendarIcon, Wallet, Heart, Gift, UtensilsCrossed, Cake, Stethoscope, UserCheck, Clock, ClipboardList, DollarSign, CalendarDays } from "lucide-react";
+import {
+  CheckSquare,
+  Calendar as CalendarIcon,
+  Wallet,
+  Heart,
+  Gift,
+  UtensilsCrossed,
+  Cake,
+  Stethoscope,
+  UserCheck,
+  Clock,
+  ClipboardList,
+  DollarSign,
+  CalendarDays,
+} from "lucide-react";
 import styles from "./page.module.css";
 
 export default async function Dashboard() {
@@ -61,17 +75,19 @@ export default async function Dashboard() {
   const families = familyMembers.map((fm) => fm.family);
 
   // Calculate task statistics
-  const allTasks = families.flatMap(f => f.tasks);
+  const allTasks = families.flatMap((f) => f.tasks);
   const totalTasks = allTasks.length;
-  const completedTasks = allTasks.filter(t => t.status === 'COMPLETED').length;
-  const unassignedTasks = allTasks.filter(t => {
+  const completedTasks = allTasks.filter(
+    (t) => t.status === "COMPLETED"
+  ).length;
+  const unassignedTasks = allTasks.filter((t) => {
     // Task is unassigned if it's not completed AND has no assignments
     const hasNoAssignments = !t.assignments || t.assignments.length === 0;
-    return t.status !== 'COMPLETED' && hasNoAssignments;
+    return t.status !== "COMPLETED" && hasNoAssignments;
   }).length;
-  const openTasks = allTasks.filter(t => t.status !== 'COMPLETED').length;
+  const openTasks = allTasks.filter((t) => t.status !== "COMPLETED").length;
 
-  console.log('Dashboard Task Stats:', {
+  console.log("Dashboard Task Stats:", {
     totalTasks,
     completedTasks,
     unassignedTasks,
@@ -90,9 +106,9 @@ export default async function Dashboard() {
           {families.length > 0 && families[0]?.elderName && (
             <div className={styles.profileHeader}>
               <div className={styles.coverPhoto}>
-                <img 
-                  src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=1200&h=300&fit=crop" 
-                  alt="Cover" 
+                <img
+                  src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=1200&h=300&fit=crop"
+                  alt="Cover"
                   className={styles.coverImage}
                 />
                 <div className={styles.coverOverlay}></div>
@@ -136,23 +152,54 @@ export default async function Dashboard() {
                   </Link>
                 </div>
                 <div className={styles.inlineStats}>
-                  <Link href="/dashboard/tasks" className={styles.inlineStatLink}>
-                    <span className={styles.inlineStatNumber}>{totalTasks}</span>
+                  <Link
+                    href="/dashboard/tasks"
+                    className={styles.inlineStatLink}
+                  >
+                    <span className={styles.inlineStatNumber}>
+                      {totalTasks}
+                    </span>
                     <span className={styles.inlineStatLabel}>Total</span>
                   </Link>
                   <div className={styles.statDivider}></div>
-                  <Link href="/dashboard/tasks?tab=open" className={styles.inlineStatLink}>
-                    <span className={styles.inlineStatNumber} style={{ color: '#3b82f6' }}>{openTasks}</span>
+                  <Link
+                    href="/dashboard/tasks?tab=open"
+                    className={styles.inlineStatLink}
+                  >
+                    <span
+                      className={styles.inlineStatNumber}
+                      style={{ color: "#3b82f6" }}
+                    >
+                      {openTasks}
+                    </span>
                     <span className={styles.inlineStatLabel}>Open</span>
                   </Link>
                   <div className={styles.statDivider}></div>
-                  <Link href="/dashboard/tasks?tab=unassigned" className={`${styles.inlineStatLink} ${unassignedTasks > 0 ? styles.warningLink : ''}`}>
-                    <span className={styles.inlineStatNumber} style={{ color: '#f59e0b' }}>{unassignedTasks}</span>
+                  <Link
+                    href="/dashboard/tasks?tab=unassigned"
+                    className={`${styles.inlineStatLink} ${
+                      unassignedTasks > 0 ? styles.warningLink : ""
+                    }`}
+                  >
+                    <span
+                      className={styles.inlineStatNumber}
+                      style={{ color: "#f59e0b" }}
+                    >
+                      {unassignedTasks}
+                    </span>
                     <span className={styles.inlineStatLabel}>Unassigned</span>
                   </Link>
                   <div className={styles.statDivider}></div>
-                  <Link href="/dashboard/tasks?tab=completed" className={styles.inlineStatLink}>
-                    <span className={styles.inlineStatNumber} style={{ color: '#10b981' }}>{completedTasks}</span>
+                  <Link
+                    href="/dashboard/tasks?tab=completed"
+                    className={styles.inlineStatLink}
+                  >
+                    <span
+                      className={styles.inlineStatNumber}
+                      style={{ color: "#10b981" }}
+                    >
+                      {completedTasks}
+                    </span>
                     <span className={styles.inlineStatLabel}>Completed</span>
                   </Link>
                 </div>
@@ -167,18 +214,33 @@ export default async function Dashboard() {
                     </div>
                     <h3>Financial Overview</h3>
                   </div>
-                  <Link href="/dashboard/finances" className={styles.viewAllLink}>
+                  <Link
+                    href="/dashboard/finances"
+                    className={styles.viewAllLink}
+                  >
                     View All →
                   </Link>
                 </div>
                 <div className={styles.miniStats}>
                   <div className={styles.miniStatCard}>
-                    <div className={styles.miniStatNumber}>{families.reduce((sum, f) => sum + f.costs.length, 0)}</div>
+                    <div className={styles.miniStatNumber}>
+                      {families.reduce((sum, f) => sum + f.costs.length, 0)}
+                    </div>
                     <div className={styles.miniStatLabel}>Pending Bills</div>
                   </div>
                   <div className={styles.miniStatCard}>
-                    <div className={styles.miniStatNumber} style={{ color: '#6366f1' }}>
-                      ${families.reduce((sum, f) => sum + f.costs.reduce((s, c) => s + c.amount, 0), 0).toFixed(0)}
+                    <div
+                      className={styles.miniStatNumber}
+                      style={{ color: "#6366f1" }}
+                    >
+                      $
+                      {families
+                        .reduce(
+                          (sum, f) =>
+                            sum + f.costs.reduce((s, c) => s + c.amount, 0),
+                          0
+                        )
+                        .toFixed(0)}
                     </div>
                     <div className={styles.miniStatLabel}>Total Due</div>
                   </div>
@@ -194,13 +256,18 @@ export default async function Dashboard() {
                     </div>
                     <h3>Calendar Overview</h3>
                   </div>
-                  <Link href="/dashboard/calendar" className={styles.addEventBtn}>
+                  <Link
+                    href="/dashboard/calendar"
+                    className={styles.addEventBtn}
+                  >
                     + Add Event
                   </Link>
                 </div>
                 <div className={styles.miniStats}>
                   <div className={styles.miniStatCard}>
-                    <div className={styles.miniStatNumber}>{families.reduce((sum, f) => sum + f.events.length, 0)}</div>
+                    <div className={styles.miniStatNumber}>
+                      {families.reduce((sum, f) => sum + f.events.length, 0)}
+                    </div>
                     <div className={styles.miniStatLabel}>Upcoming Events</div>
                   </div>
                 </div>
@@ -331,11 +398,21 @@ export default async function Dashboard() {
                             {family.events.map((event) => (
                               <li key={event.id}>
                                 <div className={styles.eventIconWrapper}>
-                                  {event.type === "BIRTHDAY" && <Cake size={16} />}
-                                  {event.type === "APPOINTMENT" && <Stethoscope size={16} />}
-                                  {event.type === "FOOD_DELIVERY" && <UtensilsCrossed size={16} />}
-                                  {event.type === "VISIT" && <UserCheck size={16} />}
-                                  {event.type === "OTHER" && <Clock size={16} />}
+                                  {event.type === "BIRTHDAY" && (
+                                    <Cake size={16} />
+                                  )}
+                                  {event.type === "APPOINTMENT" && (
+                                    <Stethoscope size={16} />
+                                  )}
+                                  {event.type === "FOOD_DELIVERY" && (
+                                    <UtensilsCrossed size={16} />
+                                  )}
+                                  {event.type === "VISIT" && (
+                                    <UserCheck size={16} />
+                                  )}
+                                  {event.type === "OTHER" && (
+                                    <Clock size={16} />
+                                  )}
                                 </div>
                                 <div>
                                   <strong>{event.title}</strong>

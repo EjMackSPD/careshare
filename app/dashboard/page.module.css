@@ -84,8 +84,8 @@
   right: 0;
   bottom: 0;
   background: linear-gradient(
-    to bottom, 
-    rgba(0, 0, 0, 0.1) 0%, 
+    to bottom,
+    rgba(0, 0, 0, 0.1) 0%,
     rgba(0, 0, 0, 0.25) 70%,
     rgba(0, 0, 0, 0.4) 100%
   );
@@ -105,8 +105,8 @@
   -webkit-backdrop-filter: blur(24px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 1rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 
-              inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
 .profileImage {
@@ -348,7 +348,6 @@
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
-
 .list strong {
   color: #212529;
 }
@@ -385,9 +384,15 @@
   animation: fadeInUp 0.5s ease-out backwards;
 }
 
-.statsGroup:nth-child(1) { animation-delay: 0s; }
-.statsGroup:nth-child(2) { animation-delay: 0.1s; }
-.statsGroup:nth-child(3) { animation-delay: 0.2s; }
+.statsGroup:nth-child(1) {
+  animation-delay: 0s;
+}
+.statsGroup:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.statsGroup:nth-child(3) {
+  animation-delay: 0.2s;
+}
 
 @keyframes fadeInUp {
   from {
@@ -483,7 +488,7 @@
 .inlineStats {
   display: flex;
   align-items: center;
-  gap: .25rem;
+  gap: 0.25rem;
   padding: 0.75rem 0;
 }
 

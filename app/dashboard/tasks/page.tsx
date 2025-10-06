@@ -506,14 +506,20 @@ function TasksPageContent() {
       <div className={styles.layout}>
         <LeftNavigation />
         <main className={styles.main}>
-          {/* Page Header */}
-          <div className={styles.pageHeader}>
-            <div>
-              <h1>Tasks & Responsibilities</h1>
-              <p className={styles.subtitle}>
-                Manage and track tasks for your loved ones
-              </p>
+          {/* Page Header with Background Image */}
+          <div className={styles.heroHeader}>
+            <div className={styles.heroOverlay}>
+              <div className={styles.heroContent}>
+                <h1>Tasks & Responsibilities</h1>
+                <p className={styles.subtitle}>
+                  Manage and track tasks for your loved ones
+                </p>
+              </div>
             </div>
+          </div>
+
+          {/* Header Actions */}
+          <div className={styles.headerActionsWrapper}>
             <div className={styles.headerActions}>
               {/* Family Selector (if multiple families) */}
               {families.length > 1 && (
