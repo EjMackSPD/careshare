@@ -16,34 +16,7 @@ import {
   BookOpen,
 } from "lucide-react";
 
-type BlogPost = {
-  id: string;
-  title: string;
-  slug: string;
-  excerpt: string;
-  author: string;
-  coverImage: string | null;
-  readTime: number;
-  category: string;
-};
-
 export default function Home() {
-  const [latestPosts, setLatestPosts] = useState<BlogPost[]>([]);
-
-  useEffect(() => {
-    async function fetchLatestPosts() {
-      try {
-        const res = await fetch("/api/blog?limit=3");
-        if (res.ok) {
-          const data = await res.json();
-          setLatestPosts(data);
-        }
-      } catch (error) {
-        console.error("Error fetching blog posts:", error);
-      }
-    }
-    fetchLatestPosts();
-  }, []);
 
   return (
     <main className={styles.main}>
