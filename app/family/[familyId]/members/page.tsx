@@ -19,6 +19,18 @@ type Member = {
   joinedAt: string
 }
 
+type Invitation = {
+  id: string
+  email: string
+  role: string
+  status: string
+  createdAt: string
+  inviter: {
+    name: string | null
+    email: string
+  }
+}
+
 type Family = {
   id: string
   name: string
@@ -29,9 +41,11 @@ export default function FamilyMembers() {
   const params = useParams()
   const familyId = params.familyId as string
   const [family, setFamily] = useState<Family | null>(null)
+  const [invitations, setInvitations] = useState<Invitation[]>([])
   const [loading, setLoading] = useState(true)
   const [showInviteForm, setShowInviteForm] = useState(false)
   const [inviteEmail, setInviteEmail] = useState('')
+  const [inviting, setInviting] = useState(false)
 
   useEffect(() => {
     fetchFamily()
