@@ -13,7 +13,7 @@ import CalendarWidget from "../components/widgets/CalendarWidget";
 import CollaborationWidget from "../components/widgets/CollaborationWidget";
 import ResourcesWidget from "../components/widgets/ResourcesWidget";
 import CarePlanWidget from "../components/widgets/CarePlanWidget";
-import { CheckSquare, Calendar, Wallet, Heart, Gift, UtensilsCrossed } from "lucide-react";
+import { CheckSquare, Calendar as CalendarIcon, Wallet, Heart, Gift, UtensilsCrossed, Cake, Stethoscope, UserCheck, Clock } from "lucide-react";
 import styles from "./page.module.css";
 
 export default async function Dashboard() {
@@ -212,7 +212,7 @@ export default async function Dashboard() {
                 </Link>
                 <Link href="/dashboard/calendar" className={styles.quickLink}>
                   <div className={styles.linkIcon}>
-                    <Calendar size={20} />
+                    <CalendarIcon size={20} />
                   </div>
                   <span>View Calendar</span>
                 </Link>
@@ -321,13 +321,13 @@ export default async function Dashboard() {
                           <ul className={styles.list}>
                             {family.events.map((event) => (
                               <li key={event.id}>
-                                <span className={styles.eventIcon}>
-                                  {event.type === "BIRTHDAY" && "🎂"}
-                                  {event.type === "APPOINTMENT" && "🏥"}
-                                  {event.type === "FOOD_DELIVERY" && "🍽️"}
-                                  {event.type === "VISIT" && "👋"}
-                                  {event.type === "OTHER" && "📅"}
-                                </span>
+                                <div className={styles.eventIconWrapper}>
+                                  {event.type === "BIRTHDAY" && <Cake size={16} />}
+                                  {event.type === "APPOINTMENT" && <Stethoscope size={16} />}
+                                  {event.type === "FOOD_DELIVERY" && <UtensilsCrossed size={16} />}
+                                  {event.type === "VISIT" && <UserCheck size={16} />}
+                                  {event.type === "OTHER" && <Clock size={16} />}
+                                </div>
                                 <div>
                                   <strong>{event.title}</strong>
                                   <br />
