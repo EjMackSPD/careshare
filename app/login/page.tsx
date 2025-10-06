@@ -214,10 +214,6 @@ export default function Login() {
               </Link>
             </div>
 
-            <p className={styles.demoExplainer}>
-              <strong>Quick Demo:</strong> Jump right in with sample data<br/>
-              <strong>Get Started:</strong> Guided setup for your family
-            </p>
 
             <div className={styles.formFooter}>
               <p>
