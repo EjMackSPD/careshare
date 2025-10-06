@@ -86,6 +86,31 @@ export default async function Dashboard() {
       <div className={styles.layout}>
         <LeftNavigation />
         <main className={styles.main}>
+          {/* Care Recipient Profile Header */}
+          {families.length > 0 && families[0]?.elderName && (
+            <div className={styles.profileHeader}>
+              <div className={styles.coverPhoto}>
+                <img 
+                  src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=1200&h=300&fit=crop" 
+                  alt="Cover" 
+                  className={styles.coverImage}
+                />
+                <div className={styles.coverOverlay}></div>
+              </div>
+              <div className={styles.profileSection}>
+                <div className={styles.profileImage}>
+                  <div className={styles.avatar}>
+                    {families[0].elderName.charAt(0).toUpperCase()}
+                  </div>
+                </div>
+                <div className={styles.profileInfo}>
+                  <h2>{families[0].elderName}</h2>
+                  <p>{families[0].name}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className={styles.header}>
             <div>
               <h1>Welcome back, {user.name || "there"}!</h1>
