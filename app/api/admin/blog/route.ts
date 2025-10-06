@@ -19,11 +19,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const posts = await prisma.blogPost.findMany({
-      orderBy: { createdAt: "desc" },
+    // Blog system is not yet implemented - return empty array
+    return NextResponse.json([], { 
+      status: 200,
+      headers: {
+        'X-System-Status': 'Blog system coming soon'
+      }
     });
 
-    return NextResponse.json(posts);
+    // TODO: Uncomment when BlogPost model is added to schema
+    // const posts = await prisma.blogPost.findMany({
+    //   orderBy: { createdAt: "desc" },
+    // });
+    // return NextResponse.json(posts);
   } catch (error) {
     console.error("Error fetching blog posts:", error);
     return NextResponse.json(
@@ -73,42 +81,49 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if slug already exists
-    const existingPost = await prisma.blogPost.findUnique({
-      where: { slug },
-    });
+    // Blog system is not yet implemented
+    return NextResponse.json(
+      { error: "Blog system coming soon" },
+      { status: 503 }
+    );
 
-    if (existingPost) {
-      return NextResponse.json(
-        { error: "A post with this slug already exists" },
-        { status: 400 }
-      );
-    }
-
-    // Create blog post
-    const newPost = await prisma.blogPost.create({
-      data: {
-        title,
-        slug,
-        excerpt,
-        content,
-        category: category as BlogCategory,
-        author,
-        authorTitle: authorTitle || null,
-        coverImage: coverImage || null,
-        readTime: readTime || 5,
-        published: published || false,
-        publishedAt:
-          published && publishedAt
-            ? new Date(publishedAt)
-            : published
-            ? new Date()
-            : null,
-        relatedPostIds: relatedPostIds || [],
-      },
-    });
-
-    return NextResponse.json(newPost, { status: 201 });
+    // TODO: Uncomment when BlogPost model is added to schema
+    // // Check if slug already exists
+    // const existingPost = await prisma.blogPost.findUnique({
+    //   where: { slug },
+    // });
+    //
+    // if (existingPost) {
+    //   return NextResponse.json(
+    //     { error: "A post with this slug already exists" },
+    //     { status: 400 }
+    //   );
+    // }
+    //
+    // // Create blog post
+    // const newPost = await prisma.blogPost.create({
+    //   data: {
+    //     title,
+    //     slug,
+    //     excerpt,
+    //     content,
+    //     category: category as BlogCategory,
+    //     author,
+    //     authorTitle: authorTitle || null,
+    //     coverImage: coverImage || null,
+    //     readTime: readTime || 5,
+    //     published: published || false,
+    //     publishedAt:
+    //       published && publishedAt
+    //         ? new Date(publishedAt)
+    //         : published
+    //         ? new Date()
+    //         : null,
+    //     relatedPostIds: relatedPostIds || [],
+    //   },
+    // });
+    //
+    // return NextResponse.json(newPost, { status: 201 });
   } catch (error) {
     console.error("Error creating blog post:", error);
     return NextResponse.json(
