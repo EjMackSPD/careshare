@@ -53,7 +53,7 @@ const categoryColors: { [key: string]: string } = {
 
 // Helper function to render markdown text with bold and italic
 const renderMarkdownText = (text: string) => {
-  const parts: (string | JSX.Element)[] = [];
+  const parts: (string | React.ReactElement)[] = [];
   let lastIndex = 0;
   let key = 0;
 
