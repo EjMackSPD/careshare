@@ -196,20 +196,27 @@ export default function Login() {
             </form>
 
             <div className={styles.divider}>
-              <span>OR</span>
+              <span>New to CareShare?</span>
             </div>
 
-            <button
-              onClick={handleDemoMode}
-              className={styles.demoBtn}
-              type="button"
-              disabled={loading}
-            >
-              <Sparkles size={20} />
-              {loading ? "Setting up demo..." : "Try Demo Mode"}
-            </button>
-            <p className={styles.demoText}>
-              Explore CareShare with pre-populated demo data
+            <div className={styles.demoOptions}>
+              <button
+                type="button"
+                onClick={handleDemoMode}
+                disabled={loading}
+                className={styles.demoBtn}
+              >
+                🎮 Quick Demo
+              </button>
+
+              <Link href="/onboarding" className={styles.onboardingBtn}>
+                🚀 Get Started
+              </Link>
+            </div>
+
+            <p className={styles.demoExplainer}>
+              <strong>Quick Demo:</strong> Jump right in with sample data<br/>
+              <strong>Get Started:</strong> Guided setup for your family
             </p>
 
             <div className={styles.formFooter}>
