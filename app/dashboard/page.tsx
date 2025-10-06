@@ -93,9 +93,6 @@ export default async function Dashboard() {
                 Here's what's happening with your families
               </p>
             </div>
-            <Link href="/family/create" className={styles.createBtn}>
-              + Create Family Group
-            </Link>
           </div>
 
           {families.length > 0 && (
