@@ -1182,6 +1182,24 @@
     margin: 0 1rem 2rem 1rem;
   }
 
+  .taskCard {
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .taskCardActions {
+    position: static;
+    justify-content: flex-end;
+    width: 100%;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+    margin-top: 1rem;
+  }
+
+  .taskContent {
+    width: 100%;
+  }
+
   .checkboxHint {
     position: relative;
     top: auto;
