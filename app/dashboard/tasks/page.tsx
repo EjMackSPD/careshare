@@ -126,17 +126,19 @@ function TasksPageContent() {
     }
   }, [searchParams]);
 
-  // Show checkbox hint on first visit
+  // Show checkbox hint on first visit (only if tasks exist)
   useEffect(() => {
-    const hasSeenCheckboxHint = localStorage.getItem("hasSeenTasksCheckboxHint");
-    if (!hasSeenCheckboxHint) {
+    const hasSeenCheckboxHint = localStorage.getItem(
+      "hasSeenTasksCheckboxHint"
+    );
+    if (!hasSeenCheckboxHint && tasks.length > 0) {
       // Delay showing the hint slightly so it doesn't appear immediately
       const timer = setTimeout(() => {
         setShowCheckboxHint(true);
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [tasks]);
 
   const dismissCheckboxHint = () => {
     setShowCheckboxHint(false);
@@ -150,7 +152,7 @@ function TasksPageContent() {
         const res = await fetch("/api/families");
         if (!res.ok) throw new Error("Failed to fetch families");
         const data = await res.json();
-        
+
         // Fetch members for each family
         const familiesWithMembers = await Promise.all(
           data.map(async (family: any) => {
@@ -345,7 +347,7 @@ function TasksPageContent() {
 
   const handleAddTask = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!selectedFamily) {
       alert("Please select a family first");
       return;
@@ -425,13 +427,13 @@ function TasksPageContent() {
 
   const handleEditTask = (task: Task) => {
     setEditingTask(task);
-    
+
     // Parse assigned members from assignedTo field (comma-separated IDs)
     const assignedIds = task.assignedTo
       ? task.assignedTo.split(",").filter((id) => id.trim())
       : [];
     setSelectedMembers(assignedIds);
-    
+
     setNewTask({
       title: task.title,
       description: task.description,
@@ -623,7 +625,7 @@ function TasksPageContent() {
   return (
     <div className={styles.container}>
       <Navigation showAuthLinks={true} />
-      
+
       <div className={styles.layout}>
         <LeftNavigation />
         <main className={styles.main}>
@@ -632,11 +634,11 @@ function TasksPageContent() {
             <div className={styles.heroOverlay}>
               <div className={styles.heroContent}>
                 <div className={styles.heroText}>
-              <h1>Tasks & Responsibilities</h1>
+                  <h1>Tasks & Responsibilities</h1>
                   <p className={styles.subtitle}>
                     Manage and track tasks for your loved ones
                   </p>
-            </div>
+                </div>
                 <div className={styles.heroActions}>
                   {/* Family Selector (if multiple families) */}
                   {families.length > 1 && (
@@ -661,8 +663,8 @@ function TasksPageContent() {
                     onClick={() => setShowAddTask(!showAddTask)}
                     disabled={!selectedFamily}
                   >
-              + Add Task
-            </button>
+                    + Add Task
+                  </button>
                 </div>
               </div>
             </div>
@@ -738,9 +740,9 @@ function TasksPageContent() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            
+
             <div className={styles.filters}>
-              <select 
+              <select
                 value={filterCategory}
                 onChange={(e) => setFilterCategory(e.target.value)}
                 className={styles.filterSelect}
@@ -759,7 +761,7 @@ function TasksPageContent() {
             </div>
           </div>
 
-            {/* Add/Edit Task Modal */}
+          {/* Add/Edit Task Modal */}
           {showAddTask && (
             <div className={styles.modal} onClick={() => setShowAddTask(false)}>
               <div
@@ -782,7 +784,7 @@ function TasksPageContent() {
                     ✕
                   </button>
                 </div>
-                
+
                 <form onSubmit={handleAddTask} className={styles.taskForm}>
                   {/* Task Title */}
                   <div className={styles.formGroup}>
@@ -851,7 +853,7 @@ function TasksPageContent() {
                         Add Member
                       </button>
                     </div>
-                    
+
                     {loading ? (
                       <div className={styles.loadingText}>
                         Loading family members...
@@ -870,7 +872,7 @@ function TasksPageContent() {
                           );
                           const displayName =
                             member.user.name || member.user.email;
-                          
+
                           return (
                             <div
                               key={member.userId}
@@ -893,7 +895,7 @@ function TasksPageContent() {
                         })}
                       </div>
                     )}
-                    
+
                     {/* Selected Members Display */}
                     {selectedMembers.length > 0 && (
                       <div className={styles.selectedMembers}>
@@ -905,7 +907,7 @@ function TasksPageContent() {
                             member?.user.name ||
                             member?.user.email ||
                             "Unknown";
-                          
+
                           return (
                             <span key={userId} className={styles.memberTag}>
                               {displayName}
@@ -1002,7 +1004,7 @@ function TasksPageContent() {
           <div className={styles.tasksSection}>
             <div className={styles.tasksSectionHeader}>
               <div>
-              <h2>Tasks</h2>
+                <h2>Tasks</h2>
               </div>
               <p className={styles.taskCount}>
                 Showing {filteredTasks.length} of {tasks.length} tasks
@@ -1035,7 +1037,8 @@ function TasksPageContent() {
                     <div className={styles.checkboxHint}>
                       <div className={styles.hintContent}>
                         <div className={styles.hintText}>
-                          <strong>💡 Quick Tip:</strong> Click the checkbox to mark tasks as complete!
+                          <strong>💡 Quick Tip:</strong> Click the checkbox to
+                          mark tasks as complete!
                         </div>
                         <button
                           className={styles.hintClose}
@@ -1065,22 +1068,22 @@ function TasksPageContent() {
                         style={{ animationDelay: `${index * 0.05}s` }}
                       >
                         {/* Checkbox */}
-                  <input
-                    type="checkbox"
-                    checked={task.completed}
+                        <input
+                          type="checkbox"
+                          checked={task.completed}
                           onChange={() => toggleTask(task.id, currentUserId)}
-                    className={styles.taskCheckbox}
+                          className={styles.taskCheckbox}
                           title={
                             task.completed
                               ? "Unmark as complete"
                               : "Mark as complete"
                           }
-                  />
-                  
+                        />
+
                         {/* Task Content */}
-                  <div className={styles.taskContent}>
-                    <h3>{task.title}</h3>
-                    <p>{task.description}</p>
+                        <div className={styles.taskContent}>
+                          <h3>{task.title}</h3>
+                          <p>{task.description}</p>
 
                           {/* Attachment Display */}
                           {task.attachmentUrl && (
@@ -1113,17 +1116,17 @@ function TasksPageContent() {
                           )}
 
                           {/* Due Date */}
-                    <div className={styles.taskMeta}>
+                          <div className={styles.taskMeta}>
                             <span className={styles.dueDate}>
                               Due: {task.dueDate}
                             </span>
-                    </div>
+                          </div>
 
                           {/* Tags and Badges */}
-                    <div className={styles.taskTags}>
+                          <div className={styles.taskTags}>
                             <span className={styles.categoryBadge}>
                               {task.category}
-                      </span>
+                            </span>
                             <span
                               className={`${
                                 styles.priorityBadge
@@ -1161,27 +1164,27 @@ function TasksPageContent() {
                                 <Lightbulb size={16} />
                                 <span>Need Help?</span>
                               </button>
-                      )}
-                    </div>
-                  </div>
+                            )}
+                          </div>
+                        </div>
 
                         {/* Task Actions */}
-                  <div className={styles.taskCardActions}>
-                    <button
-                      onClick={() => handleEditTask(task)}
-                      className={styles.editTaskBtn}
-                      title="Edit task"
-                    >
-                      <Edit size={18} />
-                    </button>
-                    <button
-                      onClick={() => deleteTask(task.id)}
-                      className={styles.deleteBtn}
-                      title="Delete task"
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
+                        <div className={styles.taskCardActions}>
+                          <button
+                            onClick={() => handleEditTask(task)}
+                            className={styles.editTaskBtn}
+                            title="Edit task"
+                          >
+                            <Edit size={18} />
+                          </button>
+                          <button
+                            onClick={() => deleteTask(task.id)}
+                            className={styles.deleteBtn}
+                            title="Delete task"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
                       </div>
                     );
                   })}
@@ -1222,8 +1225,8 @@ function TasksPageContent() {
                               >
                                 {page}
                               </button>
-                </div>
-                ))}
+                            </div>
+                          ))}
                       </div>
                       <button
                         className={styles.pageBtn}
@@ -1238,7 +1241,7 @@ function TasksPageContent() {
                     <div className={styles.paginationInfo}>
                       Page {currentPage} of {totalPages}
                     </div>
-              </div>
+                  </div>
                 )}
               </>
             )}
@@ -1251,7 +1254,7 @@ function TasksPageContent() {
       {toast && (
         <div className={`${styles.toast} ${styles[toast.type]}`}>
           {toast.message}
-    </div>
+        </div>
       )}
 
       {/* Provider Suggestions Modal */}
