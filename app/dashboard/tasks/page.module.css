@@ -24,6 +24,7 @@
   background-size: cover;
   background-position: center;
   overflow: hidden;
+  margin-bottom: 2rem;
 }
 
 .heroOverlay {
@@ -39,7 +40,7 @@
   );
   display: flex;
   align-items: center;
-  padding: 0 2rem;
+  padding: 0 2rem 0 2rem;
 }
 
 .heroContent {
@@ -51,7 +52,6 @@
   border: 1px solid rgba(255, 255, 255, 0.4);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  max-width: 1200px;
   width: 100%;
   display: flex;
   align-items: center;
@@ -164,7 +164,7 @@
   display: flex;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 2rem;
+  margin: 0 2rem 2rem 2rem;
   flex-wrap: wrap;
 }
 
@@ -1047,10 +1047,19 @@
 
   .controls {
     flex-direction: column;
+    margin: 0 1rem 2rem 1rem;
   }
 
   .searchBox {
     max-width: 100%;
+  }
+
+  .tabsContainer {
+    margin: 0 1rem 1.5rem 1rem;
+  }
+
+  .tasksSection {
+    margin: 0 1rem 2rem 1rem;
   }
 
   .filters {
