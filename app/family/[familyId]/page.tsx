@@ -8,6 +8,8 @@ import LeftNavigation from '@/app/components/LeftNavigation'
 import Footer from '@/app/components/Footer'
 import styles from './page.module.css'
 
+const caregiverRoles = new Set(['OWNER', 'PRIMARY_CAREGIVER', 'FAMILY_ADMIN'])
+
 type Family = {
   id: string
   name: string
@@ -298,7 +300,7 @@ export default function FamilyDetail() {
             </div>
             <div className={styles.membersList}>
               {family.members.map((member) => {
-                const isCareManager = member.role === 'CARE_MANAGER'
+                const isCareManager = caregiverRoles.has(member.role)
                 return (
                   <Link 
                     key={member.user.id} 
@@ -313,7 +315,7 @@ export default function FamilyDetail() {
                       <p>{member.user.email}</p>
                     </div>
                     <span className={`${styles.memberRole} ${isCareManager ? styles.careManagerBadge : styles.familyMemberBadge}`}>
-                      {isCareManager ? '⭐ Care Manager' : 'Family Member'}
+                      {isCareManager ? '⭐ Care Team Lead' : member.role.replaceAll('_', ' ')}
                     </span>
                   </Link>
                 )

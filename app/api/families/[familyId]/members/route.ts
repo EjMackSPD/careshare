@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/auth-utils";
+import { logFamilyAuditEvent, requireFamilyCapability, requireFamilyMembership } from "@/lib/auth-utils";
+import { normalizeFamilyRole } from "@/lib/family-permissions";
 
 // GET - Fetch all members for a family
 export async function GET(
@@ -8,30 +9,16 @@ export async function GET(
   { params }: { params: Promise<{ familyId: string }> }
 ) {
   try {
-    const user = await requireAuth();
     const { familyId } = await params;
-
-    // Check if user is admin or a member of this family
-    const isAdmin =
-      user.email === "admin@careshare.app" ||
-      user.email === "demo@careshare.app";
-
-    if (!isAdmin) {
-      const familyMember = await prisma.familyMember.findUnique({
-        where: {
-          familyId_userId: {
-            familyId,
-            userId: user.id,
-          },
-        },
-      });
-
-      if (!familyMember) {
-        return NextResponse.json(
-          { error: "Not authorized to view members for this family" },
-          { status: 403 }
-        );
-      }
+    let membership
+    try {
+      const result = await requireFamilyMembership(familyId);
+      membership = result.membership;
+    } catch (error) {
+      return NextResponse.json(
+        { error: "Not authorized to view members for this family" },
+        { status: 403 }
+      );
     }
 
     // Fetch all family members
@@ -48,7 +35,10 @@ export async function GET(
       },
     });
 
-    return NextResponse.json(members);
+    return NextResponse.json({
+      members,
+      currentUserRole: membership?.role ?? null,
+    });
   } catch (error) {
     console.error("Error fetching family members:", error);
     return NextResponse.json(
@@ -64,17 +54,14 @@ export async function POST(
   { params }: { params: Promise<{ familyId: string }> }
 ) {
   try {
-    const user = await requireAuth();
     const { familyId } = await params;
-
-    // Check if user is admin
-    const isAdmin =
-      user.email === "admin@careshare.app" ||
-      user.email === "demo@careshare.app";
-
-    if (!isAdmin) {
+    let user
+    try {
+      const result = await requireFamilyCapability(familyId, "members.manage");
+      user = result.user;
+    } catch (error) {
       return NextResponse.json(
-        { error: "Unauthorized - Admin access required" },
+        { error: "You do not have permission to manage family members" },
         { status: 403 }
       );
     }
@@ -104,7 +91,7 @@ export async function POST(
       data: {
         familyId,
         userId,
-        role: role || "FAMILY_MEMBER",
+        role: normalizeFamilyRole(role),
       },
       include: {
         user: {
@@ -114,6 +101,18 @@ export async function POST(
             email: true,
           },
         },
+      },
+    });
+
+    await logFamilyAuditEvent({
+      familyId,
+      userId: user.id,
+      action: "member.added",
+      entityType: "family_member",
+      entityId: newMember.id,
+      metadata: {
+        addedUserId: userId,
+        role: newMember.role,
       },
     });
 

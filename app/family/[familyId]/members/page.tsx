@@ -35,6 +35,7 @@ type Family = {
   id: string
   name: string
   members: Member[]
+  currentUserRole?: string | null
 }
 
 export default function FamilyMembers() {
@@ -64,10 +65,11 @@ export default function FamilyMembers() {
           // Fetch members separately
           const membersRes = await fetch(`/api/families/${familyId}/members`)
           if (membersRes.ok) {
-            const members = await membersRes.json()
+            const membersData = await membersRes.json()
             setFamily({
               ...currentFamily,
-              members
+              members: membersData.members ?? [],
+              currentUserRole: membersData.currentUserRole ?? null,
             })
           }
         }
@@ -100,7 +102,7 @@ export default function FamilyMembers() {
       const response = await fetch(`/api/families/${familyId}/invitations`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: inviteEmail, role: 'FAMILY_MEMBER' }),
+        body: JSON.stringify({ email: inviteEmail, role: 'VIEWER' }),
       })
 
       if (response.ok) {

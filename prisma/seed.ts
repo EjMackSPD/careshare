@@ -5,6 +5,7 @@ import {
   FamilyRole,
   DocumentCategory,
   CareLevel,
+  OnboardingStatus,
   ScenarioType,
 } from "@prisma/client";
 import bcrypt from "bcryptjs";
@@ -25,6 +26,7 @@ async function main() {
       name: "Demo User",
       password: hashedPassword,
       role: "FAMILY_MEMBER",
+      onboardingStatus: OnboardingStatus.COMPLETED,
     },
   });
 
@@ -50,9 +52,26 @@ async function main() {
       members: {
         create: {
           userId: demoUser.id,
-          role: FamilyRole.CARE_MANAGER,
+          role: FamilyRole.OWNER,
         },
       },
+    },
+  });
+
+  await prisma.careRecipient.upsert({
+    where: { familyId: demoFamily.id },
+    update: {},
+    create: {
+      familyId: demoFamily.id,
+      name: "Grandma Mary Smith",
+      preferredName: "Mary",
+      relationshipToCaregiver: "Mother",
+      phone: "(555) 123-4567",
+      address: "123 Oak Street, Springfield, IL 62701",
+      birthDate: new Date("1945-06-15"),
+      medicalNotes:
+        "Allergic to penicillin. Takes blood pressure medication daily at 8 AM.",
+      conditions: ["Hypertension"],
     },
   });
 

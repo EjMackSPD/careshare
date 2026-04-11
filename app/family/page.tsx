@@ -7,6 +7,8 @@ import LeftNavigation from '@/app/components/LeftNavigation'
 import Footer from '@/app/components/Footer'
 import styles from './page.module.css'
 
+const caregiverRoles = new Set(['OWNER', 'PRIMARY_CAREGIVER', 'FAMILY_ADMIN'])
+
 export default async function FamiliesPage() {
   const user = await getCurrentUser()
   
@@ -70,8 +72,8 @@ export default async function FamiliesPage() {
               >
                 <div className={styles.familyCardHeader}>
                   <h2>{family.name}</h2>
-                  {family.role === 'CARE_MANAGER' && (
-                    <span className={styles.badge}>⭐ Care Manager</span>
+                  {caregiverRoles.has(family.role) && (
+                    <span className={styles.badge}>⭐ Care Team Lead</span>
                   )}
                 </div>
                 {family.elderName && (

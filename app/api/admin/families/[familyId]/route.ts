@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/auth-utils";
+import { requireAdmin } from "@/lib/auth-utils";
 
 type RouteContext = {
   params: Promise<{
@@ -11,13 +11,9 @@ type RouteContext = {
 // PUT /api/admin/families/[familyId] - Update a family (admin only)
 export async function PUT(request: NextRequest, context: RouteContext) {
   try {
-    const user = await requireAuth();
-
-    // Check if user is admin
-    if (
-      user.email !== "admin@careshare.app" &&
-      user.email !== "demo@careshare.app"
-    ) {
+    try {
+      await requireAdmin();
+    } catch (error) {
       return NextResponse.json(
         { error: "Unauthorized - Admin access required" },
         { status: 403 }
@@ -89,13 +85,9 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 // DELETE /api/admin/families/[familyId] - Delete a family (admin only)
 export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
-    const user = await requireAuth();
-
-    // Check if user is admin
-    if (
-      user.email !== "admin@careshare.app" &&
-      user.email !== "demo@careshare.app"
-    ) {
+    try {
+      await requireAdmin();
+    } catch (error) {
       return NextResponse.json(
         { error: "Unauthorized - Admin access required" },
         { status: 403 }

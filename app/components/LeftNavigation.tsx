@@ -85,9 +85,7 @@ export default function LeftNavigation() {
   const [showFamilyDropdown, setShowFamilyDropdown] = useState(false);
 
   // Check if user is admin
-  const isAdmin =
-    session?.user?.email === "admin@careshare.app" ||
-    session?.user?.email === "demo@careshare.app";
+  const isAdmin = session?.user?.role === "ADMIN";
 
   // Fetch user's families
   useEffect(() => {

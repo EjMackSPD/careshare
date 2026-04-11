@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import styles from "./page.module.css";
 
+const caregiverRoles = new Set(["OWNER", "PRIMARY_CAREGIVER", "FAMILY_ADMIN"]);
+
 // Map database EventType to display type
 const mapEventType = (dbType: string): string => {
   const typeMap: { [key: string]: string } = {
@@ -120,7 +122,7 @@ export default function FamilyCollaborationPage() {
           const membersRes = await fetch(`/api/families/${family.id}/members`);
           if (membersRes.ok) {
             const membersData = await membersRes.json();
-            setFamilyMembers(membersData);
+            setFamilyMembers(membersData.members ?? []);
 
             // Fetch tasks
             const tasksRes = await fetch(`/api/families/${family.id}/tasks`);
@@ -341,9 +343,9 @@ export default function FamilyCollaborationPage() {
                           {member.user.name || member.user.email}
                         </div>
                         <div className={styles.memberRole}>
-                          {member.role === "CARE_MANAGER"
-                            ? "⭐ Care Manager"
-                            : "Family Member"}
+                          {caregiverRoles.has(member.role)
+                            ? "⭐ Care Team Lead"
+                            : member.role.replaceAll("_", " ")}
                         </div>
                       </div>
                     </Link>
@@ -543,7 +545,7 @@ export default function FamilyCollaborationPage() {
                     <div className={styles.contactInfo}>
                       <Phone size={14} />
                       <span>
-                        {member.role === "CARE_MANAGER"
+                        {caregiverRoles.has(member.role)
                           ? "Primary Contact"
                           : "Contact info not available"}
                       </span>

@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { getCurrentUser } from '@/lib/auth-utils'
+import {
+  getCurrentUser,
+  logFamilyAuditEvent,
+  requireFamilyCapability,
+  requireFamilyMembership,
+} from '@/lib/auth-utils'
+import { normalizeFamilyRole } from '@/lib/family-permissions'
 
 export async function GET(
   request: NextRequest,
@@ -13,16 +19,9 @@ export async function GET(
     }
 
     const { familyId } = await params
-
-    // Check if user is a member of this family
-    const membership = await prisma.familyMember.findFirst({
-      where: {
-        familyId,
-        userId: (user as any).id,
-      },
-    })
-
-    if (!membership) {
+    try {
+      await requireFamilyMembership(familyId)
+    } catch (error) {
       return NextResponse.json({ error: 'Not a family member' }, { status: 403 })
     }
 
@@ -64,22 +63,19 @@ export async function POST(
 
     const { familyId } = await params
     const body = await request.json()
-    const { email, role } = body
+    const { email, role, invitedName, message } = body
 
     if (!email) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     }
 
-    // Check if user is a member of this family
-    const membership = await prisma.familyMember.findFirst({
-      where: {
-        familyId,
-        userId: (user as any).id,
-      },
-    })
-
-    if (!membership) {
-      return NextResponse.json({ error: 'Not a family member' }, { status: 403 })
+    try {
+      await requireFamilyCapability(familyId, 'members.manage')
+    } catch (error) {
+      return NextResponse.json(
+        { error: 'You do not have permission to invite family members' },
+        { status: 403 }
+      )
     }
 
     // Check if user/email is already a member
@@ -118,7 +114,9 @@ export async function POST(
       data: {
         familyId,
         email,
-        role: role || 'FAMILY_MEMBER',
+        invitedName: invitedName || null,
+        message: message || null,
+        role: normalizeFamilyRole(role),
         invitedBy: (user as any).id,
       },
       include: {
@@ -132,6 +130,18 @@ export async function POST(
     })
 
     // TODO: Send email notification to invitee
+
+    await logFamilyAuditEvent({
+      familyId,
+      userId: (user as any).id,
+      action: 'invitation.created',
+      entityType: 'family_invitation',
+      entityId: invitation.id,
+      metadata: {
+        email,
+        role: invitation.role,
+      },
+    })
 
     return NextResponse.json(invitation)
   } catch (error) {

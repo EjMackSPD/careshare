@@ -34,20 +34,21 @@ export default function Login() {
         return;
       }
 
-      // Check if user has completed onboarding
-      const onboardingResponse = await fetch("/api/onboarding");
-      const onboardingData = await onboardingResponse.json();
-
-      if (!onboardingData.hasCompletedOnboarding) {
-        router.push("/onboarding");
-      } else {
-        router.push("/dashboard");
-      }
+      router.push("/auth/post-login");
       router.refresh();
     } catch (error) {
       setError("Something went wrong");
       setLoading(false);
     }
+  };
+
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    setError("");
+
+    await signIn("google", {
+      callbackUrl: "/auth/post-login",
+    });
   };
 
   const handleDemoMode = async () => {
@@ -161,6 +162,19 @@ export default function Login() {
 
             <form onSubmit={handleSubmit} className={styles.form}>
               {error && <div className={styles.error}>{error}</div>}
+
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                className={styles.submitBtn}
+                disabled={loading}
+              >
+                Continue with Google
+              </button>
+
+              <div className={styles.divider}>
+                <span>or use email</span>
+              </div>
 
               <div className={styles.formGroup}>
                 <label htmlFor="email">Email</label>

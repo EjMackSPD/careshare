@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+import { OnboardingStatus } from '@prisma/client'
 
 export async function POST(request: Request) {
   try {
@@ -36,6 +37,8 @@ export async function POST(request: Request) {
         email,
         password: hashedPassword,
         role: 'FAMILY_MEMBER',
+        onboardingStatus: OnboardingStatus.IN_PROGRESS,
+        onboardingStep: 1,
       },
     })
 

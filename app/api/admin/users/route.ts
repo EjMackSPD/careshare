@@ -1,18 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/auth-utils";
+import { requireAdmin } from "@/lib/auth-utils";
 import bcrypt from "bcryptjs";
+import { UserRole } from "@prisma/client";
 
 // GET /api/admin/users - Get all users (admin only)
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireAuth();
-
-    // Check if user is admin
-    if (
-      user.email !== "admin@careshare.app" &&
-      user.email !== "demo@careshare.app"
-    ) {
+    try {
+      await requireAdmin();
+    } catch (error) {
       return NextResponse.json(
         { error: "Unauthorized - Admin access required" },
         { status: 403 }
@@ -25,6 +22,7 @@ export async function GET(request: NextRequest) {
         id: true,
         name: true,
         email: true,
+        role: true,
         emailVerified: true,
         createdAt: true,
         _count: {
@@ -45,11 +43,7 @@ export async function GET(request: NextRequest) {
       email: user.email,
       emailVerified: user.emailVerified,
       createdAt: user.createdAt,
-      role:
-        user.email === "admin@careshare.app" ||
-        user.email === "demo@careshare.app"
-          ? "admin"
-          : "user",
+      role: user.role === UserRole.ADMIN ? "admin" : "user",
       status: user.emailVerified ? "active" : "inactive",
       familiesCount: user._count.familyMembers,
     }));
@@ -67,13 +61,9 @@ export async function GET(request: NextRequest) {
 // POST /api/admin/users - Create a new user (admin only)
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireAuth();
-
-    // Check if user is admin
-    if (
-      user.email !== "admin@careshare.app" &&
-      user.email !== "demo@careshare.app"
-    ) {
+    try {
+      await requireAdmin();
+    } catch (error) {
       return NextResponse.json(
         { error: "Unauthorized - Admin access required" },
         { status: 403 }
@@ -104,12 +94,14 @@ export async function POST(request: NextRequest) {
         name,
         email,
         password: hashedPassword,
+        role: role === "admin" ? UserRole.ADMIN : UserRole.FAMILY_MEMBER,
         emailVerified: status === "active" ? new Date() : null,
       },
       select: {
         id: true,
         name: true,
         email: true,
+        role: true,
         emailVerified: true,
         createdAt: true,
         _count: {
@@ -126,7 +118,7 @@ export async function POST(request: NextRequest) {
       email: newUser.email,
       emailVerified: newUser.emailVerified,
       createdAt: newUser.createdAt,
-      role: role || "user",
+      role: newUser.role === UserRole.ADMIN ? "admin" : "user",
       status: status || "active",
       familiesCount: newUser._count.familyMembers,
     };

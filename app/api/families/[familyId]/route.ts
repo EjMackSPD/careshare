@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/auth-utils";
+import { requireAuth, requireFamilyCapability, requireFamilyMembership } from "@/lib/auth-utils";
 
 // PATCH /api/families/[familyId] - Update family settings
 export async function PATCH(
@@ -8,20 +8,13 @@ export async function PATCH(
   { params }: { params: Promise<{ familyId: string }> }
 ) {
   try {
-    const user = await requireAuth();
     const { familyId } = await params;
 
-    // Verify user is a member of this family
-    const familyMember = await prisma.familyMember.findFirst({
-      where: {
-        familyId,
-        userId: user.id,
-      },
-    });
-
-    if (!familyMember) {
+    try {
+      await requireFamilyCapability(familyId, "sensitive.write");
+    } catch (error) {
       return NextResponse.json(
-        { error: "You are not a member of this family" },
+        { error: "You do not have permission to update family settings" },
         { status: 403 }
       );
     }
@@ -53,7 +46,39 @@ export async function PATCH(
         medicalNotes: medicalNotes || null,
         notificationPreferences: notificationPreferences || null,
       },
+      include: {
+        careRecipient: true,
+      },
     });
+
+    if (
+      elderName !== undefined ||
+      elderPhone !== undefined ||
+      elderAddress !== undefined ||
+      elderBirthday !== undefined ||
+      medicalNotes !== undefined
+    ) {
+      await prisma.careRecipient.upsert({
+        where: {
+          familyId,
+        },
+        update: {
+          name: elderName || updatedFamily.elderName || "Care Recipient",
+          phone: elderPhone || null,
+          address: elderAddress || null,
+          birthDate: elderBirthday ? new Date(elderBirthday) : null,
+          medicalNotes: medicalNotes || null,
+        },
+        create: {
+          familyId,
+          name: elderName || updatedFamily.elderName || "Care Recipient",
+          phone: elderPhone || null,
+          address: elderAddress || null,
+          birthDate: elderBirthday ? new Date(elderBirthday) : null,
+          medicalNotes: medicalNotes || null,
+        },
+      });
+    }
 
     return NextResponse.json(updatedFamily);
   } catch (error) {
@@ -74,15 +99,9 @@ export async function GET(
     const user = await requireAuth();
     const { familyId } = await params;
 
-    // Verify user is a member of this family
-    const familyMember = await prisma.familyMember.findFirst({
-      where: {
-        familyId,
-        userId: user.id,
-      },
-    });
-
-    if (!familyMember) {
+    try {
+      await requireFamilyMembership(familyId);
+    } catch (error) {
       return NextResponse.json(
         { error: "You are not a member of this family" },
         { status: 403 }
@@ -92,6 +111,7 @@ export async function GET(
     const family = await prisma.family.findUnique({
       where: { id: familyId },
       include: {
+        careRecipient: true,
         _count: {
           select: {
             members: true,

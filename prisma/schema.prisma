@@ -51,6 +51,12 @@ enum UserRole {
   ADMIN
 }
 
+enum OnboardingStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -59,6 +65,9 @@ model User {
   password      String?
   image         String?
   role          UserRole  @default(FAMILY_MEMBER)
+  onboardingStatus OnboardingStatus @default(NOT_STARTED)
+  onboardingStep Int      @default(1)
+  onboardingData Json?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
@@ -79,6 +88,7 @@ model User {
   medications       Medication[]
   notes             Note[]
   uploadedDocuments Document[]
+  auditLogs         AuditLog[]
 
   @@index([email])
 }
@@ -95,6 +105,7 @@ model Family {
   emergencyContact String? // Emergency contact info
   medicalNotes String?  // Medical notes/allergies
   notificationPreferences Json? // Notification and alert settings
+  topNeeds    Json?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   createdBy   String
@@ -118,23 +129,27 @@ model Family {
   carePlan      CarePlan?
   careScenarios CareScenario[]
   contributions FamilyContribution[]
+  careRecipient CareRecipient?
+  auditLogs     AuditLog[]
 
   @@index([createdBy])
 }
 
 // Junction table for Family-User relationship
 enum FamilyRole {
-  CARE_MANAGER    // Primary family member responsible for care coordination
-  FAMILY_MEMBER   // Regular family member
-  CONTRIBUTOR     // Family member who contributes financially
-  CARE_RECIPIENT  // The person receiving care
+  OWNER
+  PRIMARY_CAREGIVER
+  FAMILY_ADMIN
+  CONTRIBUTOR
+  VIEWER
+  CARE_RECIPIENT
 }
 
 model FamilyMember {
   id        String     @id @default(cuid())
   familyId  String
   userId    String
-  role      FamilyRole @default(FAMILY_MEMBER)
+  role      FamilyRole @default(VIEWER)
   joinedAt  DateTime   @default(now())
 
   family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
@@ -158,7 +173,9 @@ model FamilyInvitation {
   id        String           @id @default(cuid())
   familyId  String
   email     String
-  role      FamilyRole       @default(FAMILY_MEMBER)
+  invitedName String?
+  message   String?
+  role      FamilyRole       @default(VIEWER)
   invitedBy String
   status    InvitationStatus @default(PENDING)
   createdAt DateTime         @default(now())
@@ -171,6 +188,44 @@ model FamilyInvitation {
   @@index([familyId])
   @@index([email])
   @@index([status])
+}
+
+model CareRecipient {
+  id                String    @id @default(cuid())
+  familyId          String    @unique
+  name              String
+  preferredName     String?
+  relationshipToCaregiver String?
+  phone             String?
+  address           String?
+  birthDate         DateTime?
+  medicalNotes      String?   @db.Text
+  conditions        Json?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@index([familyId])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  familyId    String?
+  userId      String?
+  action      String
+  entityType  String
+  entityId    String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  family Family? @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([familyId])
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
 }
 
 // Events (birthdays, appointments, food deliveries)

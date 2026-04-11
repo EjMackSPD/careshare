@@ -5,6 +5,7 @@ import {
   EventType,
   CostStatus,
   FamilyRole,
+  OnboardingStatus,
   TaskPriority,
   TaskStatus,
   StoryCategory,
@@ -13,6 +14,13 @@ import {
 
 export async function POST() {
   try {
+    if (process.env.NODE_ENV === "production") {
+      return NextResponse.json(
+        { error: "Demo bootstrap is disabled in production" },
+        { status: 403 }
+      );
+    }
+
     // Check if demo user exists, create if not
     let demoUser = await prisma.user.findUnique({
       where: { email: "demo@careshare.app" },
@@ -35,6 +43,7 @@ export async function POST() {
           name: "Demo User",
           password: hashedPassword,
           role: "FAMILY_MEMBER",
+          onboardingStatus: OnboardingStatus.COMPLETED,
         },
         include: {
           familyMembers: {
@@ -64,6 +73,7 @@ export async function POST() {
             name: "Sarah Smith",
             password: await bcrypt.hash("demo123", 10),
             role: "FAMILY_MEMBER",
+            onboardingStatus: OnboardingStatus.COMPLETED,
           },
         });
       }
@@ -78,6 +88,7 @@ export async function POST() {
             name: "Michael Smith",
             password: await bcrypt.hash("demo123", 10),
             role: "FAMILY_MEMBER",
+            onboardingStatus: OnboardingStatus.COMPLETED,
           },
         });
       }
@@ -92,6 +103,7 @@ export async function POST() {
             name: "Emily Smith",
             password: await bcrypt.hash("demo123", 10),
             role: "FAMILY_MEMBER",
+            onboardingStatus: OnboardingStatus.COMPLETED,
           },
         });
       }
@@ -106,6 +118,7 @@ export async function POST() {
             name: "David Smith",
             password: await bcrypt.hash("demo123", 10),
             role: "FAMILY_MEMBER",
+            onboardingStatus: OnboardingStatus.COMPLETED,
           },
         });
       }
@@ -120,6 +133,7 @@ export async function POST() {
             name: "Lisa Johnson",
             password: await bcrypt.hash("demo123", 10),
             role: "FAMILY_MEMBER",
+            onboardingStatus: OnboardingStatus.COMPLETED,
           },
         });
       }
@@ -134,6 +148,7 @@ export async function POST() {
             name: "James Smith",
             password: await bcrypt.hash("demo123", 10),
             role: "FAMILY_MEMBER",
+            onboardingStatus: OnboardingStatus.COMPLETED,
           },
         });
       }
@@ -148,6 +163,7 @@ export async function POST() {
             name: "Robert Brown",
             password: await bcrypt.hash("demo123", 10),
             role: "FAMILY_MEMBER",
+            onboardingStatus: OnboardingStatus.COMPLETED,
           },
         });
       }
@@ -170,11 +186,11 @@ export async function POST() {
             create: [
               {
                 userId: demoUser.id,
-                role: FamilyRole.CARE_MANAGER, // Demo user is Care Manager
+                role: FamilyRole.OWNER,
               },
               {
                 userId: sarahUser.id,
-                role: FamilyRole.FAMILY_MEMBER,
+                role: FamilyRole.FAMILY_ADMIN,
               },
               {
                 userId: michaelUser.id,
@@ -182,7 +198,7 @@ export async function POST() {
               },
               {
                 userId: emilyUser.id,
-                role: FamilyRole.FAMILY_MEMBER,
+                role: FamilyRole.VIEWER,
               },
               {
                 userId: davidUser.id,
@@ -190,7 +206,7 @@ export async function POST() {
               },
               {
                 userId: lisaUser.id,
-                role: FamilyRole.FAMILY_MEMBER,
+                role: FamilyRole.VIEWER,
               },
               {
                 userId: jamesUser.id,
@@ -198,10 +214,25 @@ export async function POST() {
               },
               {
                 userId: robertUser.id,
-                role: FamilyRole.FAMILY_MEMBER,
+                role: FamilyRole.VIEWER,
               },
             ],
           },
+        },
+      });
+
+      await prisma.careRecipient.create({
+        data: {
+          familyId: demoFamily.id,
+          name: "Mary Smith",
+          preferredName: "Mary",
+          relationshipToCaregiver: "Mother",
+          phone: "(555) 123-4567",
+          address: "123 Oak Street, Springfield, IL 62701",
+          birthDate: new Date("1945-06-15"),
+          medicalNotes:
+            "Allergic to penicillin. Takes blood pressure medication daily at 8 AM. History of hypertension. Prefers morning appointments.",
+          conditions: ["Hypertension"],
         },
       });
 
@@ -472,8 +503,7 @@ export async function POST() {
 
     return NextResponse.json({
       success: true,
-      email: "demo@careshare.app",
-      password: "demo123",
+      message: "Demo environment is ready",
     });
   } catch (error) {
     console.error("Demo setup error:", error);

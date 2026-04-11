@@ -82,6 +82,7 @@ export default function FinancesPage() {
   const [showAddBill, setShowAddBill] = useState(false);
   const [billStep, setBillStep] = useState(1); // 1: Details, 2: Allocation
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
+  const [currentFamilyId, setCurrentFamilyId] = useState("");
   const [loading, setLoading] = useState(false);
 
   // Edit Bill States
@@ -1408,11 +1409,16 @@ export default function FinancesPage() {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!currentFamilyId) {
+      alert("Select a family before uploading a file");
+      return;
+    }
 
     setUploading(true);
     try {
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("familyId", currentFamilyId);
 
       const res = await fetch("/api/upload", {
         method: "POST",
@@ -1445,6 +1451,7 @@ export default function FinancesPage() {
         if (!res.ok) return;
         const families = await res.json();
         if (families.length > 0) {
+          setCurrentFamilyId(families[0].id);
           const membersRes = await fetch(
             `/api/families/${families[0].id}/members`
           );

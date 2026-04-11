@@ -1,17 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/auth-utils";
+import { requireAdmin } from "@/lib/auth-utils";
 
 // GET /api/admin/families - Get all families (admin only)
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireAuth();
-
-    // Check if user is admin
-    if (
-      user.email !== "admin@careshare.app" &&
-      user.email !== "demo@careshare.app"
-    ) {
+    try {
+      await requireAdmin();
+    } catch (error) {
       return NextResponse.json(
         { error: "Unauthorized - Admin access required" },
         { status: 403 }
@@ -62,13 +58,10 @@ export async function GET(request: NextRequest) {
 // POST /api/admin/families - Create a new family (admin only)
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireAuth();
-
-    // Check if user is admin
-    if (
-      user.email !== "admin@careshare.app" &&
-      user.email !== "demo@careshare.app"
-    ) {
+    let adminUser;
+    try {
+      adminUser = await requireAdmin();
+    } catch (error) {
       return NextResponse.json(
         { error: "Unauthorized - Admin access required" },
         { status: 403 }
@@ -90,7 +83,7 @@ export async function POST(request: NextRequest) {
       data: {
         name,
         description: description || null,
-        createdBy: user.id,
+        createdBy: adminUser.id,
       },
       select: {
         id: true,

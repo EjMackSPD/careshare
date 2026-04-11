@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/auth-utils";
+import { requireAdmin } from "@/lib/auth-utils";
+import { UserRole } from "@prisma/client";
 
 type RouteContext = {
   params: Promise<{
@@ -11,13 +12,9 @@ type RouteContext = {
 // PUT /api/admin/users/[userId] - Update a user (admin only)
 export async function PUT(request: NextRequest, context: RouteContext) {
   try {
-    const user = await requireAuth();
-
-    // Check if user is admin
-    if (
-      user.email !== "admin@careshare.app" &&
-      user.email !== "demo@careshare.app"
-    ) {
+    try {
+      await requireAdmin();
+    } catch (error) {
       return NextResponse.json(
         { error: "Unauthorized - Admin access required" },
         { status: 403 }
@@ -57,6 +54,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       data: {
         name,
         email,
+        role: role === "admin" ? UserRole.ADMIN : UserRole.FAMILY_MEMBER,
         emailVerified:
           status === "active" ? existingUser.emailVerified || new Date() : null,
       },
@@ -64,6 +62,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
         id: true,
         name: true,
         email: true,
+        role: true,
         emailVerified: true,
         createdAt: true,
         _count: {
@@ -80,7 +79,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       email: updatedUser.email,
       emailVerified: updatedUser.emailVerified,
       createdAt: updatedUser.createdAt,
-      role: role || "user",
+      role: updatedUser.role === UserRole.ADMIN ? "admin" : "user",
       status: status || "active",
       familiesCount: updatedUser._count.familyMembers,
     };
@@ -98,13 +97,9 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 // DELETE /api/admin/users/[userId] - Delete a user (admin only)
 export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
-    const user = await requireAuth();
-
-    // Check if user is admin
-    if (
-      user.email !== "admin@careshare.app" &&
-      user.email !== "demo@careshare.app"
-    ) {
+    try {
+      await requireAdmin();
+    } catch (error) {
       return NextResponse.json(
         { error: "Unauthorized - Admin access required" },
         { status: 403 }
@@ -123,10 +118,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     }
 
     // Prevent deleting admin users
-    if (
-      existingUser.email === "admin@careshare.app" ||
-      existingUser.email === "demo@careshare.app"
-    ) {
+    if (existingUser.role === UserRole.ADMIN) {
       return NextResponse.json(
         { error: "Cannot delete admin users" },
         { status: 400 }

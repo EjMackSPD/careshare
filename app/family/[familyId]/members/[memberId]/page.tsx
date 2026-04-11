@@ -9,6 +9,8 @@ import Footer from '@/app/components/Footer'
 import { Mail, Phone, Calendar, User, Info } from 'lucide-react'
 import styles from './page.module.css'
 
+const caregiverRoles = new Set(['OWNER', 'PRIMARY_CAREGIVER', 'FAMILY_ADMIN'])
+
 type Member = {
   id: string
   userId: string
@@ -51,7 +53,7 @@ export default function MemberProfilePage() {
       const membersRes = await fetch(`/api/families/${familyId}/members`)
       if (membersRes.ok) {
         const membersData = await membersRes.json()
-        const currentMember = membersData.find((m: Member) => m.userId === memberId)
+        const currentMember = (membersData.members ?? []).find((m: Member) => m.userId === memberId)
         setMember(currentMember || null)
       }
 
@@ -59,7 +61,7 @@ export default function MemberProfilePage() {
       const familiesRes = await fetch('/api/families')
       if (familiesRes.ok) {
         const familiesData = await familiesRes.json()
-        const currentFamily = familiesData.families?.find((f: Family) => f.id === familyId)
+        const currentFamily = (Array.isArray(familiesData) ? familiesData : []).find((f: Family) => f.id === familyId)
         setFamily(currentFamily || null)
       }
 
@@ -111,7 +113,7 @@ export default function MemberProfilePage() {
     )
   }
 
-  const isCareManager = member.role === 'CARE_MANAGER'
+  const isCareManager = caregiverRoles.has(member.role)
 
   return (
     <div className={styles.container}>
@@ -139,7 +141,7 @@ export default function MemberProfilePage() {
                   {member.user.email}
                 </p>
                 <span className={`${styles.roleBadge} ${isCareManager ? styles.careManagerBadge : styles.familyMemberBadge}`}>
-                  {isCareManager ? '⭐ Care Manager' : 'Family Member'}
+                  {isCareManager ? '⭐ Care Team Lead' : member.role.replaceAll('_', ' ')}
                 </span>
               </div>
             </div>
@@ -225,7 +227,7 @@ export default function MemberProfilePage() {
               {isCareManager && (
                 <div className={styles.infoNote}>
                   <Info size={16} />
-                  This is the primary Care Manager for {family?.elderName || 'this family'}
+                  This member helps lead care coordination for {family?.elderName || 'this family'}
                 </div>
               )}
             </div>

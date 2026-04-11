@@ -22,8 +22,7 @@ export default function ContentManagementPage() {
   const { data: session, status } = useSession();
 
   const isAdmin =
-    session?.user?.email === "admin@careshare.app" ||
-    session?.user?.email === "demo@careshare.app";
+    session?.user?.role === "ADMIN";
 
   useEffect(() => {
     if (status === "unauthenticated") {

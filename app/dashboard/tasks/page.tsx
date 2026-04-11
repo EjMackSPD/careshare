@@ -461,8 +461,14 @@ function TasksPageContent() {
   const uploadFile = async (
     file: File
   ): Promise<{ url: string; fileName: string; fileType: string } | null> => {
+    if (!selectedFamily) {
+      showToast("Select a family before uploading a file", "error");
+      return null;
+    }
+
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("familyId", selectedFamily);
 
     try {
       const res = await fetch("/api/upload", {

@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/auth-utils";
+import { requireFamilyMembership } from "@/lib/auth-utils";
 
 // GET /api/contributions - Get all contributions for a family
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireAuth();
-
     const { searchParams } = new URL(request.url);
     const familyId = searchParams.get("familyId");
 
@@ -18,14 +16,9 @@ export async function GET(request: NextRequest) {
     }
 
     // Verify user has access to this family
-    const familyMember = await prisma.familyMember.findFirst({
-      where: {
-        familyId,
-        userId: (user as any).id,
-      },
-    });
-
-    if (!familyMember) {
+    try {
+      await requireFamilyMembership(familyId);
+    } catch (error) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
@@ -48,8 +41,6 @@ export async function GET(request: NextRequest) {
 // PATCH /api/contributions - Update all contributions for a family
 export async function PATCH(request: NextRequest) {
   try {
-    const user = await requireAuth();
-
     const body = await request.json();
     const { familyId, contributions } = body;
 
@@ -61,29 +52,45 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Verify user has access to this family
-    const familyMember = await prisma.familyMember.findFirst({
-      where: {
-        familyId,
-        userId: (user as any).id,
-      },
-    });
-
-    if (!familyMember) {
+    try {
+      await requireFamilyMembership(familyId);
+    } catch (error) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
-    // Update each contribution
-    const updatePromises = contributions.map((contrib: any) =>
-      prisma.familyContribution.update({
-        where: { id: contrib.id },
-        data: {
-          amount: parseFloat(contrib.amount),
-          percentage: parseInt(contrib.percentage),
+    const contributionIds = contributions.map((contrib: any) => contrib.id);
+    const existingContributions = await prisma.familyContribution.findMany({
+      where: {
+        familyId,
+        id: {
+          in: contributionIds,
         },
-      })
-    );
+      },
+      select: {
+        id: true,
+      },
+    });
 
-    await Promise.all(updatePromises);
+    if (existingContributions.length !== contributionIds.length) {
+      return NextResponse.json(
+        { error: "One or more contributions are invalid for this family" },
+        { status: 403 }
+      );
+    }
+
+    await prisma.$transaction(
+      contributions.map((contrib: any) =>
+        prisma.familyContribution.update({
+          where: {
+            id: contrib.id,
+          },
+          data: {
+            amount: parseFloat(contrib.amount),
+            percentage: parseInt(contrib.percentage),
+          },
+        })
+      )
+    );
 
     // Fetch updated contributions
     const updatedContributions = await prisma.familyContribution.findMany({

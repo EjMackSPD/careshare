@@ -1,10 +1,17 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/auth-utils'
-import { EventType, CostStatus, FamilyRole, TaskPriority, TaskStatus } from '@prisma/client'
+import { EventType, CostStatus, FamilyRole, OnboardingStatus, TaskPriority, TaskStatus } from '@prisma/client'
 
 export async function POST() {
   try {
+    if (process.env.NODE_ENV === "production") {
+      return NextResponse.json(
+        { error: "Demo reset is disabled in production" },
+        { status: 403 }
+      )
+    }
+
     const user = await getCurrentUser()
     
     if (!user || (user as any).email !== 'demo@careshare.app') {
@@ -38,6 +45,7 @@ export async function POST() {
         name: 'Sarah Smith',
         password: await require('bcryptjs').hash('demo123', 10),
         role: 'FAMILY_MEMBER',
+        onboardingStatus: OnboardingStatus.COMPLETED,
       },
     })
 
@@ -49,6 +57,7 @@ export async function POST() {
         name: 'Michael Smith',
         password: await require('bcryptjs').hash('demo123', 10),
         role: 'FAMILY_MEMBER',
+        onboardingStatus: OnboardingStatus.COMPLETED,
       },
     })
 
@@ -60,6 +69,7 @@ export async function POST() {
         name: 'Emily Smith',
         password: await require('bcryptjs').hash('demo123', 10),
         role: 'FAMILY_MEMBER',
+        onboardingStatus: OnboardingStatus.COMPLETED,
       },
     })
 
@@ -77,12 +87,26 @@ export async function POST() {
         createdBy: (user as any).id,
         members: {
           create: [
-            { userId: (user as any).id, role: FamilyRole.CARE_MANAGER },
-            { userId: sarahUser.id, role: FamilyRole.FAMILY_MEMBER },
-            { userId: michaelUser.id, role: FamilyRole.FAMILY_MEMBER },
-            { userId: emilyUser.id, role: FamilyRole.FAMILY_MEMBER },
+            { userId: (user as any).id, role: FamilyRole.OWNER },
+            { userId: sarahUser.id, role: FamilyRole.FAMILY_ADMIN },
+            { userId: michaelUser.id, role: FamilyRole.CONTRIBUTOR },
+            { userId: emilyUser.id, role: FamilyRole.VIEWER },
           ],
         },
+      },
+    })
+
+    await prisma.careRecipient.create({
+      data: {
+        familyId: demoFamily.id,
+        name: 'Mary Smith',
+        preferredName: 'Mary',
+        relationshipToCaregiver: 'Mother',
+        phone: '(555) 123-4567',
+        address: '123 Oak Street, Springfield, IL 62701',
+        birthDate: new Date('1945-06-15'),
+        medicalNotes: 'Allergic to penicillin. Takes blood pressure medication daily at 8 AM.',
+        conditions: ['Hypertension'],
       },
     })
 

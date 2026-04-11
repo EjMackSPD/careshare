@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/prisma'
-import { FamilyRole } from '@prisma/client'
+import { FamilyRole, OnboardingStatus } from '@prisma/client'
 
 export async function GET() {
   try {
@@ -32,6 +32,7 @@ export async function GET() {
                 },
               },
             },
+            careRecipient: true,
           },
         },
       },
@@ -80,7 +81,7 @@ export async function POST(request: Request) {
         members: {
           create: {
             userId: (user as any).id,
-            role: FamilyRole.CARE_MANAGER, // Creator becomes Care Manager
+            role: FamilyRole.OWNER,
           },
         },
       },
@@ -96,6 +97,13 @@ export async function POST(request: Request) {
             },
           },
         },
+      },
+    })
+
+    await prisma.user.update({
+      where: { id: (user as any).id },
+      data: {
+        onboardingStatus: OnboardingStatus.COMPLETED,
       },
     })
 

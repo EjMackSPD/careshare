@@ -2,16 +2,35 @@ import { NextRequest, NextResponse } from "next/server"
 import { writeFile, mkdir } from "fs/promises"
 import { join } from "path"
 import { existsSync } from "fs"
+import { requireAuth, requireFamilyMembership } from "@/lib/auth-utils"
 
 export async function POST(req: NextRequest) {
   try {
+    try {
+      await requireAuth()
+    } catch (error) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      )
+    }
     const formData = await req.formData()
     const file = formData.get("file") as File
+    const familyId = formData.get("familyId")
     
-    if (!file) {
+    if (!file || typeof familyId !== "string" || familyId.trim() === "") {
       return NextResponse.json(
-        { error: "No file provided" },
+        { error: "File and family ID are required" },
         { status: 400 }
+      )
+    }
+
+    try {
+      await requireFamilyMembership(familyId)
+    } catch (error) {
+      return NextResponse.json(
+        { error: "Access denied" },
+        { status: 403 }
       )
     }
 

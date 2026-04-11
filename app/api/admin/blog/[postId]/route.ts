@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/auth-utils";
+import { requireAdmin } from "@/lib/auth-utils";
 import { BlogCategory } from "@prisma/client";
 
 // PUT /api/admin/blog/[postId] - Update a blog post (admin only)
@@ -9,13 +9,9 @@ export async function PUT(
   { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
-    const user = await requireAuth();
-
-    // Check if user is admin
-    if (
-      user.email !== "admin@careshare.app" &&
-      user.email !== "demo@careshare.app"
-    ) {
+    try {
+      await requireAdmin();
+    } catch (error) {
       return NextResponse.json(
         { error: "Unauthorized - Admin access required" },
         { status: 403 }
@@ -107,13 +103,9 @@ export async function DELETE(
   { params }: { params: Promise<{ postId: string }> }
 ) {
   try {
-    const user = await requireAuth();
-
-    // Check if user is admin
-    if (
-      user.email !== "admin@careshare.app" &&
-      user.email !== "demo@careshare.app"
-    ) {
+    try {
+      await requireAdmin();
+    } catch (error) {
       return NextResponse.json(
         { error: "Unauthorized - Admin access required" },
         { status: 403 }

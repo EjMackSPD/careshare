@@ -66,8 +66,7 @@ export default function ManageFamiliesPage() {
   const [selectedRole, setSelectedRole] = useState("CARE_RECIPIENT");
 
   const isAdmin =
-    session?.user?.email === "admin@careshare.app" ||
-    session?.user?.email === "demo@careshare.app";
+    session?.user?.role === "ADMIN";
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -115,8 +114,9 @@ export default function ManageFamiliesPage() {
       const usersRes = await fetch("/api/admin/users");
 
       if (membersRes.ok && usersRes.ok) {
-        const members = await membersRes.json();
+        const membersData = await membersRes.json();
         const allUsers = await usersRes.json();
+        const members = membersData.members ?? [];
 
         setFamilyMembers(members);
 
@@ -814,8 +814,10 @@ export default function ManageFamiliesPage() {
                         className={styles.roleSelect}
                       >
                         <option value="CARE_RECIPIENT">Care Recipient</option>
-                        <option value="CARE_MANAGER">Care Manager</option>
-                        <option value="FAMILY_MEMBER">Family Member</option>
+                        <option value="OWNER">Owner</option>
+                        <option value="PRIMARY_CAREGIVER">Primary Caregiver</option>
+                        <option value="FAMILY_ADMIN">Family Admin</option>
+                        <option value="VIEWER">Viewer</option>
                         <option value="CONTRIBUTOR">Contributor</option>
                       </select>
                       <button
@@ -978,8 +980,10 @@ export default function ManageFamiliesPage() {
                         className={styles.roleSelect}
                       >
                         <option value="CARE_RECIPIENT">Care Recipient</option>
-                        <option value="CARE_MANAGER">Care Manager</option>
-                        <option value="FAMILY_MEMBER">Family Member</option>
+                        <option value="OWNER">Owner</option>
+                        <option value="PRIMARY_CAREGIVER">Primary Caregiver</option>
+                        <option value="FAMILY_ADMIN">Family Admin</option>
+                        <option value="VIEWER">Viewer</option>
                         <option value="CONTRIBUTOR">Contributor</option>
                       </select>
                       <button
