@@ -37,7 +37,6 @@ export default async function Dashboard() {
     redirect("/login");
   }
 
-  // Fetch user's families
   const familyMembers = await prisma.familyMember.findMany({
     where: {
       userId: (user as any).id,
@@ -72,28 +71,30 @@ export default async function Dashboard() {
     },
   });
 
-  const families = familyMembers.map((fm) => fm.family);
-
-  // Calculate task statistics
-  const allTasks = families.flatMap((f) => f.tasks);
+  const families = familyMembers.map((familyMember) => familyMember.family);
+  const primaryFamily = families[0];
+  const allTasks = families.flatMap((family) => family.tasks);
   const totalTasks = allTasks.length;
   const completedTasks = allTasks.filter(
-    (t) => t.status === "COMPLETED"
+    (task) => task.status === "COMPLETED"
   ).length;
-  const unassignedTasks = allTasks.filter((t) => {
-    // Task is unassigned if it's not completed AND has no assignments
-    const hasNoAssignments = !t.assignments || t.assignments.length === 0;
-    return t.status !== "COMPLETED" && hasNoAssignments;
+  const unassignedTasks = allTasks.filter((task) => {
+    const hasNoAssignments = !task.assignments || task.assignments.length === 0;
+    return task.status !== "COMPLETED" && hasNoAssignments;
   }).length;
-  const openTasks = allTasks.filter((t) => t.status !== "COMPLETED").length;
-
-  console.log("Dashboard Task Stats:", {
-    totalTasks,
-    completedTasks,
-    unassignedTasks,
-    openTasks,
-    sampleTask: allTasks[0],
-  });
+  const openTasks = allTasks.filter((task) => task.status !== "COMPLETED").length;
+  const pendingBills = families.reduce((sum, family) => sum + family.costs.length, 0);
+  const totalDue = families.reduce(
+    (sum, family) =>
+      sum + family.costs.reduce((familySum, cost) => familySum + cost.amount, 0),
+    0
+  );
+  const upcomingEvents = families.reduce(
+    (sum, family) => sum + family.events.length,
+    0
+  );
+  const activeFamilyName = primaryFamily?.name || "Your care workspace";
+  const careRecipientName = primaryFamily?.elderName || "Care recipient";
 
   return (
     <div className={styles.container}>
@@ -101,223 +102,229 @@ export default async function Dashboard() {
 
       <div className={styles.layout}>
         <LeftNavigation />
-        <main className={styles.main}>
-          {/* Care Recipient Profile Header */}
-          {families.length > 0 && families[0]?.elderName && (
-            <div className={styles.profileHeader}>
-              <div className={styles.coverPhoto}>
-                <img
-                  src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=1200&h=300&fit=crop"
-                  alt="Cover"
-                  className={styles.coverImage}
-                />
-                <div className={styles.coverOverlay}></div>
-              </div>
-              <div className={styles.profileSection}>
-                <div className={styles.profileImage}>
-                  <div className={styles.avatar}>
-                    {families[0].elderName.charAt(0).toUpperCase()}
-                  </div>
-                </div>
-                <div className={styles.profileInfo}>
-                  <h2>{families[0].elderName}</h2>
-                  <p>{families[0].name}</p>
-                </div>
-              </div>
-            </div>
-          )}
 
-          <div className={styles.header}>
-            <div>
-              <h1>Welcome back, {user.name || "there"}!</h1>
-              <p className={styles.headerSubtitle}>
-                Here's what's happening with your families
-              </p>
+        <main className={styles.main}>
+          <section className={styles.hero}>
+            <div className={styles.heroContent}>
+              <div className={styles.eyebrow}>Care Dashboard</div>
+
+              <div className={styles.header}>
+                <div>
+                  <h1>Welcome back, {user.name || "there"}.</h1>
+                  <p className={styles.headerSubtitle}>
+                    Track care activity, upcoming obligations, and family coordination from one working view.
+                  </p>
+                </div>
+              </div>
+
+              <div className={styles.heroMeta}>
+                <div className={styles.heroMetaItem}>
+                  <span className={styles.heroMetaLabel}>Active workspace</span>
+                  <strong>{activeFamilyName}</strong>
+                </div>
+                <div className={styles.heroMetaItem}>
+                  <span className={styles.heroMetaLabel}>Care recipient</span>
+                  <strong>{careRecipientName}</strong>
+                </div>
+                <div className={styles.heroMetaItem}>
+                  <span className={styles.heroMetaLabel}>Families</span>
+                  <strong>{families.length}</strong>
+                </div>
+              </div>
             </div>
-          </div>
+
+            {families.length > 0 && (
+              <div className={styles.heroAside}>
+                <div className={styles.heroAvatar}>
+                  {careRecipientName.charAt(0).toUpperCase()}
+                </div>
+                <div className={styles.heroAsideBody}>
+                  <p className={styles.heroAsideLabel}>Current focus</p>
+                  <h2>{careRecipientName}</h2>
+                  <p className={styles.heroAsideText}>
+                    {openTasks} open tasks, {upcomingEvents} upcoming events, and {pendingBills} pending bills across your workspace.
+                  </p>
+                </div>
+                <div className={styles.heroActionRow}>
+                  <Link href="/dashboard/tasks" className={styles.heroActionPrimary}>
+                    Review Tasks
+                  </Link>
+                  <Link href="/family" className={styles.heroActionSecondary}>
+                    Open Families
+                  </Link>
+                </div>
+              </div>
+            )}
+          </section>
 
           {families.length > 0 && (
             <div className={styles.statsOverview}>
-              {/* Task Statistics Group */}
-              <div className={styles.statsGroup}>
-                <div className={styles.statsGroupHeader}>
-                  <div className={styles.groupHeaderTitle}>
-                    <div className={styles.groupIcon}>
-                      <ClipboardList size={18} />
-                    </div>
-                    <h3>Tasks Overview</h3>
+              <section className={styles.summaryPanel}>
+                <div className={styles.summaryPanelHeader}>
+                  <div className={styles.summaryIcon}>
+                    <ClipboardList size={18} />
                   </div>
-                  <Link href="/dashboard/tasks" className={styles.viewAllLink}>
-                    View All →
-                  </Link>
+                  <div>
+                    <h3>Tasks</h3>
+                    <p>What needs attention now</p>
+                  </div>
                 </div>
-                <div className={styles.inlineStats}>
-                  <Link
-                    href="/dashboard/tasks"
-                    className={styles.inlineStatLink}
-                  >
-                    <span className={styles.inlineStatNumber}>
-                      {totalTasks}
-                    </span>
-                    <span className={styles.inlineStatLabel}>Total</span>
+                <div className={styles.summaryMetrics}>
+                  <Link href="/dashboard/tasks" className={styles.metricCard}>
+                    <span className={styles.metricValue}>{totalTasks}</span>
+                    <span className={styles.metricLabel}>Total tracked</span>
                   </Link>
-                  <div className={styles.statDivider}></div>
-                  <Link
-                    href="/dashboard/tasks?tab=open"
-                    className={styles.inlineStatLink}
-                  >
-                    <span
-                      className={styles.inlineStatNumber}
-                      style={{ color: "#3b82f6" }}
-                    >
+                  <Link href="/dashboard/tasks?tab=open" className={styles.metricCard}>
+                    <span className={`${styles.metricValue} ${styles.metricOpen}`}>
                       {openTasks}
                     </span>
-                    <span className={styles.inlineStatLabel}>Open</span>
+                    <span className={styles.metricLabel}>Open now</span>
                   </Link>
-                  <div className={styles.statDivider}></div>
                   <Link
                     href="/dashboard/tasks?tab=unassigned"
-                    className={`${styles.inlineStatLink} ${
-                      unassignedTasks > 0 ? styles.warningLink : ""
+                    className={`${styles.metricCard} ${
+                      unassignedTasks > 0 ? styles.metricAlert : ""
                     }`}
                   >
-                    <span
-                      className={styles.inlineStatNumber}
-                      style={{ color: "#f59e0b" }}
-                    >
+                    <span className={`${styles.metricValue} ${styles.metricWarn}`}>
                       {unassignedTasks}
                     </span>
-                    <span className={styles.inlineStatLabel}>Unassigned</span>
+                    <span className={styles.metricLabel}>Unassigned</span>
                   </Link>
-                  <div className={styles.statDivider}></div>
                   <Link
                     href="/dashboard/tasks?tab=completed"
-                    className={styles.inlineStatLink}
+                    className={styles.metricCard}
                   >
-                    <span
-                      className={styles.inlineStatNumber}
-                      style={{ color: "#10b981" }}
-                    >
+                    <span className={`${styles.metricValue} ${styles.metricDone}`}>
                       {completedTasks}
                     </span>
-                    <span className={styles.inlineStatLabel}>Completed</span>
+                    <span className={styles.metricLabel}>Completed</span>
                   </Link>
                 </div>
-              </div>
+              </section>
 
-              {/* Financial Statistics Group */}
-              <div className={styles.statsGroup}>
-                <div className={styles.statsGroupHeader}>
-                  <div className={styles.groupHeaderTitle}>
-                    <div className={styles.groupIcon}>
-                      <DollarSign size={18} />
-                    </div>
-                    <h3>Financial Overview</h3>
+              <section className={styles.summaryPanel}>
+                <div className={styles.summaryPanelHeader}>
+                  <div className={styles.summaryIcon}>
+                    <DollarSign size={18} />
                   </div>
-                  <Link
-                    href="/dashboard/finances"
-                    className={styles.viewAllLink}
-                  >
-                    View All →
+                  <div>
+                    <h3>Finances</h3>
+                    <p>Pending costs across families</p>
+                  </div>
+                </div>
+                <div className={styles.summaryStack}>
+                  <div className={styles.summaryRow}>
+                    <span>Pending bills</span>
+                    <strong>{pendingBills}</strong>
+                  </div>
+                  <div className={styles.summaryRow}>
+                    <span>Total due</span>
+                    <strong>${totalDue.toFixed(0)}</strong>
+                  </div>
+                  <Link href="/dashboard/finances" className={styles.summaryLink}>
+                    Open finances
                   </Link>
                 </div>
-                <div className={styles.miniStats}>
-                  <div className={styles.miniStatCard}>
-                    <div className={styles.miniStatNumber}>
-                      {families.reduce((sum, f) => sum + f.costs.length, 0)}
-                    </div>
-                    <div className={styles.miniStatLabel}>Pending Bills</div>
-                  </div>
-                  <div className={styles.miniStatCard}>
-                    <div
-                      className={styles.miniStatNumber}
-                      style={{ color: "#6366f1" }}
-                    >
-                      $
-                      {families
-                        .reduce(
-                          (sum, f) =>
-                            sum + f.costs.reduce((s, c) => s + c.amount, 0),
-                          0
-                        )
-                        .toFixed(0)}
-                    </div>
-                    <div className={styles.miniStatLabel}>Total Due</div>
-                  </div>
-                </div>
-              </div>
+              </section>
 
-              {/* Calendar Statistics Group */}
-              <div className={styles.statsGroup}>
-                <div className={styles.statsGroupHeader}>
-                  <div className={styles.groupHeaderTitle}>
-                    <div className={styles.groupIcon}>
-                      <CalendarDays size={18} />
-                    </div>
-                    <h3>Calendar Overview</h3>
+              <section className={styles.summaryPanel}>
+                <div className={styles.summaryPanelHeader}>
+                  <div className={styles.summaryIcon}>
+                    <CalendarDays size={18} />
                   </div>
-                  <Link
-                    href="/dashboard/calendar"
-                    className={styles.addEventBtn}
-                  >
-                    + Add Event
+                  <div>
+                    <h3>Calendar</h3>
+                    <p>Appointments, visits, and milestones</p>
+                  </div>
+                </div>
+                <div className={styles.summaryStack}>
+                  <div className={styles.summaryRow}>
+                    <span>Upcoming events</span>
+                    <strong>{upcomingEvents}</strong>
+                  </div>
+                  <Link href="/dashboard/calendar" className={styles.summaryLink}>
+                    View calendar
+                  </Link>
+                  <Link href="/dashboard/calendar" className={styles.summaryButton}>
+                    Add event
                   </Link>
                 </div>
-                <div className={styles.miniStats}>
-                  <div className={styles.miniStatCard}>
-                    <div className={styles.miniStatNumber}>
-                      {families.reduce((sum, f) => sum + f.events.length, 0)}
-                    </div>
-                    <div className={styles.miniStatLabel}>Upcoming Events</div>
-                  </div>
-                </div>
-              </div>
+              </section>
             </div>
           )}
 
-          {/* Quick Links */}
           {families.length > 0 && (
-            <div className={styles.quickLinks}>
-              <h2>Quick Actions</h2>
+            <section className={styles.quickLinks}>
+              <div className={styles.sectionHeading}>
+                <div>
+                  <h2>Quick actions</h2>
+                  <p>Jump straight into the areas people use most.</p>
+                </div>
+              </div>
+
               <div className={styles.linksGrid}>
                 <Link href="/dashboard/tasks" className={styles.quickLink}>
                   <div className={styles.linkIcon}>
                     <CheckSquare size={20} />
                   </div>
-                  <span>Manage Tasks</span>
+                  <div className={styles.quickLinkBody}>
+                    <span>Manage tasks</span>
+                    <small>Assignments, follow-ups, deadlines</small>
+                  </div>
                 </Link>
+
                 <Link href="/dashboard/calendar" className={styles.quickLink}>
                   <div className={styles.linkIcon}>
                     <CalendarIcon size={20} />
                   </div>
-                  <span>View Calendar</span>
+                  <div className={styles.quickLinkBody}>
+                    <span>View calendar</span>
+                    <small>Visits, appointments, reminders</small>
+                  </div>
                 </Link>
+
                 <Link href="/dashboard/finances" className={styles.quickLink}>
                   <div className={styles.linkIcon}>
                     <Wallet size={20} />
                   </div>
-                  <span>Track Finances</span>
+                  <div className={styles.quickLinkBody}>
+                    <span>Track finances</span>
+                    <small>Bills, contributions, totals</small>
+                  </div>
                 </Link>
+
                 <Link href="/dashboard/care-plan" className={styles.quickLink}>
                   <div className={styles.linkIcon}>
                     <Heart size={20} />
                   </div>
-                  <span>Care Plan</span>
+                  <div className={styles.quickLinkBody}>
+                    <span>Care plan</span>
+                    <small>Goals, routines, scenarios</small>
+                  </div>
                 </Link>
+
                 <Link href="/dashboard/gifts" className={styles.quickLink}>
                   <div className={styles.linkIcon}>
                     <Gift size={20} />
                   </div>
-                  <span>Send Gift</span>
+                  <div className={styles.quickLinkBody}>
+                    <span>Send a gift</span>
+                    <small>Support from a distance</small>
+                  </div>
                 </Link>
+
                 <Link href="/dashboard/food" className={styles.quickLink}>
                   <div className={styles.linkIcon}>
                     <UtensilsCrossed size={20} />
                   </div>
-                  <span>Order Food</span>
+                  <div className={styles.quickLinkBody}>
+                    <span>Order food</span>
+                    <small>Meals and delivery support</small>
+                  </div>
                 </Link>
               </div>
-            </div>
+            </section>
           )}
 
           {families.length === 0 ? (
@@ -334,63 +341,73 @@ export default async function Dashboard() {
             </div>
           ) : (
             <>
-              {/* Widget Grid */}
-              <div className={styles.widgetGrid}>
-                <div className={styles.widgetLarge}>
-                  <CareRecipientWidget
-                    elderName={families[0]?.elderName}
-                    elderAge={
-                      families[0]?.elderBirthday
-                        ? new Date().getFullYear() -
-                          new Date(families[0].elderBirthday).getFullYear()
-                        : undefined
-                    }
-                    familyId={families[0]?.id}
-                  />
+              <section className={styles.widgetSection}>
+                <div className={styles.sectionHeading}>
+                  <div>
+                    <h2>Live workspace</h2>
+                    <p>Operational panels for notes, tasks, finances, calendar, and coordination.</p>
+                  </div>
                 </div>
-                <div className={styles.widgetMedium}>
-                  <TasksWidget />
-                </div>
-                <div className={styles.widgetMedium}>
-                  <FinancialWidget />
-                </div>
-                <div className={styles.widgetMedium}>
-                  <CalendarWidget />
-                </div>
-                <div className={styles.widgetMedium}>
-                  <CollaborationWidget />
-                </div>
-                <div className={styles.widgetLarge}>
-                  <ResourcesWidget />
-                </div>
-                <div className={styles.widgetLarge}>
-                  <CarePlanWidget />
-                </div>
-              </div>
 
-              <div className={styles.dashboard}>
+                <div className={styles.widgetGrid}>
+                  <div className={styles.widgetLarge}>
+                    <CareRecipientWidget
+                      elderName={primaryFamily?.elderName}
+                      elderAge={
+                        primaryFamily?.elderBirthday
+                          ? new Date().getFullYear() -
+                            new Date(primaryFamily.elderBirthday).getFullYear()
+                          : undefined
+                      }
+                      familyId={primaryFamily?.id}
+                    />
+                  </div>
+                  <div className={styles.widgetMedium}>
+                    <TasksWidget />
+                  </div>
+                  <div className={styles.widgetMedium}>
+                    <FinancialWidget />
+                  </div>
+                  <div className={styles.widgetMedium}>
+                    <CalendarWidget />
+                  </div>
+                  <div className={styles.widgetMedium}>
+                    <CollaborationWidget />
+                  </div>
+                  <div className={styles.widgetLarge}>
+                    <ResourcesWidget />
+                  </div>
+                  <div className={styles.widgetLarge}>
+                    <CarePlanWidget />
+                  </div>
+                </div>
+              </section>
+
+              <section className={styles.dashboard}>
+                <div className={styles.sectionHeading}>
+                  <div>
+                    <h2>Family snapshots</h2>
+                    <p>Recent events and pending costs for each family you support.</p>
+                  </div>
+                </div>
+
                 {families.map((family) => (
                   <div key={family.id} className={styles.familySection}>
                     <div className={styles.familyHeader}>
                       <div>
                         <h2>{family.name}</h2>
                         {family.elderName && (
-                          <p className={styles.elderName}>
-                            Care for {family.elderName}
-                          </p>
+                          <p className={styles.elderName}>Care for {family.elderName}</p>
                         )}
                       </div>
-                      <Link
-                        href={`/family/${family.id}`}
-                        className={styles.viewLink}
-                      >
-                        View Details →
+                      <Link href={`/family/${family.id}`} className={styles.viewLink}>
+                        View details
                       </Link>
                     </div>
 
                     <div className={styles.cards}>
                       <div className={styles.card}>
-                        <h3>Upcoming Events</h3>
+                        <h3>Upcoming events</h3>
                         {family.events.length === 0 ? (
                           <p className={styles.emptyText}>No upcoming events</p>
                         ) : (
@@ -398,29 +415,19 @@ export default async function Dashboard() {
                             {family.events.map((event) => (
                               <li key={event.id}>
                                 <div className={styles.eventIconWrapper}>
-                                  {event.type === "BIRTHDAY" && (
-                                    <Cake size={16} />
-                                  )}
-                                  {event.type === "APPOINTMENT" && (
-                                    <Stethoscope size={16} />
-                                  )}
+                                  {event.type === "BIRTHDAY" && <Cake size={16} />}
+                                  {event.type === "APPOINTMENT" && <Stethoscope size={16} />}
                                   {event.type === "FOOD_DELIVERY" && (
                                     <UtensilsCrossed size={16} />
                                   )}
-                                  {event.type === "VISIT" && (
-                                    <UserCheck size={16} />
-                                  )}
-                                  {event.type === "OTHER" && (
-                                    <Clock size={16} />
-                                  )}
+                                  {event.type === "VISIT" && <UserCheck size={16} />}
+                                  {event.type === "OTHER" && <Clock size={16} />}
                                 </div>
                                 <div>
                                   <strong>{event.title}</strong>
                                   <br />
                                   <small>
-                                    {new Date(
-                                      event.eventDate
-                                    ).toLocaleDateString()}
+                                    {new Date(event.eventDate).toLocaleDateString()}
                                   </small>
                                 </div>
                               </li>
@@ -436,7 +443,7 @@ export default async function Dashboard() {
                       </div>
 
                       <div className={styles.card}>
-                        <h3>Pending Costs</h3>
+                        <h3>Pending costs</h3>
                         {family.costs.length === 0 ? (
                           <p className={styles.emptyText}>No pending costs</p>
                         ) : (
@@ -462,11 +469,12 @@ export default async function Dashboard() {
                     </div>
                   </div>
                 ))}
-              </div>
+              </section>
             </>
           )}
         </main>
       </div>
+
       <Footer />
     </div>
   );

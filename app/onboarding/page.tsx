@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { signIn, useSession } from 'next-auth/react'
+import { getProviders, signIn, useSession } from 'next-auth/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Check, ChevronLeft, ChevronRight } from 'lucide-react'
@@ -67,9 +67,28 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false)
   const [pageLoading, setPageLoading] = useState(true)
   const [error, setError] = useState('')
+  const [googleEnabled, setGoogleEnabled] = useState(false)
   const [formData, setFormData] = useState(DEFAULT_FORM)
 
   const isAuthenticated = status === 'authenticated'
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadProviders() {
+      const providers = await getProviders()
+
+      if (!cancelled) {
+        setGoogleEnabled(Boolean(providers?.google))
+      }
+    }
+
+    void loadProviders()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     if (status === 'loading') {
@@ -402,14 +421,16 @@ export default function OnboardingPage() {
               </div>
             ) : (
               <>
-                <button
-                  type="button"
-                  onClick={() => signIn('google', { callbackUrl: '/onboarding' })}
-                  className={styles.completeBtn}
-                  disabled={loading}
-                >
-                  Continue with Google
-                </button>
+                {googleEnabled && (
+                  <button
+                    type="button"
+                    onClick={() => signIn('google', { callbackUrl: '/onboarding' })}
+                    className={styles.completeBtn}
+                    disabled={loading}
+                  >
+                    Continue with Google
+                  </button>
+                )}
 
                 <div className={styles.reviewCard}>
                   <h3>Or create an account with email</h3>

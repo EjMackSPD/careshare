@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { getProviders, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Heart, Shield, Users, Sparkles } from "lucide-react";
@@ -15,6 +15,25 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleEnabled, setGoogleEnabled] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadProviders() {
+      const providers = await getProviders();
+
+      if (!cancelled) {
+        setGoogleEnabled(Boolean(providers?.google));
+      }
+    }
+
+    void loadProviders();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -163,18 +182,22 @@ export default function Login() {
             <form onSubmit={handleSubmit} className={styles.form}>
               {error && <div className={styles.error}>{error}</div>}
 
-              <button
-                type="button"
-                onClick={handleGoogleLogin}
-                className={styles.submitBtn}
-                disabled={loading}
-              >
-                Continue with Google
-              </button>
+              {googleEnabled && (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleGoogleLogin}
+                    className={styles.submitBtn}
+                    disabled={loading}
+                  >
+                    Continue with Google
+                  </button>
 
-              <div className={styles.divider}>
-                <span>or use email</span>
-              </div>
+                  <div className={styles.divider}>
+                    <span>or use email</span>
+                  </div>
+                </>
+              )}
 
               <div className={styles.formGroup}>
                 <label htmlFor="email">Email</label>
