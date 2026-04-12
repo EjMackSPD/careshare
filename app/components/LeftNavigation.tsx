@@ -25,6 +25,7 @@ import {
   ChevronUp,
   Settings,
   Database,
+  Sparkles,
   FileText,
   Shield,
 } from "lucide-react";
@@ -37,6 +38,7 @@ const mainMenuItems = [
   { href: "/dashboard/finances", label: "Finances", icon: Wallet },
   { href: "/dashboard/care-plan", label: "Care Plan", icon: Heart },
   { href: "/dashboard/resources", label: "Resources", icon: BookOpen },
+  { href: "/dashboard/care-ai", label: "CareAI", icon: Sparkles },
 ];
 
 const familyMenuItems = [

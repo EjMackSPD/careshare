@@ -117,8 +117,8 @@ export default function Login() {
           <div className={styles.heroContent}>
             <h1>Welcome back to CareShare</h1>
             <p className={styles.subtitle}>
-              Continue coordinating care with your family. Sign in to access
-              your dashboard.
+              Sign in to continue your caregiver, family, care center, or
+              personal support workflow.
             </p>
 
             <div className={styles.features}>
@@ -129,8 +129,7 @@ export default function Login() {
                 <div>
                   <h3>Your Family Hub</h3>
                   <p>
-                    Access all your family&apos;s caregiving information in one
-                    place
+                    Keep care updates, tasks, and planning in one trusted place
                   </p>
                 </div>
               </div>
@@ -151,7 +150,7 @@ export default function Login() {
                 </div>
                 <div>
                   <h3>Stay Connected</h3>
-                  <p>Keep everyone in your family informed and involved</p>
+                  <p>Bring family members, supporters, or staff into the loop</p>
                 </div>
               </div>
 

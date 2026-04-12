@@ -1,0 +1,288 @@
+import type { PageSection } from "@/app/components/sections/section-types";
+import {
+  ArrowRight,
+  BarChart3,
+  Bell,
+  Calendar,
+  CalendarDays,
+  FileText,
+  Heart,
+  MessageSquare,
+  Shield,
+  Sparkles,
+  Target,
+  TrendingUp,
+  Users,
+  Video,
+  Wallet,
+} from "lucide-react";
+
+export const homeSections: PageSection[] = [
+  {
+    id: "home-hero",
+    type: "hero",
+    variant: "marketing",
+    theme: "light",
+    title: "Caring for loved ones,",
+    highlight: "together",
+    body:
+      "CareShare helps caregivers, families, care centers, and individuals start the right care workflow from day one.",
+    actions: [
+      { href: "/onboarding", label: "Choose Your Onboarding Path", variant: "primary" },
+      { href: "/login", label: "Quick Demo", variant: "accent" },
+    ],
+    media: { kind: "carousel" },
+  },
+  {
+    id: "home-benefits",
+    type: "feature-grid",
+    title: "Why CareShare?",
+    items: [
+      {
+        title: "Split Costs Fairly",
+        body: "Track expenses and contributions transparently without awkward money conversations.",
+        icon: Wallet,
+        accent: { background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)", foreground: "#ffffff" },
+      },
+      {
+        title: "Coordinate Events",
+        body: "Plan birthdays, appointments, and food deliveries together so everyone stays in the loop.",
+        icon: CalendarDays,
+        accent: { background: "linear-gradient(135deg, #16a34a 0%, #15803d 100%)", foreground: "#ffffff" },
+      },
+      {
+        title: "Bring Family Together",
+        body: "Share the responsibility of care and help each person contribute in their own way.",
+        icon: Users,
+        accent: { background: "linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)", foreground: "#ffffff" },
+      },
+      {
+        title: "For Care Providers",
+        body: "Support families with a shared workspace that keeps plans, updates, and responsibilities organized.",
+        icon: Heart,
+        accent: { background: "linear-gradient(135deg, #f97316 0%, #ea580c 100%)", foreground: "#ffffff" },
+      },
+    ],
+  },
+  {
+    id: "home-demo",
+    type: "content",
+    title: "See CareShare in Action",
+    intro: "Experience the platform with a fully interactive demo account. No signup required.",
+    bullets: [
+      "Pre-loaded with realistic caregiving scenarios",
+      "Explore all major workflows and features",
+      "See how families coordinate care together",
+      "Test tasks, calendars, and finances with real sample data",
+    ],
+    layout: "split",
+    background: "muted",
+    aside: {
+      title: "Try the Demo Walkthrough",
+      body: "Open the login page and jump in with demo mode to explore the product from a real family workspace.",
+      actions: [{ href: "/login", label: "Try Demo Walkthrough", variant: "accent", icon: Video }],
+      note: 'Use the "Try Demo Mode" option on the login page.',
+    },
+  },
+  {
+    id: "home-blog",
+    type: "content",
+    title: "Latest from Our Blog",
+    intro: "Blog posts are coming soon with caregiving tips, family stories, and practical resources.",
+    layout: "centered",
+    actions: [{ href: "/blog", label: "Explore Blog", variant: "primary", icon: ArrowRight }],
+  },
+  {
+    id: "home-cta",
+    type: "cta",
+    theme: "brand",
+    title: "Ready to get started?",
+    body: "Choose the setup flow that matches how you care and who you support.",
+    actions: [{ href: "/onboarding", label: "Start Caregiver, Family, Center, or Individual Setup", variant: "primary" }],
+  },
+];
+
+export const featureSections: PageSection[] = [
+  {
+    id: "features-hero",
+    type: "hero",
+    variant: "marketing",
+    theme: "brand",
+    eyebrow: "All-in-One Caregiving Platform",
+    title: "Everything Your Family Needs",
+    highlight: "In One Beautiful Place",
+    body:
+      "Stop juggling emails, texts, and spreadsheets. CareShare brings everyone together with tools that actually make caregiving easier.",
+    actions: [
+      { href: "/onboarding", label: "Start Free Trial", variant: "primary", icon: Sparkles },
+      { href: "/login", label: "Try Demo", variant: "secondary", icon: Video },
+    ],
+    media: {
+      kind: "image",
+      src: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=1920&q=80",
+      alt: "A care team meeting together",
+    },
+  },
+  {
+    id: "features-core",
+    type: "feature-grid",
+    title: "Powerful Features That Make a Difference",
+    intro: "Everything you need to coordinate care, all in one place.",
+    items: [
+      {
+        title: "Smart Financial Tracking",
+        body: "Track expenses, split costs fairly, and keep everyone aligned financially.",
+        icon: Wallet,
+        accent: { background: "#dbeafe", foreground: "#2563eb" },
+        bullets: [
+          "Transparent contribution tracking",
+          "Automatic bill splitting",
+          "Payment reminders",
+          "Financial reports and exports",
+        ],
+      },
+      {
+        title: "Shared Family Calendar",
+        body: "Keep appointments, milestones, and routines synced in one shared timeline.",
+        icon: Calendar,
+        accent: { background: "#dcfce7", foreground: "#16a34a" },
+        bullets: [
+          "Medical appointments",
+          "Family celebrations",
+          "Medication schedules",
+          "Automatic reminders",
+        ],
+      },
+      {
+        title: "Task Coordination",
+        body: "Assign responsibilities clearly and balance the work across your family.",
+        icon: Target,
+        accent: { background: "#fef3c7", foreground: "#ca8a04" },
+        bullets: [
+          "Easy task assignment",
+          "Priority levels",
+          "Progress tracking",
+          "Workload balancing",
+        ],
+      },
+      {
+        title: "Family Communication Hub",
+        body: "Share updates, photos, and care context without losing the thread.",
+        icon: MessageSquare,
+        accent: { background: "#e9d5ff", foreground: "#7c3aed" },
+        bullets: [
+          "Secure family messaging",
+          "Photo sharing",
+          "Update notifications",
+          "Less group-text chaos",
+        ],
+      },
+      {
+        title: "Comprehensive Care Planning",
+        body: "Document preferences, emergency details, and key care information in one place.",
+        icon: Heart,
+        accent: { background: "#fecaca", foreground: "#dc2626" },
+        bullets: [
+          "Care level tracking",
+          "Emergency scenarios",
+          "Medical history",
+          "Important documents",
+        ],
+      },
+      {
+        title: "Resource Library",
+        body: "Find the right services, guides, and support options when your family needs help.",
+        icon: FileText,
+        accent: { background: "#fed7aa", foreground: "#ea580c" },
+        bullets: [
+          "Healthcare providers",
+          "Legal services",
+          "Financial advisors",
+          "Support groups",
+        ],
+      },
+    ],
+    background: "muted",
+  },
+  {
+    id: "features-advanced",
+    type: "feature-grid",
+    title: "Built for Real Families",
+    intro: "Every feature is designed to reduce stress and improve coordination.",
+    layout: "compact",
+    items: [
+      {
+        title: "Expense Analytics",
+        body: "Visualize spending trends and plan ahead for future care needs.",
+        icon: BarChart3,
+        accent: { background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)", foreground: "#ffffff" },
+      },
+      {
+        title: "Smart Notifications",
+        body: "Get timely alerts about bills, appointments, and important updates.",
+        icon: Bell,
+        accent: { background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)", foreground: "#ffffff" },
+      },
+      {
+        title: "Role Management",
+        body: "Control access for care managers, family members, and contributors.",
+        icon: Users,
+        accent: { background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)", foreground: "#ffffff" },
+      },
+      {
+        title: "Bank-Level Security",
+        body: "Keep family data protected with strong privacy and access controls.",
+        icon: Shield,
+        accent: { background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)", foreground: "#ffffff" },
+      },
+      {
+        title: "24/7 Access",
+        body: "Stay connected to your care workspace from anywhere, anytime.",
+        icon: Video,
+        accent: { background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)", foreground: "#ffffff" },
+      },
+      {
+        title: "Contribution Reports",
+        body: "Download clean records of who contributed what and when.",
+        icon: TrendingUp,
+        accent: { background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)", foreground: "#ffffff" },
+      },
+    ],
+  },
+  {
+    id: "features-steps",
+    type: "stats",
+    title: "Getting Started is Easy",
+    variant: "steps",
+    background: "muted",
+    items: [
+      {
+        value: "1",
+        label: "Create Your Family",
+        description: "Set up your family group in minutes with a name, description, and starting care details.",
+      },
+      {
+        value: "2",
+        label: "Invite Family Members",
+        description: "Send invitations by email so relatives can join with one click and no complicated onboarding.",
+      },
+      {
+        value: "3",
+        label: "Start Coordinating",
+        description: "Add events, create tasks, track expenses, and communicate from one shared system.",
+      },
+    ],
+  },
+  {
+    id: "features-cta",
+    type: "cta",
+    theme: "slate",
+    title: "Ready to Transform Family Caregiving?",
+    body: "Join thousands of families who are caring better, together.",
+    actions: [
+      { href: "/onboarding", label: "Get Started Free", variant: "primary", icon: Sparkles },
+      { href: "/login", label: "Try Demo Account", variant: "secondary" },
+    ],
+    note: "No credit card required • 14-day free trial • Cancel anytime",
+  },
+];

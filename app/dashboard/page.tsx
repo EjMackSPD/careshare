@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
+import { hydrateStoredDraft } from "@/lib/onboarding";
 import Link from "next/link";
 import Navigation from "../components/Navigation";
 import LeftNavigation from "../components/LeftNavigation";
@@ -71,7 +72,15 @@ export default async function Dashboard() {
     },
   });
 
+  const dbUser = await prisma.user.findUnique({
+    where: { id: (user as any).id },
+    select: {
+      onboardingData: true,
+    },
+  });
+
   const families = familyMembers.map((familyMember) => familyMember.family);
+  const onboardingDraft = hydrateStoredDraft(dbUser?.onboardingData ?? null);
   const primaryFamily = families[0];
   const allTasks = families.flatMap((family) => family.tasks);
   const totalTasks = allTasks.length;
@@ -95,6 +104,7 @@ export default async function Dashboard() {
   );
   const activeFamilyName = primaryFamily?.name || "Your care workspace";
   const careRecipientName = primaryFamily?.elderName || "Care recipient";
+  const isIndividualAudience = onboardingDraft.audienceType === "INDIVIDUAL";
 
   return (
     <div className={styles.container}>
@@ -329,14 +339,25 @@ export default async function Dashboard() {
 
           {families.length === 0 ? (
             <div className={styles.emptyState}>
-              <h2>No families yet</h2>
-              <p>Create your first family group to start coordinating care</p>
+              <h2>{isIndividualAudience ? "Your personal plan is ready for the next step" : "No families yet"}</h2>
+              <p>
+                {isIndividualAudience
+                  ? "Start your first care workspace or invite a trusted supporter when you are ready."
+                  : "Create your first family group to start coordinating care."}
+              </p>
               {user.email === "demo@careshare.app" ? (
                 <DemoInitButton />
               ) : (
-                <Link href="/family/create" className={styles.primaryBtn}>
-                  Create Family Group
-                </Link>
+                <div className={styles.emptyActions}>
+                  <Link href="/family/create" className={styles.primaryBtn}>
+                    {isIndividualAudience ? "Create Personal Workspace" : "Create Family Group"}
+                  </Link>
+                  {isIndividualAudience && (
+                    <Link href="/onboarding" className={styles.secondaryEmptyLink}>
+                      Review onboarding details
+                    </Link>
+                  )}
+                </div>
               )}
             </div>
           ) : (

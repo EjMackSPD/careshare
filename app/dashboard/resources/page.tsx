@@ -1,11 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import Navigation from '@/app/components/Navigation'
 import LeftNavigation from '@/app/components/LeftNavigation'
 import Footer from '@/app/components/Footer'
-import { Search, ExternalLink, Phone, MapPin, Utensils, Bus, Home as HomeIcon, Loader2 } from 'lucide-react'
+import {
+  ArrowUpRight,
+  BookOpen,
+  FileText,
+  Filter,
+  Globe,
+  Library,
+  Loader2,
+  Search,
+  Sparkles,
+} from 'lucide-react'
 import styles from './page.module.css'
 
 type Resource = {
@@ -17,256 +27,333 @@ type Resource = {
   fileUrl: string | null
 }
 
+type Family = {
+  id: string
+  name: string
+  elderName: string | null
+}
+
+function normalizeCategory(value: string) {
+  return value
+    .replace(/[_-]/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase())
+}
+
 export default function ResourcesPage() {
   const [searchQuery, setSearchQuery] = useState('')
-  const [activeCategory, setActiveCategory] = useState('All Resources')
+  const [activeCategory, setActiveCategory] = useState('All')
   const [resources, setResources] = useState<Resource[]>([])
   const [loading, setLoading] = useState(true)
-  const [familyId, setFamilyId] = useState<string | null>(null)
-  const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage] = useState(12)
-
-  const categories = ['All Resources', 'Healthcare', 'Nutrition', 'Social', 'Transportation', 'Housing', 'Legal', 'Financial']
+  const [family, setFamily] = useState<Family | null>(null)
 
   useEffect(() => {
+    async function fetchResources() {
+      try {
+        setLoading(true)
+
+        const familiesRes = await fetch('/api/families')
+        if (!familiesRes.ok) {
+          throw new Error('Failed to fetch families')
+        }
+
+        const familiesData = (await familiesRes.json()) as Family[]
+        const firstFamily = Array.isArray(familiesData) ? familiesData[0] : null
+
+        if (!firstFamily) {
+          setResources([])
+          return
+        }
+
+        setFamily(firstFamily)
+
+        const resourcesRes = await fetch(
+          `/api/families/${firstFamily.id}/resources`
+        )
+
+        if (!resourcesRes.ok) {
+          throw new Error('Failed to fetch resources')
+        }
+
+        const resourcesData = (await resourcesRes.json()) as Resource[]
+        setResources(resourcesData)
+      } catch (error) {
+        console.error('ResourcesPage error:', error)
+        setResources([])
+      } finally {
+        setLoading(false)
+      }
+    }
+
     fetchResources()
   }, [])
 
-  const fetchResources = async () => {
-    try {
-      // Get user's first family
-      const familiesRes = await fetch('/api/families')
-      if (!familiesRes.ok) {
-        console.log('ResourcesPage - Failed to fetch families:', familiesRes.status)
-        return
-      }
-      
-      const familiesData = await familiesRes.json()
-      console.log('ResourcesPage - Families data:', familiesData)
-      
-      // API returns array directly, not wrapped in object
-      const families = Array.isArray(familiesData) ? familiesData : []
-      
-      if (families.length === 0) {
-        console.log('ResourcesPage - No families found')
-        return
-      }
-      
-      const family = families[0]
-      setFamilyId(family.id)
-      console.log('ResourcesPage - Using family:', family.id)
-      
-      // Fetch resources
-      const resourcesRes = await fetch(`/api/families/${family.id}/resources`)
-      if (resourcesRes.ok) {
-        const resourcesData = await resourcesRes.json()
-        console.log('ResourcesPage - Resources fetched:', resourcesData.length)
-        setResources(resourcesData)
-      }
-    } catch (error) {
-      console.error('ResourcesPage - Error fetching resources:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const categories = useMemo(() => {
+    const uniqueCategories = Array.from(
+      new Set(resources.map((resource) => normalizeCategory(resource.category)))
+    ).sort((a, b) => a.localeCompare(b))
 
-  // Filter resources based on search and category
-  const filteredResources = resources.filter(resource => {
-    const matchesSearch = searchQuery === '' || 
-      resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      resource.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      resource.category.toLowerCase().includes(searchQuery.toLowerCase())
-    
-    const matchesCategory = activeCategory === 'All Resources' || 
-      resource.category.toLowerCase() === activeCategory.toLowerCase()
-    
-    return matchesSearch && matchesCategory
-  })
+    return ['All', ...uniqueCategories]
+  }, [resources])
 
-  // Pagination calculations
-  const totalPages = Math.ceil(filteredResources.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  const paginatedResources = filteredResources.slice(startIndex, endIndex)
+  const filteredResources = useMemo(() => {
+    return resources.filter((resource) => {
+      const normalizedCategory = normalizeCategory(resource.category)
+      const matchesSearch =
+        searchQuery.trim() === '' ||
+        resource.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        resource.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        normalizedCategory.toLowerCase().includes(searchQuery.toLowerCase())
 
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [searchQuery, activeCategory])
+      const matchesCategory =
+        activeCategory === 'All' || normalizedCategory === activeCategory
 
-  // Group featured resources (first 3)
-  const featuredResources = filteredResources.slice(0, 3)
-  
-  // Group by category for directory
-  const resourcesByCategory = filteredResources.reduce((acc, resource) => {
-    const cat = resource.category
-    if (!acc[cat]) acc[cat] = []
-    acc[cat].push(resource)
-    return acc
-  }, {} as Record<string, Resource[]>)
+      return matchesSearch && matchesCategory
+    })
+  }, [activeCategory, resources, searchQuery])
+
+  const categoryCounts = useMemo(() => {
+    return resources.reduce<Record<string, number>>((acc, resource) => {
+      const category = normalizeCategory(resource.category)
+      acc[category] = (acc[category] || 0) + 1
+      return acc
+    }, {})
+  }, [resources])
+
+  const topCategory = useMemo(() => {
+    const entries = Object.entries(categoryCounts)
+    if (entries.length === 0) return null
+
+    return entries.sort((a, b) => b[1] - a[1])[0]
+  }, [categoryCounts])
+
+  const linkedResources = resources.filter((resource) => resource.url).length
+  const documentResources = resources.filter((resource) => resource.fileUrl).length
+  const descriptiveResources = resources.filter(
+    (resource) => resource.description && resource.description.trim().length > 0
+  ).length
+
+  const highlightedResources = filteredResources.slice(0, 3)
 
   return (
     <div className={styles.container}>
       <Navigation showAuthLinks={true} />
-      
+
       <div className={styles.layout}>
         <LeftNavigation />
+
         <main className={styles.main}>
-          <div className={styles.pageHeader}>
-            <div>
-              <h1>Community Resources</h1>
-              <p className={styles.subtitle}>Discover local and online resources to support caregiving</p>
+          <section className={styles.header}>
+            <div className={styles.headerCopy}>
+              <div className={styles.eyebrow}>
+                <Library size={15} />
+                <span>Resources</span>
+              </div>
+              <h1>Resource library</h1>
+              <p>
+                Keep trusted services, documents, and useful links in one working
+                view for {family?.elderName || family?.name || 'your family'}.
+              </p>
             </div>
-          </div>
 
-          {/* Search Bar */}
-          <div className={styles.searchBox}>
-            <Search size={20} />
-            <input
-              type="text"
-              placeholder="Search for resources..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
-          {loading ? (
-            <div className={styles.loading}>
-              <div className={styles.spinner}></div>
-              <p>Loading resources...</p>
+            <div className={styles.headerMeta}>
+              <div className={styles.metaLabel}>Current workspace</div>
+              <div className={styles.metaValue}>{family?.name || 'Loading...'}</div>
+              <div className={styles.metaSubtle}>
+                {family?.elderName || 'Shared care support'}
+              </div>
             </div>
-          ) : (
-            <>
-              {/* Featured Resources */}
-              {featuredResources.length > 0 && (
-                <section className={styles.section}>
-                  <h2>Featured Resources</h2>
-                  <div className={styles.featuredGrid}>
-                    {featuredResources.map((resource, index) => {
-                      const colors = ['#f97316', '#3b82f6', '#a855f7']
-                      const icons = ['🍽️', '🚐', '📍', '🏥', '💰', '⚖️']
-                      
-                      return (
-                        <div key={resource.id} className={styles.featuredCard}>
-                          <div className={styles.resourceIcon} style={{ background: colors[index % colors.length] }}>
-                            {icons[index % icons.length]}
-                          </div>
-                          <h3>{resource.title}</h3>
-                          <p>{resource.description}</p>
-                          {resource.url && (
-                            <a href={resource.url} target="_blank" rel="noopener noreferrer" className={styles.learnMore}>
-                              Learn More <ExternalLink size={14} />
-                            </a>
-                          )}
-                        </div>
-                      )
-                    })}
-                  </div>
-                </section>
-              )}
+          </section>
 
-              {/* Resource Directory */}
-              <section className={styles.section}>
-                <h2>Resource Directory</h2>
-                <p className={styles.resultsCount}>
-                  {filteredResources.length} resource{filteredResources.length !== 1 ? 's' : ''} found
-                </p>
-                
-                <div className={styles.categoryTabs}>
-                  {categories.map((category) => (
-                    <button
-                      key={category}
-                      className={`${styles.categoryTab} ${activeCategory === category ? styles.active : ''}`}
-                      onClick={() => setActiveCategory(category)}
-                    >
-                      {category}
-                    </button>
-                  ))}
+          <section className={styles.signalRow}>
+            <article className={styles.signalCard}>
+              <span className={styles.signalLabel}>Tracked resources</span>
+              <strong>{resources.length}</strong>
+              <p>Total services, links, and files in this workspace.</p>
+            </article>
+
+            <article className={styles.signalCard}>
+              <span className={styles.signalLabel}>Most represented</span>
+              <strong>{topCategory ? topCategory[0] : 'No category yet'}</strong>
+              <p>
+                {topCategory
+                  ? `${topCategory[1]} item${topCategory[1] === 1 ? '' : 's'} currently grouped here.`
+                  : 'Add a few resources to start building the library.'}
+              </p>
+            </article>
+
+            <article className={styles.signalCard}>
+              <span className={styles.signalLabel}>Reference coverage</span>
+              <strong>{descriptiveResources}</strong>
+              <p>Resources with enough context for someone else to use quickly.</p>
+            </article>
+          </section>
+
+          <section className={styles.workspace}>
+            <aside className={styles.filtersPanel}>
+              <div className={styles.searchPanel}>
+                <label className={styles.panelLabel} htmlFor="resource-search">
+                  Search
+                </label>
+                <div className={styles.searchBox}>
+                  <Search size={18} />
+                  <input
+                    id="resource-search"
+                    type="text"
+                    placeholder="Search titles, notes, or categories"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className={styles.filterSection}>
+                <div className={styles.sectionHeader}>
+                  <Filter size={16} />
+                  <span>Categories</span>
                 </div>
 
-                <div className={styles.directoryContent}>
-                  {filteredResources.length === 0 ? (
-                    <div className={styles.noResources}>
-                      <div className={styles.emptyIcon}>🌐</div>
-                      <h3>No resources found</h3>
-                      <p>Try adjusting your search or category filter</p>
+                <div className={styles.categoryList}>
+                  {categories.map((category) => {
+                    const count =
+                      category === 'All'
+                        ? resources.length
+                        : categoryCounts[category] || 0
+
+                    return (
+                      <button
+                        key={category}
+                        className={`${styles.categoryButton} ${
+                          activeCategory === category ? styles.categoryButtonActive : ''
+                        }`}
+                        onClick={() => setActiveCategory(category)}
+                      >
+                        <span>{category}</span>
+                        <strong>{count}</strong>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div className={styles.insightPanel}>
+                <div className={styles.sectionHeader}>
+                  <Sparkles size={16} />
+                  <span>Quick insight</span>
+                </div>
+                <p>
+                  Strong libraries usually mix live service links with internal
+                  documents. Right now you have <strong>{linkedResources}</strong>{' '}
+                  link-based resource{linkedResources === 1 ? '' : 's'} and{' '}
+                  <strong>{documentResources}</strong> file-based reference
+                  {documentResources === 1 ? '' : 's'}.
+                </p>
+              </div>
+            </aside>
+
+            <section className={styles.resultsPanel}>
+              <div className={styles.resultsHeader}>
+                <div>
+                  <h2>Library view</h2>
+                  <p>
+                    {filteredResources.length} result
+                    {filteredResources.length === 1 ? '' : 's'}
+                    {activeCategory !== 'All' ? ` in ${activeCategory}` : ''}
+                  </p>
+                </div>
+              </div>
+
+              {loading ? (
+                <div className={styles.loadingState}>
+                  <Loader2 size={24} className={styles.spinner} />
+                  <p>Loading resources…</p>
+                </div>
+              ) : filteredResources.length === 0 ? (
+                <div className={styles.emptyState}>
+                  <BookOpen size={28} />
+                  <h3>No resources match this view</h3>
+                  <p>Try a broader search or switch to another category.</p>
+                </div>
+              ) : (
+                <>
+                  {highlightedResources.length > 0 && (
+                    <div className={styles.highlightStrip}>
+                      {highlightedResources.map((resource) => (
+                        <Link
+                          key={`highlight-${resource.id}`}
+                          href={`/dashboard/resources/${resource.id}`}
+                          className={styles.highlightCard}
+                        >
+                          <div className={styles.highlightMeta}>
+                            <span>{normalizeCategory(resource.category)}</span>
+                            <ArrowUpRight size={16} />
+                          </div>
+                          <h3>{resource.title}</h3>
+                          <p>
+                            {resource.description?.trim()
+                              ? resource.description
+                              : 'Open this resource to review links, files, and usage details.'}
+                          </p>
+                        </Link>
+                      ))}
                     </div>
-                  ) : (
-                    <>
-                      <div className={styles.resultsInfo}>
-                        Showing {startIndex + 1}-{Math.min(endIndex, filteredResources.length)} of {filteredResources.length} resources
-                        {totalPages > 1 && ` (Page ${currentPage} of ${totalPages})`}
-                      </div>
-                      <div className={styles.resourcesList}>
-                        {paginatedResources.map((resource) => (
+                  )}
+
+                  <div className={styles.resourceGrid}>
+                    {filteredResources.map((resource) => {
+                      const hasLink = Boolean(resource.url)
+                      const hasFile = Boolean(resource.fileUrl)
+
+                      return (
                         <Link
                           key={resource.id}
                           href={`/dashboard/resources/${resource.id}`}
                           className={styles.resourceCard}
                         >
-                          <div className={styles.resourceHeader}>
-                            <h3>{resource.title}</h3>
-                            <span className={styles.categoryBadge}>{resource.category}</span>
+                          <div className={styles.resourceTop}>
+                            <span className={styles.categoryBadge}>
+                              {normalizeCategory(resource.category)}
+                            </span>
+                            <div className={styles.assetFlags}>
+                              {hasLink && (
+                                <span className={styles.assetPill}>
+                                  <Globe size={13} />
+                                  Link
+                                </span>
+                              )}
+                              {hasFile && (
+                                <span className={styles.assetPill}>
+                                  <FileText size={13} />
+                                  File
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          {resource.description && (
-                            <p className={styles.resourceDescription}>
-                              {resource.description.length > 150 
-                                ? `${resource.description.substring(0, 150)}...` 
-                                : resource.description}
+
+                          <div className={styles.resourceBody}>
+                            <h3>{resource.title}</h3>
+                            <p>
+                              {resource.description?.trim()
+                                ? resource.description
+                                : 'No description yet. Open this resource to add context and make it easier for the family to use.'}
                             </p>
-                          )}
-                          <div className={styles.viewDetails}>
-                            View Details →
+                          </div>
+
+                          <div className={styles.resourceFooter}>
+                            <span>Open resource</span>
+                            <ArrowUpRight size={16} />
                           </div>
                         </Link>
-                        ))}
-                      </div>
-                      {totalPages > 1 && (
-                        <div className={styles.pagination}>
-                          <button
-                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                            disabled={currentPage === 1}
-                            className={styles.paginationBtn}
-                          >
-                            ← Previous
-                          </button>
-                          <span className={styles.paginationInfo}>
-                            Page {currentPage} of {totalPages}
-                          </span>
-                          <button
-                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                            disabled={currentPage === totalPages}
-                            className={styles.paginationBtn}
-                          >
-                            Next →
-                          </button>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-              </section>
-            </>
-          )}
-
-          {/* Tips Section */}
-          <section className={styles.tipsSection}>
-            <h3>Tip: Making the Most of Resources</h3>
-            <p className={styles.tipsIntro}>
-              When contacting resources, have the following information ready:
-            </p>
-            <ul className={styles.tipsList}>
-              <li>Specific needs of your loved one</li>
-              <li>Insurance information (if applicable)</li>
-              <li>Location and transportation requirements</li>
-              <li>Questions about cost, availability, and scheduling</li>
-            </ul>
-            <button className={styles.downloadBtn}>Download Resource Checklist</button>
+                      )
+                    })}
+                  </div>
+                </>
+              )}
+            </section>
           </section>
         </main>
       </div>
+
       <Footer />
     </div>
   )
 }
-

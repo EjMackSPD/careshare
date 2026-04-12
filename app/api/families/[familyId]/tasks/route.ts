@@ -106,6 +106,9 @@ export async function POST(
         priority: (body.priority as TaskPriority) || TaskPriority.MEDIUM,
         status: TaskStatus.TODO,
         dueDate: body.dueDate ? new Date(body.dueDate) : null,
+        attachmentUrl: body.attachmentUrl || null,
+        fileName: body.fileName || null,
+        fileType: body.fileType || null,
         assignments: {
           create: assignedMembers.map((userId: string) => ({
             userId: userId.trim()
@@ -136,4 +139,3 @@ export async function POST(
     )
   }
 }
-

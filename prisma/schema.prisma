@@ -88,6 +88,7 @@ model User {
   medications       Medication[]
   notes             Note[]
   uploadedDocuments Document[]
+  aiConversations AIConversation[]
   auditLogs         AuditLog[]
 
   @@index([email])
@@ -130,6 +131,7 @@ model Family {
   careScenarios CareScenario[]
   contributions FamilyContribution[]
   careRecipient CareRecipient?
+  aiConversations AIConversation[]
   auditLogs     AuditLog[]
 
   @@index([createdBy])
@@ -677,6 +679,43 @@ enum BlogCategory {
   TECHNOLOGY
   LEGAL_MATTERS
   COMPANY_NEWS
+}
+
+enum AIMessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+model AIConversation {
+  id          String      @id @default(cuid())
+  familyId    String
+  createdBy   String
+  title       String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  family      Family      @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  creator     User        @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  messages    AIMessage[]
+
+  @@index([familyId])
+  @@index([createdBy])
+  @@index([updatedAt])
+}
+
+model AIMessage {
+  id             String        @id @default(cuid())
+  conversationId String
+  role           AIMessageRole
+  content        String        @db.Text
+  citedContext   Json?
+  createdAt      DateTime      @default(now())
+
+  conversation   AIConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([createdAt])
 }
 
 model BlogPost {

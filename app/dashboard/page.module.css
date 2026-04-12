@@ -158,7 +158,8 @@
 .heroActionPrimary,
 .heroActionSecondary,
 .summaryButton,
-.primaryBtn {
+.primaryBtn,
+.secondaryEmptyLink {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -176,6 +177,12 @@
   box-shadow: 0 14px 28px rgba(15, 23, 42, 0.16);
 }
 
+.secondaryEmptyLink {
+  background: #fff;
+  color: #0f172a;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+}
+
 .heroActionPrimary,
 .heroActionSecondary {
   min-height: 46px;
@@ -191,7 +198,8 @@
 .heroActionPrimary:hover,
 .heroActionSecondary:hover,
 .summaryButton:hover,
-.primaryBtn:hover {
+.primaryBtn:hover,
+.secondaryEmptyLink:hover {
   transform: translateY(-1px);
 }
 
@@ -215,6 +223,14 @@
   border: 1px solid rgba(148, 163, 184, 0.16);
   border-radius: 1.4rem;
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+}
+
+.emptyActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-top: 1.25rem;
 }
 
 .summaryPanel {

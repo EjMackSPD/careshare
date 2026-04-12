@@ -5,16 +5,26 @@ import { useRouter } from 'next/navigation'
 import { getProviders, signIn, useSession } from 'next-auth/react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Check, ChevronLeft, ChevronRight } from 'lucide-react'
+import {
+  ArrowRight,
+  Building2,
+  Check,
+  ChevronLeft,
+  HeartHandshake,
+  ShieldCheck,
+  Sparkles,
+  Users,
+  UserRound,
+} from 'lucide-react'
 import styles from './page.module.css'
+import {
+  DEFAULT_ONBOARDING_DRAFT,
+  type OnboardingAudienceType,
+  type OnboardingDraft,
+  type OnboardingInvite,
+} from '@/types/onboarding'
 
 type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6
-
-type Invite = {
-  email: string
-  name: string
-  role: string
-}
 
 const TOP_NEEDS = [
   'Bills',
@@ -24,33 +34,81 @@ const TOP_NEEDS = [
   'Contributions',
 ]
 
-const STEP_LABELS = [
-  'Account',
-  'Role',
-  'Family',
-  'Care',
-  'Invites',
-  'Goals',
+const AUDIENCE_OPTIONS: Array<{
+  value: OnboardingAudienceType
+  title: string
+  description: string
+  nextLabel: string
+  bullets: string[]
+  icon: typeof HeartHandshake
+}> = [
+  {
+    value: 'CAREGIVER_POA',
+    title: 'Caregiver / Power of Attorney',
+    description:
+      'Start a care workspace with the authority, context, and permissions needed to coordinate confidently.',
+    nextLabel: 'Authority',
+    bullets: [
+      'Capture relationship and decision-making status',
+      'Create a trusted care workspace for one loved one',
+      'Invite helpers with clear roles',
+    ],
+    icon: ShieldCheck,
+  },
+  {
+    value: 'FAMILY',
+    title: 'Family',
+    description:
+      'Bring siblings, relatives, and close supporters into one place to share updates, responsibilities, and planning.',
+    nextLabel: 'Family path',
+    bullets: [
+      'Choose whether you are creating or joining a care circle',
+      'Set up shared coordination details',
+      'Invite contributors right away',
+    ],
+    icon: Users,
+  },
+  {
+    value: 'CARE_CENTER',
+    title: 'Care Center',
+    description:
+      'Set up a partnership intake so your team can explore family communication, visibility, and support workflows.',
+    nextLabel: 'Organization',
+    bullets: [
+      'Collect organization and contact details',
+      'Request a demo or partnership follow-up',
+      'Finish with a dedicated next-step handoff',
+    ],
+    icon: Building2,
+  },
+  {
+    value: 'INDIVIDUAL',
+    title: 'Individual',
+    description:
+      'Start a personal care plan for yourself now, then invite family or trusted supporters when you are ready.',
+    nextLabel: 'Planning style',
+    bullets: [
+      'Set up your own profile with self-first language',
+      'Choose your top support priorities',
+      'Invite helpers later without blocking setup',
+    ],
+    icon: UserRound,
+  },
 ]
 
-const DEFAULT_FORM = {
-  name: '',
-  email: '',
-  password: '',
-  confirmPassword: '',
-  accountType: 'PRIMARY_CAREGIVER',
-  workspaceName: '',
-  workspaceDescription: '',
-  caregiverRelationship: '',
-  careRecipientName: '',
-  careRecipientPreferredName: '',
-  careRecipientPhone: '',
-  careRecipientAddress: '',
-  careRecipientBirthDate: '',
-  careRecipientMedicalNotes: '',
-  careRecipientConditions: '',
-  invites: [] as Invite[],
-  topNeeds: [] as string[],
+const STEP_LABELS: Record<OnboardingAudienceType, string[]> = {
+  CAREGIVER_POA: ['Account', 'Audience', 'Authority', 'Profile', 'Workspace', 'Finish'],
+  FAMILY: ['Account', 'Audience', 'Path', 'Profile', 'Setup', 'Finish'],
+  CARE_CENTER: ['Account', 'Audience', 'Organization', 'Contact', 'Goals', 'Finish'],
+  INDIVIDUAL: ['Account', 'Audience', 'Planning', 'About You', 'Support', 'Finish'],
+}
+
+function emptyInvite(): OnboardingInvite {
+  return {
+    email: '',
+    name: '',
+    role: 'VIEWER',
+  }
 }
 
 function parseConditions(input: string) {
@@ -58,6 +116,22 @@ function parseConditions(input: string) {
     .split(',')
     .map((item) => item.trim())
     .filter(Boolean)
+}
+
+function getWorkspaceMode(audienceType: OnboardingAudienceType) {
+  if (audienceType === 'CARE_CENTER') {
+    return 'PARTNER'
+  }
+
+  if (audienceType === 'INDIVIDUAL') {
+    return 'SOLO'
+  }
+
+  return 'FAMILY'
+}
+
+function getAudienceContent(audienceType: OnboardingAudienceType) {
+  return AUDIENCE_OPTIONS.find((option) => option.value === audienceType) ?? AUDIENCE_OPTIONS[0]
 }
 
 export default function OnboardingPage() {
@@ -68,9 +142,15 @@ export default function OnboardingPage() {
   const [pageLoading, setPageLoading] = useState(true)
   const [error, setError] = useState('')
   const [googleEnabled, setGoogleEnabled] = useState(false)
-  const [formData, setFormData] = useState(DEFAULT_FORM)
+  const [formData, setFormData] = useState<OnboardingDraft>(DEFAULT_ONBOARDING_DRAFT)
 
   const isAuthenticated = status === 'authenticated'
+  const audienceContent = useMemo(
+    () => getAudienceContent(formData.audienceType),
+    [formData.audienceType]
+  )
+  const stepLabels = STEP_LABELS[formData.audienceType]
+  const progressStep = useMemo(() => (isAuthenticated ? step : 1), [isAuthenticated, step])
 
   useEffect(() => {
     let cancelled = false
@@ -111,46 +191,49 @@ export default function OnboardingPage() {
           return
         }
 
+        const saved = { ...DEFAULT_ONBOARDING_DRAFT, ...(data.data ?? {}) } as OnboardingDraft
+        saved.workspaceMode = getWorkspaceMode(saved.audienceType)
+
         if (data.hasCompletedOnboarding) {
+          if (saved.audienceType === 'CARE_CENTER') {
+            router.replace('/onboarding/partner-complete')
+            return
+          }
+
+          if (
+            saved.audienceType === 'FAMILY' &&
+            saved.careContext.familyIntent === 'JOIN' &&
+            !data.familyId
+          ) {
+            router.replace('/onboarding/join-family')
+            return
+          }
+
           router.replace('/dashboard')
           return
         }
 
-        const saved = data.data ?? {}
-        setFormData((prev) => ({
-          ...prev,
-          name: session?.user?.name ?? prev.name,
-          email: session?.user?.email ?? prev.email,
-          accountType: saved.accountType ?? prev.accountType,
-          workspaceName: saved.workspaceName ?? prev.workspaceName,
-          workspaceDescription:
-            saved.workspaceDescription ?? prev.workspaceDescription,
-          caregiverRelationship:
-            saved.caregiverRelationship ?? prev.caregiverRelationship,
-          careRecipientName:
-            saved.careRecipient?.name ?? data.family?.careRecipient?.name ?? prev.careRecipientName,
-          careRecipientPreferredName:
-            saved.careRecipient?.preferredName ??
-            data.family?.careRecipient?.preferredName ??
-            prev.careRecipientPreferredName,
-          careRecipientPhone:
-            saved.careRecipient?.phone ?? data.family?.careRecipient?.phone ?? prev.careRecipientPhone,
-          careRecipientAddress:
-            saved.careRecipient?.address ?? data.family?.careRecipient?.address ?? prev.careRecipientAddress,
-          careRecipientBirthDate:
-            saved.careRecipient?.birthDate?.slice?.(0, 10) ??
-            data.family?.careRecipient?.birthDate?.slice?.(0, 10) ??
-            prev.careRecipientBirthDate,
-          careRecipientMedicalNotes:
-            saved.careRecipient?.medicalNotes ??
-            data.family?.careRecipient?.medicalNotes ??
-            prev.careRecipientMedicalNotes,
-          careRecipientConditions: Array.isArray(saved.careRecipient?.conditions)
-            ? saved.careRecipient.conditions.join(', ')
-            : prev.careRecipientConditions,
-          invites: saved.invites ?? prev.invites,
-          topNeeds: saved.topNeeds ?? prev.topNeeds,
-        }))
+        setFormData({
+          ...saved,
+          currentStep: saved.currentStep ?? 1,
+          workspaceMode: getWorkspaceMode(saved.audienceType),
+          careRecipient: {
+            ...DEFAULT_ONBOARDING_DRAFT.careRecipient,
+            ...saved.careRecipient,
+          },
+          careContext: {
+            ...DEFAULT_ONBOARDING_DRAFT.careContext,
+            ...saved.careContext,
+          },
+          organization: {
+            ...DEFAULT_ONBOARDING_DRAFT.organization,
+            ...saved.organization,
+          },
+          invites: saved.invites ?? [],
+          notificationPreferences:
+            saved.notificationPreferences ?? DEFAULT_ONBOARDING_DRAFT.notificationPreferences,
+          topNeeds: saved.topNeeds ?? [],
+        })
         setStep(Math.min(Math.max(data.onboardingStep ?? 2, 2), 6) as OnboardingStep)
       } catch (loadError) {
         setError('Unable to load your onboarding progress')
@@ -161,30 +244,72 @@ export default function OnboardingPage() {
       }
     }
 
-    loadOnboarding()
+    void loadOnboarding()
 
     return () => {
       cancelled = true
     }
-  }, [isAuthenticated, router, session?.user?.email, session?.user?.name, status])
+  }, [isAuthenticated, router, status])
 
-  const progressStep = useMemo(() => (isAuthenticated ? step : 1), [isAuthenticated, step])
-
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target
+  const setAudience = (audienceType: OnboardingAudienceType) => {
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      audienceType,
+      workspaceMode: getWorkspaceMode(audienceType),
+      careContext: {
+        ...prev.careContext,
+        selfManaged: audienceType === 'INDIVIDUAL',
+        familyIntent: audienceType === 'FAMILY' ? prev.careContext.familyIntent : 'CREATE',
+      },
+      invites:
+        audienceType === 'CARE_CENTER'
+          ? []
+          : prev.invites.length > 0
+            ? prev.invites
+            : audienceType === 'INDIVIDUAL'
+              ? []
+              : [emptyInvite()],
     }))
   }
 
-  const handleInviteChange = (
-    index: number,
-    field: keyof Invite,
-    value: string
-  ) => {
+  const updateForm = <K extends keyof OnboardingDraft>(key: K, value: OnboardingDraft[K]) => {
+    setFormData((prev) => ({
+      ...prev,
+      [key]: value,
+    }))
+  }
+
+  const updateCareContext = (field: keyof OnboardingDraft['careContext'], value: string | boolean) => {
+    setFormData((prev) => ({
+      ...prev,
+      careContext: {
+        ...prev.careContext,
+        [field]: value,
+      },
+    }))
+  }
+
+  const updateCareRecipient = (field: keyof OnboardingDraft['careRecipient'], value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      careRecipient: {
+        ...prev.careRecipient,
+        [field]: value,
+      },
+    }))
+  }
+
+  const updateOrganization = (field: keyof OnboardingDraft['organization'], value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      organization: {
+        ...prev.organization,
+        [field]: value,
+      },
+    }))
+  }
+
+  const handleInviteChange = (index: number, field: keyof OnboardingInvite, value: string) => {
     setFormData((prev) => {
       const invites = [...prev.invites]
       invites[index] = {
@@ -202,21 +327,14 @@ export default function OnboardingPage() {
   const addInvite = () => {
     setFormData((prev) => ({
       ...prev,
-      invites: [
-        ...prev.invites,
-        {
-          email: '',
-          name: '',
-          role: 'VIEWER',
-        },
-      ],
+      invites: [...prev.invites, emptyInvite()],
     }))
   }
 
   const removeInvite = (index: number) => {
     setFormData((prev) => ({
       ...prev,
-      invites: prev.invites.filter((_, currentIndex) => currentIndex !== index),
+      invites: prev.invites.filter((_, inviteIndex) => inviteIndex !== index),
     }))
   }
 
@@ -230,25 +348,12 @@ export default function OnboardingPage() {
   }
 
   const buildPayload = (currentStep: OnboardingStep) => ({
-    accountType: 'PRIMARY_CAREGIVER',
+    ...formData,
     currentStep,
-    workspaceName: formData.workspaceName,
-    workspaceDescription: formData.workspaceDescription,
-    caregiverRelationship: formData.caregiverRelationship,
+    workspaceMode: getWorkspaceMode(formData.audienceType),
     careRecipient: {
-      name: formData.careRecipientName,
-      preferredName: formData.careRecipientPreferredName,
-      phone: formData.careRecipientPhone,
-      address: formData.careRecipientAddress,
-      birthDate: formData.careRecipientBirthDate || null,
-      medicalNotes: formData.careRecipientMedicalNotes,
-      conditions: parseConditions(formData.careRecipientConditions),
-    },
-    invites: formData.invites,
-    topNeeds: formData.topNeeds,
-    notificationPreferences: {
-      email: true,
-      push: true,
+      ...formData.careRecipient,
+      conditions: parseConditions(formData.careRecipient.conditions).join(', '),
     },
   })
 
@@ -268,43 +373,104 @@ export default function OnboardingPage() {
     setError('')
 
     if (currentStep === 1 && !isAuthenticated) {
-      if (!formData.name || !formData.email || !formData.password) {
+      const name = (document.querySelector('input[name="signup-name"]') as HTMLInputElement | null)?.value
+      const email = (document.querySelector('input[name="signup-email"]') as HTMLInputElement | null)?.value
+      const password = (document.querySelector('input[name="signup-password"]') as HTMLInputElement | null)?.value
+      const confirmPassword = (
+        document.querySelector('input[name="signup-confirm-password"]') as HTMLInputElement | null
+      )?.value
+
+      if (!name || !email || !password) {
         setError('Please fill in all required fields')
         return false
       }
 
-      if (formData.password.length < 6) {
+      if (password.length < 6) {
         setError('Password must be at least 6 characters')
         return false
       }
 
-      if (formData.password !== formData.confirmPassword) {
+      if (password !== confirmPassword) {
         setError('Passwords do not match')
         return false
       }
     }
 
-    if (currentStep === 3 && !formData.workspaceName.trim()) {
-      setError('Please name your family workspace')
-      return false
+    if (currentStep === 3) {
+      if (
+        formData.audienceType === 'CAREGIVER_POA' &&
+        !formData.careContext.caregiverRelationship.trim()
+      ) {
+        setError('Please add your relationship to the person you support')
+        return false
+      }
+
+      if (formData.audienceType === 'CARE_CENTER' && !formData.organization.name.trim()) {
+        setError('Please add your organization name')
+        return false
+      }
     }
 
-    if (currentStep === 4 && !formData.careRecipientName.trim()) {
-      setError('Please add the person receiving care')
-      return false
+    if (currentStep === 4) {
+      if (
+        formData.audienceType !== 'CARE_CENTER' &&
+        !formData.careRecipient.name.trim()
+      ) {
+        setError(
+          formData.audienceType === 'INDIVIDUAL'
+            ? 'Please tell us who this personal plan is for'
+            : 'Please add the person receiving care'
+        )
+        return false
+      }
+
+      if (
+        formData.audienceType === 'CARE_CENTER' &&
+        (!formData.organization.contactName.trim() ||
+          !formData.organization.contactEmail.trim())
+      ) {
+        setError('Please add a primary contact name and email')
+        return false
+      }
+    }
+
+    if (currentStep === 5) {
+      if (
+        (formData.audienceType === 'CAREGIVER_POA' ||
+          (formData.audienceType === 'FAMILY' &&
+            formData.careContext.familyIntent === 'CREATE')) &&
+        !formData.workspaceName.trim()
+      ) {
+        setError('Please name your workspace')
+        return false
+      }
+
+      if (
+        formData.audienceType === 'FAMILY' &&
+        formData.careContext.familyIntent === 'JOIN' &&
+        !formData.careContext.joinContactEmail.trim()
+      ) {
+        setError('Please add the organizer email for the care circle you are joining')
+        return false
+      }
     }
 
     return true
   }
 
   const handleAccountStep = async () => {
+    const name = (document.querySelector('input[name="signup-name"]') as HTMLInputElement | null)?.value ?? ''
+    const email = (document.querySelector('input[name="signup-email"]') as HTMLInputElement | null)?.value ?? ''
+    const password =
+      (document.querySelector('input[name="signup-password"]') as HTMLInputElement | null)?.value ?? ''
+
     const signupRes = await fetch('/api/auth/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
+        name,
+        email,
+        password,
       }),
     })
 
@@ -314,8 +480,8 @@ export default function OnboardingPage() {
     }
 
     const result = await signIn('credentials', {
-      email: formData.email,
-      password: formData.password,
+      email,
+      password,
       redirect: false,
     })
 
@@ -383,7 +549,7 @@ export default function OnboardingPage() {
         throw new Error(data.error || 'Failed to complete onboarding')
       }
 
-      router.push('/dashboard')
+      router.push(data.redirectTo || '/dashboard')
       router.refresh()
     } catch (completeError: any) {
       setError(completeError.message || 'Something went wrong')
@@ -392,13 +558,679 @@ export default function OnboardingPage() {
     }
   }
 
+  const renderAccountStep = () => (
+    <div className={styles.stepContent}>
+      <span className={styles.stepEyebrow}>Account</span>
+      <h2>{isAuthenticated ? 'You are signed in' : 'Create your CareShare account'}</h2>
+      <p className={styles.stepDescription}>
+        Start with an account, then we&apos;ll tailor setup for the kind of care support
+        you&apos;re building.
+      </p>
+
+      {isAuthenticated ? (
+        <div className={styles.dataPanel}>
+          <div>
+            <span className={styles.dataLabel}>Name</span>
+            <strong>{session?.user?.name || 'CareShare member'}</strong>
+          </div>
+          <div>
+            <span className={styles.dataLabel}>Email</span>
+            <strong>{session?.user?.email}</strong>
+          </div>
+        </div>
+      ) : (
+        <>
+          {googleEnabled && (
+            <button
+              type="button"
+              onClick={() => signIn('google', { callbackUrl: '/onboarding' })}
+              className={styles.primaryAction}
+              disabled={loading}
+            >
+              Continue with Google
+            </button>
+          )}
+
+          <div className={styles.formShell}>
+            <div className={styles.formGroup}>
+              <label htmlFor="signup-name">Your name *</label>
+              <input id="signup-name" name="signup-name" type="text" placeholder="Jordan Smith" />
+            </div>
+            <div className={styles.formGroup}>
+              <label htmlFor="signup-email">Email address *</label>
+              <input
+                id="signup-email"
+                name="signup-email"
+                type="email"
+                placeholder="jordan@example.com"
+              />
+            </div>
+            <div className={styles.formRow}>
+              <div className={styles.formGroup}>
+                <label htmlFor="signup-password">Password *</label>
+                <input
+                  id="signup-password"
+                  name="signup-password"
+                  type="password"
+                  placeholder="Minimum 6 characters"
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="signup-confirm-password">Confirm password *</label>
+                <input
+                  id="signup-confirm-password"
+                  name="signup-confirm-password"
+                  type="password"
+                  placeholder="Re-enter password"
+                />
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  )
+
+  const renderAudienceStep = () => (
+    <div className={styles.stepContent}>
+      <span className={styles.stepEyebrow}>Audience</span>
+      <h2>Who are you setting CareShare up for?</h2>
+      <p className={styles.stepDescription}>
+        Pick the path that matches your role right now. We&apos;ll shape the setup flow and
+        first actions around it.
+      </p>
+
+      <div className={styles.audienceGrid}>
+        {AUDIENCE_OPTIONS.map((option) => {
+          const Icon = option.icon
+          const isActive = option.value === formData.audienceType
+
+          return (
+            <button
+              key={option.value}
+              type="button"
+              className={`${styles.audienceCard} ${isActive ? styles.audienceCardActive : ''}`}
+              onClick={() => setAudience(option.value)}
+            >
+              <div className={styles.audienceHeader}>
+                <div className={styles.audienceIcon}>
+                  <Icon size={20} />
+                </div>
+                <span className={styles.audienceNext}>{option.nextLabel}</span>
+              </div>
+              <h3>{option.title}</h3>
+              <p>{option.description}</p>
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+
+  const renderContextStep = () => {
+    if (formData.audienceType === 'CAREGIVER_POA') {
+      return (
+        <div className={styles.stepContent}>
+          <span className={styles.stepEyebrow}>Authority</span>
+          <h2>Tell us how you support this person</h2>
+          <p className={styles.stepDescription}>
+            We&apos;ll use this to frame permissions, language, and your recommended next steps.
+          </p>
+
+          <div className={styles.formGroup}>
+            <label>Your relationship *</label>
+            <input
+              type="text"
+              value={formData.careContext.caregiverRelationship}
+              onChange={(event) =>
+                updateCareContext('caregiverRelationship', event.target.value)
+              }
+              placeholder="Daughter, spouse, son, partner, friend..."
+            />
+          </div>
+
+          <div className={styles.segmented}>
+            {[
+              ['PRIMARY_HELPER', 'Primary helper'],
+              ['POWER_OF_ATTORNEY', 'Power of attorney'],
+              ['LEGAL_GUARDIAN', 'Legal guardian'],
+              ['FAMILY_SUPPORT', 'Family support'],
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                className={`${styles.segment} ${
+                  formData.careContext.decisionAuthority === value ? styles.segmentActive : ''
+                }`}
+                onClick={() => updateCareContext('decisionAuthority', value)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    if (formData.audienceType === 'FAMILY') {
+      return (
+        <div className={styles.stepContent}>
+          <span className={styles.stepEyebrow}>Family Path</span>
+          <h2>Are you creating a care circle or joining one?</h2>
+          <p className={styles.stepDescription}>
+            Choose the path that matches where your family is today.
+          </p>
+
+          <div className={styles.choiceStack}>
+            {[
+              ['CREATE', 'Create a care circle', 'Start the shared workspace and invite family members yourself.'],
+              ['JOIN', 'Join an existing care circle', 'Finish setup, then we’ll guide you to connect with the organizer who invited you.'],
+            ].map(([value, title, copy]) => (
+              <button
+                key={value}
+                type="button"
+                className={`${styles.choiceCard} ${
+                  formData.careContext.familyIntent === value ? styles.choiceCardActive : ''
+                }`}
+                onClick={() => updateCareContext('familyIntent', value)}
+              >
+                <div>
+                  <h3>{title}</h3>
+                  <p>{copy}</p>
+                </div>
+                <ArrowRight size={18} />
+              </button>
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    if (formData.audienceType === 'CARE_CENTER') {
+      return (
+        <div className={styles.stepContent}>
+          <span className={styles.stepEyebrow}>Organization</span>
+          <h2>Introduce your care center</h2>
+          <p className={styles.stepDescription}>
+            This creates a partnership intake, not a family workspace.
+          </p>
+
+          <div className={styles.formGroup}>
+            <label>Organization name *</label>
+            <input
+              type="text"
+              value={formData.organization.name}
+              onChange={(event) => updateOrganization('name', event.target.value)}
+              placeholder="Willow Creek Assisted Living"
+            />
+          </div>
+
+          <div className={styles.formRow}>
+            <div className={styles.formGroup}>
+              <label>Organization type</label>
+              <select
+                value={formData.organization.type}
+                onChange={(event) => updateOrganization('type', event.target.value)}
+              >
+                <option value="ASSISTED_LIVING">Assisted living</option>
+                <option value="NURSING_HOME">Nursing home</option>
+                <option value="HOME_CARE_AGENCY">Home care agency</option>
+                <option value="HOSPICE">Hospice</option>
+                <option value="OTHER">Other</option>
+              </select>
+            </div>
+            <div className={styles.formGroup}>
+              <label>Estimated size</label>
+              <select
+                value={formData.organization.size}
+                onChange={(event) => updateOrganization('size', event.target.value)}
+              >
+                <option value="1_10">1-10 families</option>
+                <option value="11_50">11-50 families</option>
+                <option value="51_200">51-200 families</option>
+                <option value="201_PLUS">201+ families</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div className={styles.stepContent}>
+        <span className={styles.stepEyebrow}>Planning Style</span>
+        <h2>Start with your own plan first</h2>
+        <p className={styles.stepDescription}>
+          We&apos;ll set this up with self-first language so you can capture what matters now
+          and invite trusted supporters later.
+        </p>
+
+        <div className={styles.choiceStack}>
+          <div className={`${styles.choiceCard} ${styles.choiceCardActive}`}>
+            <div>
+              <h3>Personal plan, family later</h3>
+              <p>Keep setup lightweight now. You can bring in family or helpers when you&apos;re ready.</p>
+            </div>
+            <Check size={18} />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const renderProfileStep = () => {
+    if (formData.audienceType === 'CARE_CENTER') {
+      return (
+        <div className={styles.stepContent}>
+          <span className={styles.stepEyebrow}>Contact</span>
+          <h2>Who should we follow up with?</h2>
+          <p className={styles.stepDescription}>
+            Add the primary point of contact for demos, implementation, or partnership follow-up.
+          </p>
+
+          <div className={styles.formGroup}>
+            <label>Contact name *</label>
+            <input
+              type="text"
+              value={formData.organization.contactName}
+              onChange={(event) => updateOrganization('contactName', event.target.value)}
+              placeholder="Jordan Smith"
+            />
+          </div>
+          <div className={styles.formRow}>
+            <div className={styles.formGroup}>
+              <label>Email *</label>
+              <input
+                type="email"
+                value={formData.organization.contactEmail}
+                onChange={(event) => updateOrganization('contactEmail', event.target.value)}
+                placeholder="jordan@willowcreek.org"
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label>Phone</label>
+              <input
+                type="tel"
+                value={formData.organization.contactPhone}
+                onChange={(event) => updateOrganization('contactPhone', event.target.value)}
+                placeholder="(555) 123-4567"
+              />
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    const isIndividual = formData.audienceType === 'INDIVIDUAL'
+
+    return (
+      <div className={styles.stepContent}>
+        <span className={styles.stepEyebrow}>{isIndividual ? 'About You' : 'Profile'}</span>
+        <h2>{isIndividual ? 'Build your personal care profile' : 'Add the person receiving care'}</h2>
+        <p className={styles.stepDescription}>
+          {isIndividual
+            ? 'These details stay in one place so your care plan, reminders, and supporters start from the right context.'
+            : 'We’ll create a structured profile instead of burying care details in notes later.'}
+        </p>
+
+        <div className={styles.formRow}>
+          <div className={styles.formGroup}>
+            <label>{isIndividual ? 'Your full name *' : 'Full name *'}</label>
+            <input
+              type="text"
+              value={formData.careRecipient.name}
+              onChange={(event) => updateCareRecipient('name', event.target.value)}
+              placeholder={isIndividual ? 'Jordan Smith' : 'Margaret Smith'}
+            />
+          </div>
+          <div className={styles.formGroup}>
+            <label>{isIndividual ? 'Preferred name' : 'Preferred name'}</label>
+            <input
+              type="text"
+              value={formData.careRecipient.preferredName}
+              onChange={(event) => updateCareRecipient('preferredName', event.target.value)}
+              placeholder={isIndividual ? 'Jordan' : 'Maggie'}
+            />
+          </div>
+        </div>
+
+        <div className={styles.formRow}>
+          <div className={styles.formGroup}>
+            <label>Phone</label>
+            <input
+              type="tel"
+              value={formData.careRecipient.phone}
+              onChange={(event) => updateCareRecipient('phone', event.target.value)}
+              placeholder="(555) 123-4567"
+            />
+          </div>
+          <div className={styles.formGroup}>
+            <label>Date of birth</label>
+            <input
+              type="date"
+              value={formData.careRecipient.birthDate}
+              onChange={(event) => updateCareRecipient('birthDate', event.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Address</label>
+          <input
+            type="text"
+            value={formData.careRecipient.address}
+            onChange={(event) => updateCareRecipient('address', event.target.value)}
+            placeholder="123 Main Street, City, State ZIP"
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>{isIndividual ? 'Medical notes and routines' : 'Medical notes'}</label>
+          <textarea
+            value={formData.careRecipient.medicalNotes}
+            onChange={(event) => updateCareRecipient('medicalNotes', event.target.value)}
+            placeholder="Key medical context, medications, allergies, routines, or risks."
+            rows={4}
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Known conditions</label>
+          <input
+            type="text"
+            value={formData.careRecipient.conditions}
+            onChange={(event) => updateCareRecipient('conditions', event.target.value)}
+            placeholder="Mobility issues, diabetes, memory support"
+          />
+        </div>
+      </div>
+    )
+  }
+
+  const renderSetupStep = () => {
+    if (formData.audienceType === 'CARE_CENTER') {
+      return (
+        <div className={styles.stepContent}>
+          <span className={styles.stepEyebrow}>Goals</span>
+          <h2>What kind of partnership are you exploring?</h2>
+          <p className={styles.stepDescription}>
+            This helps us tailor the follow-up and route your request to the right team.
+          </p>
+
+          <div className={styles.choiceStack}>
+            {[
+              ['DEMO_REQUEST', 'Request a product demo'],
+              ['FAMILY_PORTAL', 'Offer families a shared portal'],
+              ['STAFF_COORDINATION', 'Improve staff-family coordination'],
+              ['PARTNERSHIP_EXPLORATION', 'Explore a broader partnership'],
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                className={`${styles.choiceCard} ${
+                  formData.organization.partnershipGoal === value ? styles.choiceCardActive : ''
+                }`}
+                onClick={() => updateOrganization('partnershipGoal', value)}
+              >
+                <div>
+                  <h3>{label}</h3>
+                </div>
+                <ArrowRight size={18} />
+              </button>
+            ))}
+          </div>
+
+          <div className={styles.formGroup}>
+            <label>Anything else we should know?</label>
+            <textarea
+              value={formData.organization.notes}
+              onChange={(event) => updateOrganization('notes', event.target.value)}
+              rows={4}
+              placeholder="Current workflow, timing, family communication goals, or rollout details."
+            />
+          </div>
+        </div>
+      )
+    }
+
+    if (formData.audienceType === 'FAMILY' && formData.careContext.familyIntent === 'JOIN') {
+      return (
+        <div className={styles.stepContent}>
+          <span className={styles.stepEyebrow}>Join Flow</span>
+          <h2>We&apos;ll guide you into the existing care circle</h2>
+          <p className={styles.stepDescription}>
+            For this first version, we&apos;ll save your profile and route you to join guidance if you
+            don&apos;t have an invite token yet.
+          </p>
+
+          <div className={styles.formGroup}>
+            <label>Organizer email *</label>
+            <input
+              type="email"
+              value={formData.careContext.joinContactEmail}
+              onChange={(event) => updateCareContext('joinContactEmail', event.target.value)}
+              placeholder="alex@example.com"
+            />
+          </div>
+
+          <div className={styles.dataPanel}>
+            <div>
+              <span className={styles.dataLabel}>What happens next</span>
+              <strong>We&apos;ll save your profile and send you to a join guidance screen.</strong>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div className={styles.stepContent}>
+        <span className={styles.stepEyebrow}>
+          {formData.audienceType === 'INDIVIDUAL' ? 'Support' : 'Workspace'}
+        </span>
+        <h2>
+          {formData.audienceType === 'INDIVIDUAL'
+            ? 'Name your personal workspace and add supporters'
+            : 'Create the workspace people will use together'}
+        </h2>
+        <p className={styles.stepDescription}>
+          {formData.audienceType === 'INDIVIDUAL'
+            ? 'This can stay personal for now. Invite people only if you want support right away.'
+            : 'Set the shared name, describe the care circle, and invite the first people who should be involved.'}
+        </p>
+
+        <div className={styles.formGroup}>
+          <label>Workspace name {formData.audienceType === 'INDIVIDUAL' ? '' : '*'}</label>
+          <input
+            type="text"
+            value={formData.workspaceName}
+            onChange={(event) => updateForm('workspaceName', event.target.value)}
+            placeholder={
+              formData.audienceType === 'INDIVIDUAL'
+                ? "Jordan's Care Plan"
+                : 'Smith Family Care'
+            }
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Short description</label>
+          <textarea
+            value={formData.workspaceDescription}
+            onChange={(event) => updateForm('workspaceDescription', event.target.value)}
+            placeholder={
+              formData.audienceType === 'INDIVIDUAL'
+                ? 'A private place to organize appointments, decisions, and personal support.'
+                : 'A shared place to coordinate daily care, bills, and family updates.'
+            }
+            rows={4}
+          />
+        </div>
+
+        <div className={styles.inviteHeader}>
+          <h3>{formData.audienceType === 'INDIVIDUAL' ? 'Optional supporters' : 'Invite helpers'}</h3>
+          <button type="button" onClick={addInvite} className={styles.secondaryInlineAction}>
+            Add person
+          </button>
+        </div>
+
+        {formData.invites.length === 0 ? (
+          <div className={styles.dataPanel}>
+            <div>
+              <span className={styles.dataLabel}>No invites yet</span>
+              <strong>
+                {formData.audienceType === 'INDIVIDUAL'
+                  ? 'You can finish setup now and invite supporters later.'
+                  : 'Add one or two people now to share the work sooner.'}
+              </strong>
+            </div>
+          </div>
+        ) : (
+          <div className={styles.inviteList}>
+            {formData.invites.map((invite, index) => (
+              <div key={`${invite.email}-${index}`} className={styles.inviteCard}>
+                <div className={styles.formRow}>
+                  <div className={styles.formGroup}>
+                    <label>Name</label>
+                    <input
+                      type="text"
+                      value={invite.name}
+                      onChange={(event) =>
+                        handleInviteChange(index, 'name', event.target.value)
+                      }
+                      placeholder="Alex Smith"
+                    />
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label>Email</label>
+                    <input
+                      type="email"
+                      value={invite.email}
+                      onChange={(event) =>
+                        handleInviteChange(index, 'email', event.target.value)
+                      }
+                      placeholder="alex@example.com"
+                    />
+                  </div>
+                </div>
+
+                <div className={styles.inviteFooter}>
+                  <div className={styles.formGroup}>
+                    <label>Role</label>
+                    <select
+                      value={invite.role}
+                      onChange={(event) =>
+                        handleInviteChange(index, 'role', event.target.value)
+                      }
+                    >
+                      <option value="FAMILY_ADMIN">Family Admin</option>
+                      <option value="CONTRIBUTOR">Contributor</option>
+                      <option value="VIEWER">Viewer</option>
+                      <option value="CARE_RECIPIENT">Care Recipient</option>
+                    </select>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => removeInvite(index)}
+                    className={styles.ghostAction}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  const renderFinishStep = () => {
+    if (formData.audienceType === 'CARE_CENTER') {
+      return (
+        <div className={styles.stepContent}>
+          <span className={styles.stepEyebrow}>Finish</span>
+          <h2>Review your partnership intake</h2>
+          <p className={styles.stepDescription}>
+            We&apos;ll route this to the right follow-up path and take you to a dedicated next-step
+            screen after submission.
+          </p>
+
+          <div className={styles.summaryStack}>
+            <div className={styles.summaryRow}>
+              <span>Organization</span>
+              <strong>{formData.organization.name || 'Not provided yet'}</strong>
+            </div>
+            <div className={styles.summaryRow}>
+              <span>Contact</span>
+              <strong>{formData.organization.contactName || 'Not provided yet'}</strong>
+            </div>
+            <div className={styles.summaryRow}>
+              <span>Goal</span>
+              <strong>{formData.organization.partnershipGoal.replaceAll('_', ' ')}</strong>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div className={styles.stepContent}>
+        <span className={styles.stepEyebrow}>Finish</span>
+        <h2>
+          {formData.audienceType === 'INDIVIDUAL'
+            ? 'Choose your support priorities'
+            : 'Choose your top needs'}
+        </h2>
+        <p className={styles.stepDescription}>
+          We&apos;ll use this to shape the first dashboard guidance after setup.
+        </p>
+
+        <div className={styles.needGrid}>
+          {TOP_NEEDS.map((need) => (
+            <button
+              key={need}
+              type="button"
+              className={`${styles.needChip} ${
+                formData.topNeeds.includes(need) ? styles.needChipActive : ''
+              }`}
+              onClick={() => toggleNeed(need)}
+            >
+              {need}
+            </button>
+          ))}
+        </div>
+
+        <div className={styles.summaryStack}>
+          <div className={styles.summaryRow}>
+            <span>Workspace</span>
+            <strong>
+              {formData.workspaceName ||
+                (formData.audienceType === 'INDIVIDUAL' ? 'Auto-name on finish' : 'Not set yet')}
+            </strong>
+          </div>
+          <div className={styles.summaryRow}>
+            <span>Invites</span>
+            <strong>{formData.invites.filter((invite) => invite.email.trim()).length}</strong>
+          </div>
+          <div className={styles.summaryRow}>
+            <span>Audience</span>
+            <strong>{audienceContent.title}</strong>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const renderStep = () => {
     if (pageLoading) {
       return (
         <div className={styles.stepContent}>
-          <h2>Loading your setup</h2>
+          <span className={styles.stepEyebrow}>Loading</span>
+          <h2>Preparing your setup</h2>
           <p className={styles.stepDescription}>
-            Pulling in your saved progress and preparing your workspace.
+            Pulling in your saved progress and getting the right onboarding path ready.
           </p>
         </div>
       )
@@ -406,451 +1238,141 @@ export default function OnboardingPage() {
 
     switch (step) {
       case 1:
-        return (
-          <div className={styles.stepContent}>
-            <h2>{isAuthenticated ? 'Account ready' : 'Create your account'}</h2>
-            <p className={styles.stepDescription}>
-              Start with Google or email, then we&apos;ll build your care workspace around you.
-            </p>
-
-            {isAuthenticated ? (
-              <div className={styles.reviewCard}>
-                <h3>Signed in as</h3>
-                <p><strong>Name:</strong> {session?.user?.name || 'Primary Caregiver'}</p>
-                <p><strong>Email:</strong> {session?.user?.email}</p>
-              </div>
-            ) : (
-              <>
-                {googleEnabled && (
-                  <button
-                    type="button"
-                    onClick={() => signIn('google', { callbackUrl: '/onboarding' })}
-                    className={styles.completeBtn}
-                    disabled={loading}
-                  >
-                    Continue with Google
-                  </button>
-                )}
-
-                <div className={styles.reviewCard}>
-                  <h3>Or create an account with email</h3>
-
-                  <div className={styles.formGroup}>
-                    <label>Your Name *</label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      placeholder="Jordan Smith"
-                      required
-                    />
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label>Email Address *</label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      placeholder="jordan@example.com"
-                      required
-                    />
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label>Password *</label>
-                    <input
-                      type="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      placeholder="Minimum 6 characters"
-                      required
-                    />
-                  </div>
-
-                  <div className={styles.formGroup}>
-                    <label>Confirm Password *</label>
-                    <input
-                      type="password"
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleInputChange}
-                      placeholder="Re-enter your password"
-                      required
-                    />
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        )
+        return renderAccountStep()
       case 2:
-        return (
-          <div className={styles.stepContent}>
-            <h2>You&apos;re the Primary Caregiver</h2>
-            <p className={styles.stepDescription}>
-              We&apos;ll set you up as the initial workspace owner and primary caregiver.
-            </p>
-
-            <div className={styles.reviewCard}>
-              <h3>Role bundle</h3>
-              <p>
-                You&apos;ll start with workspace management, member invites, sensitive care profile
-                access, and the ability to assign or adjust future roles.
-              </p>
-            </div>
-
-            <div className={styles.formGroup}>
-              <label>Your relationship to the person receiving care</label>
-              <input
-                type="text"
-                name="caregiverRelationship"
-                value={formData.caregiverRelationship}
-                onChange={handleInputChange}
-                placeholder="Daughter, spouse, son, partner, friend..."
-              />
-            </div>
-          </div>
-        )
+        return renderAudienceStep()
       case 3:
-        return (
-          <div className={styles.stepContent}>
-            <h2>Create your family workspace</h2>
-            <p className={styles.stepDescription}>
-              This is the shared place your family will use for updates, tasks, and bills.
-            </p>
-
-            <div className={styles.formGroup}>
-              <label>Workspace name *</label>
-              <input
-                type="text"
-                name="workspaceName"
-                value={formData.workspaceName}
-                onChange={handleInputChange}
-                placeholder="Smith Family Care"
-                required
-              />
-            </div>
-
-            <div className={styles.formGroup}>
-              <label>Short description</label>
-              <textarea
-                name="workspaceDescription"
-                value={formData.workspaceDescription}
-                onChange={handleInputChange}
-                placeholder="A shared place to coordinate daily care, bills, and family updates."
-                rows={4}
-              />
-            </div>
-          </div>
-        )
+        return renderContextStep()
       case 4:
-        return (
-          <div className={styles.stepContent}>
-            <h2>Add the person receiving care</h2>
-            <p className={styles.stepDescription}>
-              We&apos;ll create a first-class care recipient profile instead of storing this as loose notes.
-            </p>
-
-            <div className={styles.formGroup}>
-              <label>Full name *</label>
-              <input
-                type="text"
-                name="careRecipientName"
-                value={formData.careRecipientName}
-                onChange={handleInputChange}
-                placeholder="Margaret Smith"
-                required
-              />
-            </div>
-
-            <div className={styles.formGroup}>
-              <label>Preferred name</label>
-              <input
-                type="text"
-                name="careRecipientPreferredName"
-                value={formData.careRecipientPreferredName}
-                onChange={handleInputChange}
-                placeholder="Maggie"
-              />
-            </div>
-
-            <div className={styles.formGroup}>
-              <label>Phone number</label>
-              <input
-                type="tel"
-                name="careRecipientPhone"
-                value={formData.careRecipientPhone}
-                onChange={handleInputChange}
-                placeholder="(555) 123-4567"
-              />
-            </div>
-
-            <div className={styles.formGroup}>
-              <label>Address</label>
-              <input
-                type="text"
-                name="careRecipientAddress"
-                value={formData.careRecipientAddress}
-                onChange={handleInputChange}
-                placeholder="123 Main Street, City, State ZIP"
-              />
-            </div>
-
-            <div className={styles.formGroup}>
-              <label>Date of birth</label>
-              <input
-                type="date"
-                name="careRecipientBirthDate"
-                value={formData.careRecipientBirthDate}
-                onChange={handleInputChange}
-              />
-            </div>
-
-            <div className={styles.formGroup}>
-              <label>Medical notes</label>
-              <textarea
-                name="careRecipientMedicalNotes"
-                value={formData.careRecipientMedicalNotes}
-                onChange={handleInputChange}
-                placeholder="Key medical context, medications, allergies, routines, or risks."
-                rows={4}
-              />
-            </div>
-
-            <div className={styles.formGroup}>
-              <label>Known conditions</label>
-              <input
-                type="text"
-                name="careRecipientConditions"
-                value={formData.careRecipientConditions}
-                onChange={handleInputChange}
-                placeholder="Alzheimer's, diabetes, mobility issues"
-              />
-            </div>
-          </div>
-        )
+        return renderProfileStep()
       case 5:
-        return (
-          <div className={styles.stepContent}>
-            <h2>Invite your first family members</h2>
-            <p className={styles.stepDescription}>
-              You can skip this for now, but inviting even one person helps share the workload sooner.
-            </p>
-
-            {formData.invites.map((invite, index) => (
-              <div className={styles.reviewCard} key={`${invite.email}-${index}`}>
-                <div className={styles.formGroup}>
-                  <label>Name</label>
-                  <input
-                    type="text"
-                    value={invite.name}
-                    onChange={(event) =>
-                      handleInviteChange(index, 'name', event.target.value)
-                    }
-                    placeholder="Alex Smith"
-                  />
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Email</label>
-                  <input
-                    type="email"
-                    value={invite.email}
-                    onChange={(event) =>
-                      handleInviteChange(index, 'email', event.target.value)
-                    }
-                    placeholder="alex@example.com"
-                  />
-                </div>
-
-                <div className={styles.formGroup}>
-                  <label>Role bundle</label>
-                  <select
-                    value={invite.role}
-                    onChange={(event) =>
-                      handleInviteChange(index, 'role', event.target.value)
-                    }
-                  >
-                    <option value="FAMILY_ADMIN">Family Admin</option>
-                    <option value="CONTRIBUTOR">Contributor</option>
-                    <option value="VIEWER">Viewer</option>
-                    <option value="CARE_RECIPIENT">Care Recipient</option>
-                  </select>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => removeInvite(index)}
-                  className={styles.backBtn}
-                >
-                  Remove
-                </button>
-              </div>
-            ))}
-
-            <button type="button" onClick={addInvite} className={styles.nextBtn}>
-              Add family member
-            </button>
-          </div>
-        )
+        return renderSetupStep()
       case 6:
-        return (
-          <div className={styles.stepContent}>
-            <div className={styles.successIcon}>✅</div>
-            <h2>Choose your top needs</h2>
-            <p className={styles.stepDescription}>
-              We&apos;ll use this to shape your dashboard and recommended next actions after setup.
-            </p>
-
-            <div className={styles.reviewCard}>
-              {TOP_NEEDS.map((need) => (
-                <label key={need} className={styles.formGroup}>
-                  <input
-                    type="checkbox"
-                    checked={formData.topNeeds.includes(need)}
-                    onChange={() => toggleNeed(need)}
-                  />
-                  <span>{need}</span>
-                </label>
-              ))}
-            </div>
-
-            <div className={styles.reviewCard}>
-              <h3>Next actions after launch</h3>
-              <p>1. Add your first bill</p>
-              <p>2. Create your first care task</p>
-              <p>3. Invite family members</p>
-            </div>
-          </div>
-        )
+      default:
+        return renderFinishStep()
     }
   }
 
   return (
-    <div className={styles.pageContainer}>
-      <div className={styles.leftPanel}>
-        <Link href="/" className={styles.logo}>
-          <Image
-            src="/careshare-logo.png"
-            alt="CareShare Logo"
-            width={200}
-            height={76}
-            priority
-          />
-        </Link>
+    <div className={styles.page}>
+      <div className={styles.shell}>
+        <section className={styles.heroPanel}>
+          <Link href="/" className={styles.logo}>
+            <Image
+              src="/careshare-logo.png"
+              alt="CareShare Logo"
+              width={200}
+              height={76}
+              priority
+            />
+          </Link>
 
-        <div className={styles.marketingContent}>
-          <h1>Build a trusted family care workspace</h1>
-          <p className={styles.subtitle}>
-            Start with the primary caregiver, the person receiving care, and the
-            permissions your family actually needs.
-          </p>
+          <div className={styles.heroCopy}>
+            <span className={styles.heroEyebrow}>Adaptive Onboarding</span>
+            <h1>{audienceContent.title}</h1>
+            <p>{audienceContent.description}</p>
+          </div>
 
-          <ul className={styles.benefits}>
-            <li>
-              <Check size={20} className={styles.checkIcon} />
-              <span>Google or email sign-in with one onboarding path</span>
-            </li>
-            <li>
-              <Check size={20} className={styles.checkIcon} />
-              <span>Role bundles for owner, caregiver, admin, contributors, and viewers</span>
-            </li>
-            <li>
-              <Check size={20} className={styles.checkIcon} />
-              <span>First-class care recipient profile with save and resume</span>
-            </li>
-            <li>
-              <Check size={20} className={styles.checkIcon} />
-              <span>Recommended next steps to get your family moving quickly</span>
-            </li>
-          </ul>
-        </div>
-      </div>
+          <div className={styles.heroHighlights}>
+            {audienceContent.bullets.map((bullet) => (
+              <div key={bullet} className={styles.heroHighlight}>
+                <Check size={18} />
+                <span>{bullet}</span>
+              </div>
+            ))}
+          </div>
 
-      <div className={styles.rightPanel}>
-        <div className={styles.onboardingCard}>
+          <div className={styles.heroFootnote}>
+            <Sparkles size={16} />
+            <span>One onboarding route, tailored guidance for four kinds of care support.</span>
+          </div>
+        </section>
+
+        <section className={styles.formPanel}>
           <div className={styles.progressBar}>
             <div className={styles.progressSteps}>
-              {[1, 2, 3, 4, 5, 6].map((stepNum) => (
-                <div key={stepNum} className={styles.progressStepWrapper}>
+              {[1, 2, 3, 4, 5, 6].map((stepNumber) => (
+                <div key={stepNumber} className={styles.progressStepWrapper}>
                   <div
                     className={`${styles.progressStep} ${
-                      stepNum <= progressStep ? styles.progressStepActive : ''
-                    } ${stepNum < progressStep ? styles.progressStepCompleted : ''}`}
+                      stepNumber <= progressStep ? styles.progressStepActive : ''
+                    } ${stepNumber < progressStep ? styles.progressStepCompleted : ''}`}
                   >
-                    {stepNum < progressStep ? <Check size={16} /> : stepNum}
+                    {stepNumber < progressStep ? <Check size={15} /> : stepNumber}
                   </div>
-                  {stepNum < 6 && (
+                  {stepNumber < 6 && (
                     <div
                       className={`${styles.progressLine} ${
-                        stepNum < progressStep ? styles.progressLineCompleted : ''
+                        stepNumber < progressStep ? styles.progressLineCompleted : ''
                       }`}
                     />
                   )}
                 </div>
               ))}
             </div>
+
             <div className={styles.progressLabels}>
-              {STEP_LABELS.map((label, index) => (
-                <span
-                  key={label}
-                  className={index + 1 === progressStep ? styles.activeLabel : ''}
-                >
+              {stepLabels.map((label, index) => (
+                <span key={label} className={index + 1 === progressStep ? styles.activeLabel : ''}>
                   {label}
                 </span>
               ))}
             </div>
           </div>
 
-          {error && <div className={styles.error}>{error}</div>}
+          <div className={styles.formCard}>
+            {error && <div className={styles.error}>{error}</div>}
 
-          {renderStep()}
+            {renderStep()}
 
-          <div className={styles.stepActions}>
-            {step > 1 && (
-              <button
-                type="button"
-                onClick={handleBack}
-                className={styles.backBtn}
-                disabled={loading}
-              >
-                <ChevronLeft size={20} />
-                Back
-              </button>
-            )}
+            <div className={styles.stepActions}>
+              {step > 1 ? (
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  className={styles.secondaryAction}
+                  disabled={loading}
+                >
+                  <ChevronLeft size={18} />
+                  Back
+                </button>
+              ) : (
+                <span />
+              )}
 
-            {step < 6 ? (
-              <button
-                type="button"
-                onClick={handleNext}
-                className={styles.nextBtn}
-                disabled={loading || pageLoading}
-              >
-                Continue
-                <ChevronRight size={20} />
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleComplete}
-                className={styles.completeBtn}
-                disabled={loading || pageLoading}
-              >
-                {loading ? 'Finishing setup...' : 'Launch workspace'}
-              </button>
-            )}
+              {step < 6 ? (
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  className={styles.primaryAction}
+                  disabled={loading || pageLoading}
+                >
+                  Continue
+                  <ArrowRight size={18} />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleComplete}
+                  className={styles.primaryAction}
+                  disabled={loading || pageLoading}
+                >
+                  {loading
+                    ? 'Finishing setup...'
+                    : formData.audienceType === 'CARE_CENTER'
+                      ? 'Submit partnership intake'
+                      : 'Launch workspace'}
+                </button>
+              )}
+            </div>
+
+            <div className={styles.footerNote}>
+              <p>
+                Already have an account? <Link href="/login">Sign in</Link>
+              </p>
+            </div>
           </div>
-
-          <div className={styles.onboardingFooter}>
-            <p>
-              Already have an account? <Link href="/login">Sign in</Link>
-            </p>
-          </div>
-        </div>
+        </section>
       </div>
     </div>
   )

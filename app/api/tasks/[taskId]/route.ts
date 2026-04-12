@@ -74,6 +74,18 @@ export async function PATCH(
         status: body.status as TaskStatus,
         dueDate: body.dueDate ? new Date(body.dueDate) : null,
         completedAt: body.status === 'COMPLETED' ? new Date() : null,
+        attachmentUrl:
+          Object.prototype.hasOwnProperty.call(body, "attachmentUrl")
+            ? body.attachmentUrl || null
+            : task.attachmentUrl,
+        fileName:
+          Object.prototype.hasOwnProperty.call(body, "fileName")
+            ? body.fileName || null
+            : task.fileName,
+        fileType:
+          Object.prototype.hasOwnProperty.call(body, "fileType")
+            ? body.fileType || null
+            : task.fileType,
         assignments: {
           create: finalAssignedMembers.map((userId: string) => ({
             userId: userId.trim()
@@ -158,4 +170,3 @@ export async function DELETE(
     )
   }
 }
-
