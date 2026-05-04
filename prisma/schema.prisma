@@ -9,7 +9,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Auth models for NextAuth.js
+// Legacy auth compatibility models retained while product data remains in Prisma.
 model Account {
   id                String  @id @default(cuid())
   userId            String

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { upsertPayloadUser } from "@/lib/payload-users";
 import {
   EventType,
   CostStatus,
@@ -54,6 +55,17 @@ export async function POST() {
         },
       });
     }
+
+    await upsertPayloadUser({
+      id: demoUser.id,
+      email: demoUser.email,
+      name: demoUser.name,
+      password: "demo123",
+      roles: ["family-member"],
+      onboardingStatus: OnboardingStatus.COMPLETED,
+      onboardingStep: demoUser.onboardingStep,
+      mustResetPassword: false,
+    });
 
     // Check if demo user has a family, if not create one with sample data
     const hasFamily =
@@ -167,6 +179,22 @@ export async function POST() {
           },
         });
       }
+
+      await Promise.all(
+        [sarahUser, michaelUser, emilyUser, davidUser, lisaUser, jamesUser, robertUser].map(
+          (user) =>
+            upsertPayloadUser({
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              password: "demo123",
+              roles: ["family-member"],
+              onboardingStatus: OnboardingStatus.COMPLETED,
+              onboardingStep: user.onboardingStep,
+              mustResetPassword: false,
+            })
+        )
+      );
 
       // Create demo family with all members
       const demoFamily = await prisma.family.create({

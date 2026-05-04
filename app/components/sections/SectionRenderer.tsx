@@ -1,11 +1,35 @@
 import Link from "next/link";
-import { CheckCircle2 } from "lucide-react";
+import Image from "next/image";
+import { Calendar, CheckCircle2, Clock, Tag, User } from "lucide-react";
 import ImageCarousel from "@/app/components/ImageCarousel";
 import styles from "./SectionRenderer.module.css";
-import type { CTA, PageSection } from "./section-types";
+import ContactSubmissionForm from "./ContactSubmissionForm";
+import { resolveIcon } from "./icon-map";
+import type { BlogListItem, CTA, PageSection } from "./section-types";
 
 type SectionRendererProps = {
   sections: PageSection[];
+  posts?: BlogListItem[];
+};
+
+const categoryLabels: Record<string, string> = {
+  CAREGIVING_TIPS: "Caregiving Tips",
+  FAMILY_STORIES: "Family Stories",
+  HEALTH_WELLNESS: "Health & Wellness",
+  FINANCIAL_PLANNING: "Financial Planning",
+  TECHNOLOGY: "Technology",
+  LEGAL_MATTERS: "Legal Matters",
+  COMPANY_NEWS: "Company News",
+};
+
+const categoryColors: Record<string, string> = {
+  CAREGIVING_TIPS: "#6366f1",
+  FAMILY_STORIES: "#ec4899",
+  HEALTH_WELLNESS: "#10b981",
+  FINANCIAL_PLANNING: "#f59e0b",
+  TECHNOLOGY: "#8b5cf6",
+  LEGAL_MATTERS: "#ef4444",
+  COMPANY_NEWS: "#06b6d4",
 };
 
 function cx(...classNames: Array<string | false | null | undefined>) {
@@ -20,7 +44,7 @@ function renderActions(actions: CTA[] | undefined, tone: "default" | "inverse" =
   return (
     <div className={styles.actionRow}>
       {actions.map((action) => {
-        const Icon = action.icon;
+        const Icon = resolveIcon(action.icon);
         const variant = action.variant ?? "primary";
         const className = cx(
           styles.action,
@@ -38,6 +62,46 @@ function renderActions(actions: CTA[] | undefined, tone: "default" | "inverse" =
         );
       })}
     </div>
+  );
+}
+
+function renderParagraphs(text: string | undefined, className: string) {
+  const paragraphs = text ? text.split("\n\n").filter(Boolean) : [];
+
+  if (!paragraphs.length) {
+    return null;
+  }
+
+  return (
+    <div className={className}>
+      {paragraphs.map((paragraph) => (
+        <p key={paragraph}>{paragraph}</p>
+      ))}
+    </div>
+  );
+}
+
+function SmartLink({
+  href,
+  className,
+  children,
+}: {
+  href: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  if (href.startsWith("/")) {
+    return (
+      <Link href={href} className={className}>
+        {children}
+      </Link>
+    );
+  }
+
+  return (
+    <a href={href} className={className}>
+      {children}
+    </a>
   );
 }
 
@@ -86,7 +150,7 @@ function SectionHeader({
   );
 }
 
-function renderSection(section: PageSection, index: number) {
+function renderSection(section: PageSection, index: number, posts: BlogListItem[] = []) {
   const sectionId = section.id ?? `${section.type}-${index + 1}`;
   const headingId = "title" in section && section.title ? `${sectionId}-title` : undefined;
 
@@ -149,7 +213,7 @@ function renderSection(section: PageSection, index: number) {
             )}
           >
             {section.items.map((item) => {
-              const Icon = item.icon;
+              const Icon = resolveIcon(item.icon);
 
               return (
                 <article
@@ -217,10 +281,6 @@ function renderSection(section: PageSection, index: number) {
     }
 
     case "content": {
-      const paragraphs = section.prose
-        ? section.prose.split("\n\n").filter(Boolean)
-        : [];
-
       return (
         <SectionShell
           key={sectionId}
@@ -237,13 +297,7 @@ function renderSection(section: PageSection, index: number) {
               ) : null}
               {section.intro ? <p className={styles.contentIntro}>{section.intro}</p> : null}
 
-              {paragraphs.length ? (
-                <div className={styles.contentProse}>
-                  {paragraphs.map((paragraph) => (
-                    <p key={paragraph}>{paragraph}</p>
-                  ))}
-                </div>
-              ) : null}
+              {renderParagraphs(section.prose, styles.contentProse)}
 
               {section.bullets?.length ? (
                 <ul className={cx(styles.bulletList, styles.contentProse)}>
@@ -323,9 +377,203 @@ function renderSection(section: PageSection, index: number) {
           </div>
         </SectionShell>
       );
+
+    case "legal-article":
+      return (
+        <SectionShell key={sectionId} id={sectionId} labelledBy={headingId}>
+          <div className={styles.legalLayout}>
+            <aside className={styles.legalSidebar}>
+              <h3>Quick Navigation</h3>
+              <nav>
+                {section.sections.map((item) => (
+                  <a key={item.anchor} href={`#${item.anchor}`}>
+                    {item.title}
+                  </a>
+                ))}
+              </nav>
+            </aside>
+
+            <article className={styles.legalArticle}>
+              <header className={styles.legalHeader}>
+                <h1 id={headingId}>{section.title}</h1>
+                {section.lastUpdated ? <p>Last updated: {section.lastUpdated}</p> : null}
+                {section.intro ? <div className={styles.legalIntro}>{section.intro}</div> : null}
+              </header>
+
+              {section.sections.map((item) => {
+                const Icon = resolveIcon(item.icon);
+
+                return (
+                  <section key={item.anchor} id={item.anchor} className={styles.legalSection}>
+                    <h2>
+                      {Icon ? <Icon size={24} /> : null}
+                      {item.title}
+                    </h2>
+                    {renderParagraphs(item.body, styles.legalProse)}
+                    {item.bullets?.length ? (
+                      <ul>
+                        {item.bullets.map((bullet) => (
+                          <li key={bullet}>{bullet}</li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </section>
+                );
+              })}
+            </article>
+          </div>
+        </SectionShell>
+      );
+
+    case "contact-form":
+      return (
+        <SectionShell key={sectionId} id={sectionId} labelledBy={headingId}>
+          <SectionHeader title={section.title} intro={section.intro} headingId={headingId} />
+
+          <div className={styles.contactLayout}>
+            <ContactSubmissionForm inquiryTypes={section.inquiryTypes} />
+
+            {section.contactCards?.length ? (
+              <div className={styles.contactCards}>
+                {section.contactCards.map((card) => {
+                  const Icon = resolveIcon(card.icon);
+
+                  return (
+                    <article key={card.title} className={styles.contactCard}>
+                      {Icon ? (
+                        <div className={styles.contactCardIcon}>
+                          <Icon size={28} />
+                        </div>
+                      ) : null}
+                      <h3>{card.title}</h3>
+                      {card.href ? (
+                        <SmartLink href={card.href}>
+                          {card.body.split("\n").map((line) => (
+                            <span key={line}>
+                              {line}
+                              <br />
+                            </span>
+                          ))}
+                        </SmartLink>
+                      ) : (
+                        <p>{card.body}</p>
+                      )}
+                      {card.note ? <span>{card.note}</span> : null}
+                    </article>
+                  );
+                })}
+              </div>
+            ) : null}
+          </div>
+        </SectionShell>
+      );
+
+    case "partnership-cards":
+      return (
+        <SectionShell key={sectionId} id={sectionId} labelledBy={headingId}>
+          <SectionHeader title={section.title} intro={section.intro} headingId={headingId} />
+
+          <div className={styles.partnershipGrid}>
+            {section.items.map((item) => {
+              const Icon = resolveIcon(item.icon);
+
+              return (
+                <article key={item.title} className={styles.partnershipCard}>
+                  <header className={styles.partnershipHeader}>
+                    {Icon ? (
+                      <div className={styles.partnershipIcon}>
+                        <Icon size={32} />
+                      </div>
+                    ) : null}
+                    <div>
+                      <h3>{item.title}</h3>
+                      {item.subtitle ? <p>{item.subtitle}</p> : null}
+                    </div>
+                  </header>
+                  <p className={styles.partnershipBody}>{item.body}</p>
+                  {item.bullets?.length ? (
+                    <ul className={styles.bulletList}>
+                      {item.bullets.map((bullet) => (
+                        <li key={bullet} className={styles.bulletItem}>
+                          <CheckCircle2 size={18} className={styles.bulletIcon} />
+                          <span>{bullet}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  {renderActions(item.actions)}
+                </article>
+              );
+            })}
+          </div>
+        </SectionShell>
+      );
+
+    case "blog-archive":
+      return (
+        <SectionShell key={sectionId} id={sectionId} labelledBy={headingId}>
+          <SectionHeader title={section.title} intro={section.intro} headingId={headingId} />
+
+          {posts.length ? (
+            <div className={styles.blogGrid}>
+              {posts.map((post, postIndex) => (
+                <Link
+                  key={post.id}
+                  href={`/blog/${post.slug}`}
+                  className={cx(styles.blogCard, postIndex === 0 && styles.blogCardFeatured)}
+                >
+                  {post.coverImage ? (
+                    <div className={styles.blogImage}>
+                      <Image src={post.coverImage} alt={post.title} fill style={{ objectFit: "cover" }} />
+                    </div>
+                  ) : null}
+                  <div className={styles.blogCardContent}>
+                    <span
+                      className={styles.blogCategory}
+                      style={{ background: categoryColors[post.category] ?? "#6366f1" }}
+                    >
+                      <Tag size={14} />
+                      {categoryLabels[post.category] ?? post.category}
+                    </span>
+                    <h3>{post.title}</h3>
+                    <p>{post.excerpt}</p>
+                    <div className={styles.blogMeta}>
+                      <span>
+                        <User size={15} />
+                        {post.author}
+                      </span>
+                      {post.publishedAt ? (
+                        <span>
+                          <Calendar size={15} />
+                          {new Date(post.publishedAt).toLocaleDateString()}
+                        </span>
+                      ) : null}
+                      {post.readTime ? (
+                        <span>
+                          <Clock size={15} />
+                          {post.readTime} min read
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className={styles.emptyState}>
+              <h3>No articles found</h3>
+              <p>Published posts will appear here once they are added in Payload.</p>
+            </div>
+          )}
+        </SectionShell>
+      );
   }
 }
 
-export default function SectionRenderer({ sections }: SectionRendererProps) {
-  return <div className={styles.stack}>{sections.map((section, index) => renderSection(section, index))}</div>;
+export default function SectionRenderer({ sections, posts }: SectionRendererProps) {
+  return (
+    <div className={styles.stack}>
+      {sections.map((section, index) => renderSection(section, index, posts))}
+    </div>
+  );
 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getPublishedPostBySlug, mapPostForList } from "@/lib/cms";
 
 type RouteContext = {
   params: Promise<{
@@ -7,17 +7,10 @@ type RouteContext = {
   }>;
 };
 
-// GET /api/blog/[slug] - Get a single blog post by slug
 export async function GET(request: NextRequest, context: RouteContext) {
   try {
     const { slug } = await context.params;
-
-    const post = await prisma.blogPost.findUnique({
-      where: {
-        slug,
-        published: true,
-      },
-    });
+    const post = await getPublishedPostBySlug(slug);
 
     if (!post) {
       return NextResponse.json(
@@ -26,13 +19,18 @@ export async function GET(request: NextRequest, context: RouteContext) {
       );
     }
 
-    // Increment view count
-    await prisma.blogPost.update({
-      where: { id: post.id },
-      data: { views: { increment: 1 } },
-    });
+    const listPost = mapPostForList(post);
 
-    return NextResponse.json({ ...post, views: post.views + 1 });
+    return NextResponse.json({
+      ...listPost,
+      content: post.content,
+      views: 0,
+      relatedPostIds: Array.isArray(post.relatedPosts)
+        ? post.relatedPosts.map((related: any) =>
+            typeof related === "object" && related !== null ? related.id : related
+          )
+        : [],
+    });
   } catch (error) {
     console.error("Error fetching blog post:", error);
     return NextResponse.json(

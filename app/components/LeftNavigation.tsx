@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession } from "./AuthProvider";
 import {
   LayoutDashboard,
   CheckSquare,
@@ -58,12 +58,11 @@ const marketplaceMenuItems = [
 ];
 
 const adminMenuItems = [
-  { href: "/admin/users", label: "Manage Users", icon: Users },
-  { href: "/admin/families", label: "Manage Families", icon: UsersRound },
-  { href: "/admin/blog", label: "Blog Management", icon: BookOpen },
-  { href: "/admin/content", label: "Content Management", icon: FileText },
-  { href: "/admin/database", label: "Database Tools", icon: Database },
-  { href: "/admin/settings", label: "System Settings", icon: Settings },
+  { href: "/admin/collections/users", label: "Manage Users", icon: Users },
+  { href: "/admin/collections/pages", label: "Pages", icon: FileText },
+  { href: "/admin/collections/posts", label: "Blog Posts", icon: BookOpen },
+  { href: "/admin/collections/media", label: "Media", icon: Database },
+  { href: "/admin/collections/contact-submissions", label: "Contact Inbox", icon: Settings },
 ];
 
 const accountMenuItems = [

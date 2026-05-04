@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getProviders, signIn } from "next-auth/react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Heart, Shield, Users, Sparkles } from "lucide-react";
 import MarketingNav from "../components/MarketingNav";
 import Footer from "../components/Footer";
+import { payloadLogin } from "../components/AuthProvider";
 import styles from "./page.module.css";
 
 export default function Login() {
@@ -15,25 +15,6 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [googleEnabled, setGoogleEnabled] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadProviders() {
-      const providers = await getProviders();
-
-      if (!cancelled) {
-        setGoogleEnabled(Boolean(providers?.google));
-      }
-    }
-
-    void loadProviders();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,13 +22,9 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
+      const result = await payloadLogin(email, password);
 
-      if (result?.error) {
+      if (!result.ok) {
         setError("Invalid email or password");
         setLoading(false);
         return;
@@ -59,15 +36,6 @@ export default function Login() {
       setError("Something went wrong");
       setLoading(false);
     }
-  };
-
-  const handleGoogleLogin = async () => {
-    setLoading(true);
-    setError("");
-
-    await signIn("google", {
-      callbackUrl: "/auth/post-login",
-    });
   };
 
   const handleDemoMode = async () => {
@@ -87,13 +55,9 @@ export default function Login() {
       }
 
       // Now sign in with demo account
-      const result = await signIn("credentials", {
-        email: "demo@careshare.app",
-        password: "demo123",
-        redirect: false,
-      });
+      const result = await payloadLogin("demo@careshare.app", "demo123");
 
-      if (result?.error) {
+      if (!result.ok) {
         setError("Demo mode login failed. Please try again.");
         setLoading(false);
         return;
@@ -181,23 +145,6 @@ export default function Login() {
             <form onSubmit={handleSubmit} className={styles.form}>
               {error && <div className={styles.error}>{error}</div>}
 
-              {googleEnabled && (
-                <>
-                  <button
-                    type="button"
-                    onClick={handleGoogleLogin}
-                    className={styles.submitBtn}
-                    disabled={loading}
-                  >
-                    Continue with Google
-                  </button>
-
-                  <div className={styles.divider}>
-                    <span>or use email</span>
-                  </div>
-                </>
-              )}
-
               <div className={styles.formGroup}>
                 <label htmlFor="email">Email</label>
                 <input
@@ -250,7 +197,7 @@ export default function Login() {
                 Don&apos;t have an account? <Link href="/onboarding">Sign up</Link>
               </p>
               <p className={styles.adminLink}>
-                <Link href="/admin/login">Care Provider Login →</Link>
+                <Link href="/admin">Care Provider Login →</Link>
               </p>
             </div>
           </div>

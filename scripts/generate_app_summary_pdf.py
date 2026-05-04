@@ -135,8 +135,8 @@ def main() -> None:
         [Paragraph("How It Works", section_header_style)],
         [
             Paragraph(
-                "<b>Frontend:</b> Next.js App Router pages under <font name='Helvetica-Oblique'>app/</font> render the marketing site, onboarding, family pages, dashboards, and admin UI.<br/>"
-                "<b>Auth:</b> NextAuth with credentials and optional Google sign-in, wrapped by a SessionProvider; middleware protects <font name='Helvetica-Oblique'>/dashboard</font>, <font name='Helvetica-Oblique'>/family</font>, and <font name='Helvetica-Oblique'>/admin</font> routes.<br/>"
+                "<b>Frontend:</b> Next.js App Router pages under <font name='Helvetica-Oblique'>app/</font> render Payload-managed marketing pages, onboarding, family pages, dashboards, and Payload Admin.<br/>"
+                "<b>Auth:</b> Payload auth with role-based app helpers; middleware protects <font name='Helvetica-Oblique'>/dashboard</font>, <font name='Helvetica-Oblique'>/family</font>, and <font name='Helvetica-Oblique'>/profile</font> routes while Payload owns <font name='Helvetica-Oblique'>/admin</font>.<br/>"
                 "<b>Application layer:</b> Route handlers under <font name='Helvetica-Oblique'>app/api/</font> serve family-scoped CRUD for tasks, events, costs, resources, notes, medications, documents, messages, onboarding, and admin operations.<br/>"
                 "<b>Data layer:</b> Prisma talks to PostgreSQL. Schema evidence shows core models for users, families, memberships, invitations, care recipients, tasks, events, costs, messages, documents, resources, care plans, scenarios, contributions, blog posts, and audit logs.<br/>"
                 "<b>Files:</b> The upload route writes image/PDF receipts to <font name='Helvetica-Oblique'>public/uploads/receipts</font> on the app server.<br/>"
@@ -146,7 +146,7 @@ def main() -> None:
         ],
         [Paragraph("How To Run", section_header_style)],
         [bullet("Install deps: <b>npm install</b>", bullet_style)],
-        [bullet("Create <b>.env</b> with <b>DATABASE_URL</b>, <b>NEXTAUTH_URL</b>, and <b>NEXTAUTH_SECRET</b>. Google OAuth vars appear optional in code.", bullet_style)],
+        [bullet("Create <b>.env</b> with <b>DATABASE_URL</b>, <b>PAYLOAD_SECRET</b>, and <b>PAYLOAD_BLOB_READ_WRITE_TOKEN</b>.", bullet_style)],
         [bullet("Prepare Prisma: <b>npx prisma generate</b> and <b>npx prisma db push</b>", bullet_style)],
         [bullet("Start dev server: <b>npm run dev</b>", bullet_style)],
         [bullet("Open <b>http://localhost:3000</b>", bullet_style)],

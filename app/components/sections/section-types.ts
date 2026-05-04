@@ -1,10 +1,12 @@
 import type { LucideIcon } from "lucide-react";
 
+export type IconValue = LucideIcon | string;
+
 export type CTA = {
   href: string;
   label: string;
   variant?: "primary" | "secondary" | "accent";
-  icon?: LucideIcon;
+  icon?: IconValue;
 };
 
 export type SectionMedia =
@@ -20,7 +22,7 @@ export type SectionMedia =
 export type FeatureItem = {
   title: string;
   body: string;
-  icon?: LucideIcon;
+  icon?: IconValue;
   bullets?: string[];
   accent?: {
     background: string;
@@ -37,6 +39,49 @@ export type StatItem = {
 export type FAQItem = {
   question: string;
   answer: string;
+};
+
+export type LegalArticleItem = {
+  anchor: string;
+  title: string;
+  icon?: IconValue;
+  body?: string;
+  bullets?: string[];
+};
+
+export type ContactCard = {
+  title: string;
+  body: string;
+  href?: string;
+  icon?: IconValue;
+  note?: string;
+};
+
+export type InquiryType = {
+  label: string;
+  value: string;
+};
+
+export type PartnershipCard = {
+  title: string;
+  subtitle?: string;
+  body: string;
+  icon?: IconValue;
+  bullets?: string[];
+  actions?: CTA[];
+};
+
+export type BlogListItem = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  category: string;
+  author: string;
+  authorTitle?: string | null;
+  coverImage?: string | null;
+  readTime?: number | null;
+  publishedAt?: string | null;
 };
 
 export type PageSection =
@@ -109,4 +154,33 @@ export type PageSection =
       title: string;
       intro?: string;
       items: FAQItem[];
+    }
+  | {
+      id?: string;
+      type: "legal-article";
+      title: string;
+      lastUpdated?: string;
+      intro?: string;
+      sections: LegalArticleItem[];
+    }
+  | {
+      id?: string;
+      type: "contact-form";
+      title: string;
+      intro?: string;
+      inquiryTypes?: InquiryType[];
+      contactCards?: ContactCard[];
+    }
+  | {
+      id?: string;
+      type: "partnership-cards";
+      title: string;
+      intro?: string;
+      items: PartnershipCard[];
+    }
+  | {
+      id?: string;
+      type: "blog-archive";
+      title: string;
+      intro?: string;
     };

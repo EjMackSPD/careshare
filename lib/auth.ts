@@ -1,154 +1,114 @@
-import NextAuth from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
-import Google from "next-auth/providers/google"
-import { PrismaAdapter } from "@auth/prisma-adapter"
-import { prisma } from "./prisma"
-import bcrypt from "bcryptjs"
-import { OnboardingStatus } from "@prisma/client"
+import { headers as nextHeaders } from "next/headers";
+import { OnboardingStatus, UserRole } from "@prisma/client";
+import type { PayloadRole } from "@/payload/access";
+import { getPayloadClient } from "@/lib/cms";
+import { prisma } from "@/lib/prisma";
+import { mapPayloadRolesToPrismaRole, syncPayloadUserToPrisma } from "@/payload/hooks/syncUserToPrisma";
 
-const providers = []
+export type CareShareUser = {
+  id: string;
+  email: string;
+  name?: string | null;
+  role: UserRole;
+  roles: PayloadRole[];
+  onboardingStatus: OnboardingStatus;
+  onboardingStep: number;
+  onboardingData?: unknown;
+  mustResetPassword?: boolean | null;
+};
 
-if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-  providers.push(
-    Google({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      allowDangerousEmailAccountLinking: true,
-    })
-  )
+export type CareShareSession = {
+  user: CareShareUser;
+};
+
+type PayloadUser = {
+  id: string | number;
+  email?: string | null;
+  name?: string | null;
+  roles?: PayloadRole[] | PayloadRole | null;
+  onboardingStatus?: OnboardingStatus | null;
+  onboardingStep?: number | null;
+  onboardingData?: unknown;
+  mustResetPassword?: boolean | null;
+};
+
+function normalizeRoles(roles: PayloadUser["roles"]): PayloadRole[] {
+  if (Array.isArray(roles)) {
+    return roles.length ? roles : ["family-member"];
+  }
+
+  return roles ? [roles] : ["family-member"];
 }
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: PrismaAdapter(prisma),
-  providers: [
-    ...providers,
-    CredentialsProvider({
-      name: "credentials",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error("Invalid credentials")
-        }
+export function isOperationalAdmin(user: Pick<CareShareUser, "roles" | "role"> | null | undefined) {
+  return Boolean(
+    user?.roles.includes("super-admin") ||
+      user?.roles.includes("support-admin") ||
+      user?.role === UserRole.ADMIN
+  );
+}
 
-        const email = credentials.email as string
-        const password = credentials.password as string
+export function canAccessPayloadAdmin(user: Pick<CareShareUser, "roles"> | null | undefined) {
+  return Boolean(
+    user?.roles.includes("super-admin") ||
+      user?.roles.includes("content-editor") ||
+      user?.roles.includes("support-admin")
+  );
+}
 
-        const user = await prisma.user.findUnique({
-          where: {
-            email,
-          },
-        })
+async function normalizePayloadUser(user: PayloadUser): Promise<CareShareUser | null> {
+  if (!user.email) {
+    return null;
+  }
 
-        if (!user || !user.password) {
-          throw new Error("Invalid credentials")
-        }
+  const roles = normalizeRoles(user.roles);
+  await syncPayloadUserToPrisma({
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    roles,
+    onboardingStatus: user.onboardingStatus ?? OnboardingStatus.NOT_STARTED,
+    onboardingStep: user.onboardingStep ?? 1,
+    onboardingData: user.onboardingData,
+  });
 
-        const isCorrectPassword = await bcrypt.compare(
-          password,
-          user.password
-        )
-
-        if (!isCorrectPassword) {
-          throw new Error("Invalid credentials")
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          onboardingStatus: user.onboardingStatus,
-          onboardingStep: user.onboardingStep,
-        }
-      },
-    }),
-  ],
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.role = (user as any).role
-        token.id = user.id
-        token.onboardingStatus = (user as any).onboardingStatus
-        token.onboardingStep = (user as any).onboardingStep
-      }
-
-      if (token.email) {
-        const dbUser = await prisma.user.findUnique({
-          where: { email: token.email },
-          select: {
-            id: true,
-            role: true,
-            onboardingStatus: true,
-            onboardingStep: true,
-          },
-        })
-
-        if (dbUser) {
-          token.id = dbUser.id
-          token.role = dbUser.role
-          token.onboardingStatus = dbUser.onboardingStatus
-          token.onboardingStep = dbUser.onboardingStep
-        }
-      }
-
-      return token
+  const prismaUser = await prisma.user.findUnique({
+    where: { id: String(user.id) },
+    select: {
+      role: true,
+      onboardingStatus: true,
+      onboardingStep: true,
+      onboardingData: true,
     },
-    async session({ session, token }) {
-      if (token && session.user) {
-        (session.user as any).role = token.role as string
-        (session.user as any).id = token.id as string
-        ;(session.user as any).onboardingStatus =
-          token.onboardingStatus as OnboardingStatus
-        ;(session.user as any).onboardingStep = token.onboardingStep as number
-      }
-      return session
-    },
-    async signIn({ user }) {
-      if (!user.email) {
-        return false
-      }
+  });
 
-      const existingUser = await prisma.user.findUnique({
-        where: { email: user.email },
-      })
+  return {
+    id: String(user.id),
+    email: user.email,
+    name: user.name,
+    role: prismaUser?.role ?? mapPayloadRolesToPrismaRole(roles),
+    roles,
+    onboardingStatus:
+      prismaUser?.onboardingStatus ?? user.onboardingStatus ?? OnboardingStatus.NOT_STARTED,
+    onboardingStep: prismaUser?.onboardingStep ?? user.onboardingStep ?? 1,
+    onboardingData: prismaUser?.onboardingData ?? user.onboardingData,
+    mustResetPassword: user.mustResetPassword,
+  };
+}
 
-      if (!existingUser) {
-        return true
-      }
+export async function getPayloadAuthenticatedUser(headers?: Headers): Promise<CareShareUser | null> {
+  const payload = await getPayloadClient();
+  const authHeaders = headers ?? ((await nextHeaders()) as unknown as Headers);
+  const result = await payload.auth({ headers: authHeaders });
 
-      if (existingUser.onboardingStatus === OnboardingStatus.NOT_STARTED) {
-        await prisma.user.update({
-          where: { id: existingUser.id },
-          data: {
-            onboardingStatus: OnboardingStatus.IN_PROGRESS,
-            onboardingStep: 1,
-          },
-        })
-      }
+  if (!result.user) {
+    return null;
+  }
 
-      return true
-    },
-    async redirect({ url, baseUrl }) {
-      if (url.startsWith("/")) {
-        return `${baseUrl}${url}`
-      }
+  return normalizePayloadUser(result.user as PayloadUser);
+}
 
-      if (new URL(url).origin === baseUrl) {
-        return url
-      }
-
-      return `${baseUrl}/auth/post-login`
-    },
-  },
-  session: {
-    strategy: "jwt",
-  },
-  pages: {
-    signIn: "/login",
-  },
-  secret: process.env.NEXTAUTH_SECRET,
-})
-
+export async function auth(): Promise<CareShareSession | null> {
+  const user = await getPayloadAuthenticatedUser();
+  return user ? { user } : null;
+}

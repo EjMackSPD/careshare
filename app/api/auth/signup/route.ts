@@ -1,64 +1,57 @@
-import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import bcrypt from 'bcryptjs'
-import { OnboardingStatus } from '@prisma/client'
+import { NextResponse } from "next/server";
+import { OnboardingStatus } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
+import { upsertPayloadUser } from "@/lib/payload-users";
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
-    const { name, email, password } = body
+    const body = await request.json();
+    const { name, email, password } = body;
 
     if (!email || !password) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: "Missing required fields" },
         { status: 400 }
-      )
+      );
     }
 
-    // Check if user already exists
     const existingUser = await prisma.user.findUnique({
       where: { email },
-    })
+    });
 
     if (existingUser) {
       return NextResponse.json(
-        { error: 'User already exists' },
+        { error: "User already exists" },
         { status: 400 }
-      )
+      );
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10)
-
-    // Create user
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        role: 'FAMILY_MEMBER',
-        onboardingStatus: OnboardingStatus.IN_PROGRESS,
-        onboardingStep: 1,
-      },
-    })
+    const user = await upsertPayloadUser({
+      email,
+      name,
+      password,
+      roles: ["family-member"],
+      onboardingStatus: OnboardingStatus.IN_PROGRESS,
+      onboardingStep: 1,
+      mustResetPassword: false,
+    });
 
     return NextResponse.json(
-      { 
-        message: 'User created successfully',
+      {
+        message: "User created successfully",
         user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
+          id: String((user as { id: string | number }).id),
+          name,
+          email,
         },
       },
       { status: 201 }
-    )
+    );
   } catch (error) {
-    console.error('Signup error:', error)
+    console.error("Signup error:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: "Internal server error" },
       { status: 500 }
-    )
+    );
   }
 }
-

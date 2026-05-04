@@ -1,18 +1,12 @@
-import Footer from "../components/Footer";
-import MarketingNav from "../components/MarketingNav";
-import SectionRenderer from "@/app/components/sections/SectionRenderer";
-import { featureSections } from "@/app/content/marketingSections";
+import CMSMarketingPage from "@/app/components/CMSMarketingPage";
+import { getPageBySlug, pageMetadata } from "@/lib/cms";
+
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata() {
+  return pageMetadata(await getPageBySlug("features"));
+}
 
 export default function Features() {
-  return (
-    <div>
-      <MarketingNav />
-
-      <main>
-        <SectionRenderer sections={featureSections} />
-      </main>
-
-      <Footer />
-    </div>
-  );
+  return <CMSMarketingPage slug="features" />;
 }

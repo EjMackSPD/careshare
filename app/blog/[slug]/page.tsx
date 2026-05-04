@@ -1,37 +1,24 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import Footer from "../../components/Footer";
-import MarketingNav from "../../components/MarketingNav";
+import { notFound } from "next/navigation";
+import { ArrowLeft, Calendar, Clock, Tag, User } from "lucide-react";
+import Footer from "@/app/components/Footer";
+import MarketingNav from "@/app/components/MarketingNav";
 import {
-  Calendar,
-  Clock,
-  User,
-  Tag,
-  TrendingUp,
-  ArrowLeft,
-} from "lucide-react";
+  getPublishedPostBySlug,
+  getRelatedPosts,
+  mapPostForList,
+  postMetadata,
+} from "@/lib/cms";
 import styles from "./page.module.css";
 
-type BlogPost = {
-  id: string;
-  title: string;
-  slug: string;
-  excerpt: string;
-  content: string;
-  category: string;
-  author: string;
-  authorTitle: string | null;
-  coverImage: string | null;
-  readTime: number;
-  publishedAt: string;
-  views: number;
+type BlogPostPageProps = {
+  params: Promise<{
+    slug: string;
+  }>;
 };
 
-const categoryLabels: { [key: string]: string } = {
+const categoryLabels: Record<string, string> = {
   CAREGIVING_TIPS: "Caregiving Tips",
   FAMILY_STORIES: "Family Stories",
   HEALTH_WELLNESS: "Health & Wellness",
@@ -41,7 +28,7 @@ const categoryLabels: { [key: string]: string } = {
   COMPANY_NEWS: "Company News",
 };
 
-const categoryColors: { [key: string]: string } = {
+const categoryColors: Record<string, string> = {
   CAREGIVING_TIPS: "#6366f1",
   FAMILY_STORIES: "#ec4899",
   HEALTH_WELLNESS: "#10b981",
@@ -51,141 +38,53 @@ const categoryColors: { [key: string]: string } = {
   COMPANY_NEWS: "#06b6d4",
 };
 
-// Helper function to render markdown text with bold and italic
-const renderMarkdownText = (text: string) => {
-  const parts: (string | React.ReactElement)[] = [];
-  let lastIndex = 0;
-  let key = 0;
+export const dynamic = "force-dynamic";
 
-  // Combined regex to match **bold** first, then *italic* (order matters)
-  const markdownRegex = /(\*\*(.+?)\*\*)|(\*(.+?)\*)/g;
-  let match;
+export async function generateMetadata({ params }: BlogPostPageProps) {
+  const { slug } = await params;
+  return postMetadata(await getPublishedPostBySlug(slug));
+}
 
-  while ((match = markdownRegex.exec(text)) !== null) {
-    // Add text before the match
-    if (match.index > lastIndex) {
-      parts.push(text.substring(lastIndex, match.index));
-    }
-
-    // Check if it's bold or italic
-    if (match[1]) {
-      // Bold match (**text**)
-      parts.push(<strong key={`strong-${key++}`}>{match[2]}</strong>);
-    } else if (match[3]) {
-      // Italic match (*text*)
-      parts.push(<em key={`em-${key++}`}>{match[4]}</em>);
-    }
-
-    lastIndex = markdownRegex.lastIndex;
-  }
-
-  // Add remaining text
-  if (lastIndex < text.length) {
-    parts.push(text.substring(lastIndex));
-  }
-
-  return parts.length > 0 ? <>{parts}</> : text;
-};
-
-export default function BlogPostPage() {
-  const params = useParams();
-  const router = useRouter();
-  const [post, setPost] = useState<BlogPost | null>(null);
-  const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (params.slug) {
-      fetchPost(params.slug as string);
-    }
-  }, [params.slug]);
-
-  async function fetchPost(slug: string) {
-    try {
-      const res = await fetch(`/api/blog/${slug}`);
-      if (res.ok) {
-        const data = await res.json();
-        setPost(data);
-
-        // First, try to fetch manually selected related posts
-        if (data.relatedPostIds && data.relatedPostIds.length > 0) {
-          const relatedPostsData: BlogPost[] = [];
-          for (const postId of data.relatedPostIds) {
-            try {
-              const postRes = await fetch(`/api/blog?id=${postId}`);
-              if (postRes.ok) {
-                const posts = await postRes.json();
-                if (posts && posts.length > 0) {
-                  relatedPostsData.push(posts[0]);
-                }
-              }
-            } catch (err) {
-              console.error("Error fetching related post:", err);
-            }
-          }
-          if (relatedPostsData.length > 0) {
-            setRelatedPosts(relatedPostsData);
-          } else {
-            // Fallback to category-based if no manual selections found
-            await fetchCategoryRelatedPosts(data.category, slug);
-          }
-        } else {
-          // Fallback to category-based if no manual selections
-          await fetchCategoryRelatedPosts(data.category, slug);
-        }
-      } else {
-        router.push("/blog");
+function renderArticleContent(content: string) {
+  return content
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      if (line.startsWith("### ")) {
+        return <h3 key={line}>{line.replace(/^### /, "")}</h3>;
       }
-    } catch (error) {
-      console.error("Error fetching blog post:", error);
-      router.push("/blog");
-    } finally {
-      setLoading(false);
-    }
-  }
 
-  async function fetchCategoryRelatedPosts(
-    category: string,
-    currentSlug: string
-  ) {
-    try {
-      const relatedRes = await fetch(`/api/blog?category=${category}&limit=3`);
-      if (relatedRes.ok) {
-        const relatedData = await relatedRes.json();
-        // Filter out current post
-        setRelatedPosts(
-          relatedData.filter((p: BlogPost) => p.slug !== currentSlug)
-        );
+      if (line.startsWith("## ")) {
+        return <h2 key={line}>{line.replace(/^## /, "")}</h2>;
       }
-    } catch (error) {
-      console.error("Error fetching category-related posts:", error);
-    }
-  }
 
-  if (loading) {
-    return (
-      <div className={styles.container}>
-        <MarketingNav />
-        <div className={styles.loadingState}>
-          <div className={styles.spinner}></div>
-          <p>Loading article...</p>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
+      if (line.startsWith("- ")) {
+        return <li key={line}>{line.replace(/^- /, "")}</li>;
+      }
+
+      return <p key={line}>{line}</p>;
+    });
+}
+
+export default async function BlogPostPage({ params }: BlogPostPageProps) {
+  const { slug } = await params;
+  const post = await getPublishedPostBySlug(slug);
 
   if (!post) {
-    return null;
+    notFound();
   }
 
-  // Generate structured data for SEO
+  const listPost = mapPostForList(post);
+  const relatedPosts = await getRelatedPosts(post);
+  const image = listPost.coverImage;
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     headline: post.title,
     description: post.excerpt,
-    image: post.coverImage || "https://careshare.vercel.app/careshare-logo.png",
+    image: image || "https://careshare.vercel.app/careshare-logo.png",
     datePublished: post.publishedAt,
     author: {
       "@type": "Person",
@@ -224,164 +123,64 @@ export default function BlogPostPage() {
           <header className={styles.articleHeader}>
             <span
               className={styles.categoryBadge}
-              style={{ background: categoryColors[post.category] }}
+              style={{ background: categoryColors[post.category] ?? "#6366f1" }}
             >
               <Tag size={16} />
-              {categoryLabels[post.category]}
+              {categoryLabels[post.category] ?? post.category}
             </span>
             <h1>{post.title}</h1>
             <p className={styles.excerpt}>{post.excerpt}</p>
 
             <div className={styles.meta}>
               <div className={styles.author}>
-                <div className={styles.authorAvatar}>{post.author[0]}</div>
+                <div className={styles.authorAvatar}>{post.author?.[0] ?? "C"}</div>
                 <div className={styles.authorInfo}>
                   <div className={styles.authorName}>{post.author}</div>
-                  {post.authorTitle && (
+                  {post.authorTitle ? (
                     <div className={styles.authorTitle}>{post.authorTitle}</div>
-                  )}
+                  ) : null}
                 </div>
               </div>
               <div className={styles.stats}>
-                <div className={styles.metaItem}>
-                  <Calendar size={16} />
-                  <span>{new Date(post.publishedAt).toLocaleDateString()}</span>
-                </div>
-                <div className={styles.metaItem}>
-                  <Clock size={16} />
-                  <span>{post.readTime} min read</span>
-                </div>
-                <div className={styles.metaItem}>
-                  <TrendingUp size={16} />
-                  <span>{post.views} views</span>
-                </div>
+                {post.publishedAt ? (
+                  <div className={styles.metaItem}>
+                    <Calendar size={16} />
+                    <span>{new Date(post.publishedAt).toLocaleDateString()}</span>
+                  </div>
+                ) : null}
+                {post.readTime ? (
+                  <div className={styles.metaItem}>
+                    <Clock size={16} />
+                    <span>{post.readTime} min read</span>
+                  </div>
+                ) : null}
               </div>
             </div>
           </header>
 
-          {post.coverImage && (
+          {image ? (
             <div className={styles.coverImage}>
-              <Image
-                src={post.coverImage}
-                alt={post.title}
-                width={1200}
-                height={600}
-                style={{ width: "100%", height: "auto" }}
-                priority
-              />
+              <Image src={image} alt={post.title} width={1200} height={630} />
             </div>
-          )}
+          ) : null}
 
-          <div className={styles.content}>
-            {post.content.split("\n").map((paragraph, index) => {
-              if (paragraph.startsWith("## ")) {
-                return (
-                  <h2 key={index}>
-                    {renderMarkdownText(paragraph.replace("## ", ""))}
-                  </h2>
-                );
-              } else if (paragraph.startsWith("### ")) {
-                return (
-                  <h3 key={index}>
-                    {renderMarkdownText(paragraph.replace("### ", ""))}
-                  </h3>
-                );
-              } else if (paragraph.startsWith("| ")) {
-                // Skip table rows (would need more complex parsing)
-                return null;
-              } else if (paragraph.trim() === "") {
-                return null;
-              } else if (paragraph.startsWith("- ")) {
-                return (
-                  <li key={index} style={{ marginLeft: "2rem" }}>
-                    {renderMarkdownText(paragraph.replace("- ", ""))}
-                  </li>
-                );
-              } else if (/^\d+\./.test(paragraph)) {
-                return (
-                  <li
-                    key={index}
-                    style={{ marginLeft: "2rem", listStyleType: "decimal" }}
-                  >
-                    {renderMarkdownText(paragraph.replace(/^\d+\.\s*/, ""))}
-                  </li>
-                );
-              } else {
-                return <p key={index}>{renderMarkdownText(paragraph)}</p>;
-              }
-            })}
-          </div>
-
-          <footer className={styles.articleFooter}>
-            <Link href="/blog" className={styles.backButton}>
-              <ArrowLeft size={20} />
-              Back to All Articles
-            </Link>
-            <div className={styles.shareText}>
-              Share this article with your family
-            </div>
-          </footer>
+          <div className={styles.content}>{renderArticleContent(post.content)}</div>
         </article>
 
-        {/* CTA Section */}
-        <div className={styles.ctaSection}>
-          <h3>Start Coordinating Care Today</h3>
-          <p>
-            Join thousands of families using CareShare to organize care, share
-            costs, and stay connected.
-          </p>
-          <div className={styles.ctaButtons}>
-            <Link href="/onboarding" className={styles.ctaPrimary}>
-              Get Started Free
-            </Link>
-            <Link href="/features" className={styles.ctaSecondary}>
-              Explore Features
-            </Link>
-          </div>
-        </div>
-
-        {/* Related Posts */}
-        {relatedPosts.length > 0 && (
-          <div className={styles.relatedSection}>
-            <h3>Related Articles</h3>
-            <div className={styles.relatedGrid}>
-              {relatedPosts.slice(0, 3).map((relatedPost) => (
-                <Link
-                  key={relatedPost.id}
-                  href={`/blog/${relatedPost.slug}`}
-                  className={styles.relatedCard}
-                >
-                  {relatedPost.coverImage && (
-                    <div className={styles.relatedImage}>
-                      <Image
-                        src={relatedPost.coverImage}
-                        alt={relatedPost.title}
-                        fill
-                        style={{ objectFit: "cover" }}
-                      />
-                    </div>
-                  )}
-                  <div className={styles.relatedContent}>
-                    <span
-                      className={styles.relatedCategory}
-                      style={{
-                        background: categoryColors[relatedPost.category],
-                      }}
-                    >
-                      {categoryLabels[relatedPost.category]}
-                    </span>
-                    <h4>{relatedPost.title}</h4>
-                    <div className={styles.relatedMeta}>
-                      <span>{relatedPost.author}</span>
-                      <span>•</span>
-                      <span>{relatedPost.readTime} min read</span>
-                    </div>
-                  </div>
+        {relatedPosts.length ? (
+          <section className={styles.ctaSection}>
+            <h3>Keep reading</h3>
+            <p>More practical CareShare resources for families and care teams.</p>
+            <div className={styles.ctaButtons}>
+              {relatedPosts.map((related) => (
+                <Link key={related.id} href={`/blog/${related.slug}`} className={styles.ctaSecondary}>
+                  <User size={18} />
+                  {related.title}
                 </Link>
               ))}
             </div>
-          </div>
-        )}
+          </section>
+        ) : null}
       </main>
 
       <Footer />

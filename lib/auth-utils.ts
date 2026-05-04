@@ -1,43 +1,43 @@
-import { auth } from "./auth"
-import { prisma } from "./prisma"
-import { FamilyRole, Prisma, UserRole } from "@prisma/client"
+import { prisma } from "./prisma";
+import { FamilyRole, Prisma, UserRole } from "@prisma/client";
 import {
   FamilyCapability,
   hasFamilyCapability,
-} from "./family-permissions"
+} from "./family-permissions";
+import { auth, isOperationalAdmin } from "./auth";
 
 export async function getCurrentUser() {
-  const session = await auth()
-  return session?.user
+  const session = await auth();
+  return session?.user ?? null;
 }
 
 export async function requireAuth() {
-  const user = await getCurrentUser()
+  const user = await getCurrentUser();
   if (!user) {
-    throw new Error("Unauthorized")
+    throw new Error("Unauthorized");
   }
-  return user
+  return user;
 }
 
 export async function requireAdmin() {
-  const user = await requireAuth()
-  if (user.role !== UserRole.ADMIN) {
-    throw new Error("Admin access required")
+  const user = await requireAuth();
+  if (!isOperationalAdmin(user)) {
+    throw new Error("Admin access required");
   }
-  return user
+  return user;
 }
 
 export async function requireFamilyMembership(
   familyId: string,
   allowedRoles?: FamilyRole[]
 ) {
-  const user = await requireAuth()
+  const user = await requireAuth();
 
-  if (user.role === UserRole.ADMIN) {
+  if (user.role === UserRole.ADMIN || isOperationalAdmin(user)) {
     return {
       user,
       membership: null,
-    }
+    };
   }
 
   const membership = await prisma.familyMember.findUnique({
@@ -47,46 +47,46 @@ export async function requireFamilyMembership(
         userId: user.id,
       },
     },
-  })
+  });
 
   if (!membership) {
-    throw new Error("Family access required")
+    throw new Error("Family access required");
   }
 
   if (allowedRoles && !allowedRoles.includes(membership.role)) {
-    throw new Error("Insufficient family permissions")
+    throw new Error("Insufficient family permissions");
   }
 
   return {
     user,
     membership,
-  }
+  };
 }
 
 export async function requireFamilyCapability(
   familyId: string,
   capability: FamilyCapability
 ) {
-  const { user, membership } = await requireFamilyMembership(familyId)
+  const { user, membership } = await requireFamilyMembership(familyId);
 
-  if (user.role === UserRole.ADMIN) {
-    return { user, membership }
+  if (user.role === UserRole.ADMIN || isOperationalAdmin(user)) {
+    return { user, membership };
   }
 
   if (!membership || !hasFamilyCapability(membership.role, capability)) {
-    throw new Error("Insufficient family permissions")
+    throw new Error("Insufficient family permissions");
   }
 
-  return { user, membership }
+  return { user, membership };
 }
 
 export async function logFamilyAuditEvent(input: {
-  familyId?: string
-  userId?: string
-  action: string
-  entityType: string
-  entityId?: string
-  metadata?: Prisma.InputJsonValue
+  familyId?: string;
+  userId?: string;
+  action: string;
+  entityType: string;
+  entityId?: string;
+  metadata?: Prisma.InputJsonValue;
 }) {
   return prisma.auditLog.create({
     data: {
@@ -97,6 +97,5 @@ export async function logFamilyAuditEvent(input: {
       entityId: input.entityId,
       metadata: input.metadata,
     },
-  })
+  });
 }
-

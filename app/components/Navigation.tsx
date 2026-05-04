@@ -1,6 +1,6 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useSession } from "./AuthProvider";
 import Link from "next/link";
 import Image from "next/image";
 import { LogOut } from "lucide-react";

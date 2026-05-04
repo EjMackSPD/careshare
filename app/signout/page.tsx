@@ -1,11 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import MarketingNav from '@/app/components/MarketingNav'
 import Footer from '@/app/components/Footer'
+import { payloadLogout } from '@/app/components/AuthProvider'
 import { Heart, Calendar, Users, MessageCircle, ArrowRight, Sparkles } from 'lucide-react'
 import styles from './page.module.css'
 
@@ -17,11 +17,12 @@ export default function SignOutPage() {
     // Auto sign out after component mounts
     const performSignOut = async () => {
       setSigningOut(true)
-      await signOut({ redirect: false })
+      await payloadLogout()
+      router.refresh()
       setSigningOut(false)
     }
     performSignOut()
-  }, [])
+  }, [router])
 
   return (
     <div className={styles.pageContainer}>
@@ -126,4 +127,3 @@ export default function SignOutPage() {
     </div>
   )
 }
-

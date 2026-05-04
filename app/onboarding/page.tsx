@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { getProviders, signIn, useSession } from 'next-auth/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import {
@@ -23,6 +22,7 @@ import {
   type OnboardingDraft,
   type OnboardingInvite,
 } from '@/types/onboarding'
+import { payloadLogin, useSession } from '@/app/components/AuthProvider'
 
 type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6
 
@@ -141,7 +141,6 @@ export default function OnboardingPage() {
   const [loading, setLoading] = useState(false)
   const [pageLoading, setPageLoading] = useState(true)
   const [error, setError] = useState('')
-  const [googleEnabled, setGoogleEnabled] = useState(false)
   const [formData, setFormData] = useState<OnboardingDraft>(DEFAULT_ONBOARDING_DRAFT)
 
   const isAuthenticated = status === 'authenticated'
@@ -151,24 +150,6 @@ export default function OnboardingPage() {
   )
   const stepLabels = STEP_LABELS[formData.audienceType]
   const progressStep = useMemo(() => (isAuthenticated ? step : 1), [isAuthenticated, step])
-
-  useEffect(() => {
-    let cancelled = false
-
-    async function loadProviders() {
-      const providers = await getProviders()
-
-      if (!cancelled) {
-        setGoogleEnabled(Boolean(providers?.google))
-      }
-    }
-
-    void loadProviders()
-
-    return () => {
-      cancelled = true
-    }
-  }, [])
 
   useEffect(() => {
     if (status === 'loading') {
@@ -479,13 +460,9 @@ export default function OnboardingPage() {
       throw new Error(data.error || 'Failed to create account')
     }
 
-    const result = await signIn('credentials', {
-      email,
-      password,
-      redirect: false,
-    })
+    const result = await payloadLogin(email, password)
 
-    if (result?.error) {
+    if (!result.ok) {
       throw new Error('Failed to sign in')
     }
   }
@@ -580,17 +557,6 @@ export default function OnboardingPage() {
         </div>
       ) : (
         <>
-          {googleEnabled && (
-            <button
-              type="button"
-              onClick={() => signIn('google', { callbackUrl: '/onboarding' })}
-              className={styles.primaryAction}
-              disabled={loading}
-            >
-              Continue with Google
-            </button>
-          )}
-
           <div className={styles.formShell}>
             <div className={styles.formGroup}>
               <label htmlFor="signup-name">Your name *</label>

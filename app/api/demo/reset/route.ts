@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { EventType, CostStatus, FamilyRole, OnboardingStatus, TaskPriority, TaskStatus } from '@prisma/client'
@@ -43,7 +44,7 @@ export async function POST() {
       create: {
         email: 'sarah.smith@example.com',
         name: 'Sarah Smith',
-        password: await require('bcryptjs').hash('demo123', 10),
+        password: await bcrypt.hash('demo123', 10),
         role: 'FAMILY_MEMBER',
         onboardingStatus: OnboardingStatus.COMPLETED,
       },
@@ -55,7 +56,7 @@ export async function POST() {
       create: {
         email: 'michael.smith@example.com',
         name: 'Michael Smith',
-        password: await require('bcryptjs').hash('demo123', 10),
+        password: await bcrypt.hash('demo123', 10),
         role: 'FAMILY_MEMBER',
         onboardingStatus: OnboardingStatus.COMPLETED,
       },
@@ -67,7 +68,7 @@ export async function POST() {
       create: {
         email: 'emily.smith@example.com',
         name: 'Emily Smith',
-        password: await require('bcryptjs').hash('demo123', 10),
+        password: await bcrypt.hash('demo123', 10),
         role: 'FAMILY_MEMBER',
         onboardingStatus: OnboardingStatus.COMPLETED,
       },
