@@ -33,6 +33,16 @@ export const iconOptions = [
   { label: "Zap", value: "zap" },
 ];
 
+export const accentPresetOptions = [
+  { label: "Brand Blue", value: "brandBlue" },
+  { label: "Care Green", value: "careGreen" },
+  { label: "Warm Gold", value: "warmGold" },
+  { label: "Family Purple", value: "familyPurple" },
+  { label: "Alert Rose", value: "alertRose" },
+  { label: "Support Orange", value: "supportOrange" },
+  { label: "Brand Gradient", value: "brandGradient" },
+];
+
 const sectionIdField: Field = {
   name: "sectionId",
   type: "text",
@@ -70,11 +80,6 @@ const bulletsField: Field = {
   type: "array",
   fields: [{ name: "text", type: "text", required: true }],
 };
-
-const accentFields: Field[] = [
-  { name: "background", type: "text" },
-  { name: "foreground", type: "text" },
-];
 
 export const HeroBlock: Block = {
   slug: "hero",
@@ -117,11 +122,50 @@ export const HeroBlock: Block = {
           options: [
             { label: "None", value: "none" },
             { label: "Carousel", value: "carousel" },
-            { label: "Image URL", value: "image" },
+            { label: "Media Image", value: "image" },
           ],
         },
-        { name: "src", type: "text" },
-        { name: "alt", type: "text" },
+        {
+          name: "image",
+          type: "upload",
+          relationTo: "media",
+          admin: {
+            condition: (_, siblingData) => siblingData?.kind === "image",
+            description: "Choose an image from Payload Media.",
+          },
+        },
+        {
+          name: "images",
+          type: "array",
+          labels: { singular: "Carousel Image", plural: "Carousel Images" },
+          admin: {
+            condition: (_, siblingData) => siblingData?.kind === "carousel",
+            description: "Choose carousel images from Payload Media.",
+          },
+          fields: [
+            {
+              name: "image",
+              type: "upload",
+              relationTo: "media",
+              required: true,
+            },
+            {
+              name: "alt",
+              type: "text",
+              admin: {
+                description: "Optional override. Defaults to the Media alt text.",
+              },
+            },
+          ],
+        },
+        {
+          name: "alt",
+          type: "text",
+          admin: {
+            condition: (_, siblingData) => siblingData?.kind === "image",
+            description: "Optional override. Defaults to the Media alt text.",
+          },
+        },
       ],
     },
   ],
@@ -161,7 +205,12 @@ export const FeatureGridBlock: Block = {
         { name: "title", type: "text", required: true },
         { name: "body", type: "textarea", required: true },
         { name: "iconKey", type: "select", options: iconOptions },
-        { name: "accent", type: "group", fields: accentFields },
+        {
+          name: "accentPreset",
+          type: "select",
+          defaultValue: "brandBlue",
+          options: accentPresetOptions,
+        },
         bulletsField,
       ],
     },
@@ -266,6 +315,47 @@ export const CTABlock: Block = {
       options: [
         { label: "Brand", value: "brand" },
         { label: "Slate", value: "slate" },
+      ],
+    },
+  ],
+};
+
+export const MediaBlock: Block = {
+  slug: "media",
+  interfaceName: "MediaBlock",
+  labels: { singular: "Media", plural: "Media" },
+  fields: [
+    sectionIdField,
+    {
+      name: "image",
+      type: "upload",
+      relationTo: "media",
+      required: true,
+    },
+    {
+      name: "alt",
+      type: "text",
+      admin: {
+        description: "Optional override. Defaults to the Media alt text.",
+      },
+    },
+    { name: "caption", type: "text" },
+    {
+      name: "layout",
+      type: "select",
+      defaultValue: "contained",
+      options: [
+        { label: "Contained", value: "contained" },
+        { label: "Wide", value: "wide" },
+      ],
+    },
+    {
+      name: "background",
+      type: "select",
+      defaultValue: "plain",
+      options: [
+        { label: "Plain", value: "plain" },
+        { label: "Muted", value: "muted" },
       ],
     },
   ],
@@ -398,6 +488,21 @@ export const pageBlocks: Block[] = [
   StatsBlock,
   ContentBlock,
   CTABlock,
+  MediaBlock,
+  TestimonialBlock,
+  FAQBlock,
+  LegalArticleBlock,
+  ContactFormBlock,
+  PartnershipCardsBlock,
+  BlogArchiveBlock,
+];
+
+export const contentPageBlocks: Block[] = [
+  FeatureGridBlock,
+  StatsBlock,
+  ContentBlock,
+  CTABlock,
+  MediaBlock,
   TestimonialBlock,
   FAQBlock,
   LegalArticleBlock,

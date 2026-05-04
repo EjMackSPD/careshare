@@ -1,6 +1,6 @@
 .footer {
-  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-  color: #cbd5e1;
+  background: linear-gradient(135deg, var(--cs-color-ink) 0%, var(--cs-color-brand-deep) 100%);
+  color: var(--cs-color-border-strong);
   margin-top: auto;
   width: 100%;
   clear: both;
@@ -39,7 +39,7 @@
 }
 
 .brandDescription {
-  color: #94a3b8;
+  color: rgba(255, 255, 255, 0.68);
   font-size: 0.95rem;
   line-height: 1.6;
   margin: 0;
@@ -56,7 +56,7 @@
   height: 40px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
-  color: #cbd5e1;
+  color: var(--cs-color-border-strong);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -65,7 +65,7 @@
 }
 
 .socialLink:hover {
-  background: #6366f1;
+  background: var(--cs-color-brand);
   color: white;
   transform: translateY(-2px);
 }
@@ -88,7 +88,7 @@
 }
 
 .footerColumn ul li a {
-  color: #94a3b8;
+  color: rgba(255, 255, 255, 0.68);
   text-decoration: none;
   font-size: 0.9rem;
   transition: all 0.2s;
@@ -101,20 +101,20 @@
 }
 
 .contactList li {
-  color: #94a3b8;
+  color: rgba(255, 255, 255, 0.68);
   font-size: 0.9rem;
   line-height: 1.8;
 }
 
 .contactList strong {
-  color: #cbd5e1;
+  color: var(--cs-color-border-strong);
   font-size: 0.85rem;
   display: block;
   margin-bottom: 0.25rem;
 }
 
 .contactList a {
-  color: #94a3b8;
+  color: rgba(255, 255, 255, 0.68);
   text-decoration: none;
   transition: color 0.2s;
 }
@@ -135,7 +135,7 @@
 }
 
 .copyright {
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.56);
   font-size: 0.85rem;
   margin: 0;
 }
@@ -147,7 +147,7 @@
 }
 
 .bottomLinks a {
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.56);
   text-decoration: none;
   font-size: 0.85rem;
   transition: color 0.2s;
@@ -158,7 +158,7 @@
 }
 
 .divider {
-  color: #475569;
+  color: rgba(255, 255, 255, 0.28);
 }
 
 /* Responsive */

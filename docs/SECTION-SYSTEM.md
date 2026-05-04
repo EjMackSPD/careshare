@@ -2,6 +2,8 @@
 
 Use this system when building new marketing or informational page sections in CareShare.
 
+For Payload-managed page blocks, use `docs/PAGE-BLOCKS-PLAYBOOK.md` as the current source of truth. This document is retained as a high-level renderer overview.
+
 ## Recommended Skills
 
 - `frontend-skill`: shape the visual direction and section hierarchy before adding UI.
@@ -13,7 +15,7 @@ Use this system when building new marketing or informational page sections in Ca
 
 Add new sections as typed objects in a content file, then render them through `SectionRenderer`.
 
-Current source of truth:
+Current renderer files:
 
 - `app/components/sections/section-types.ts`
 - `app/components/sections/SectionRenderer.tsx`

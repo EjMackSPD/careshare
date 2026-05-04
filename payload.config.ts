@@ -15,6 +15,8 @@ const dirname = path.dirname(filename);
 
 const siteURL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 const trustedOrigins = Array.from(new Set([siteURL, "http://localhost:3000"]));
+const payloadBlobToken =
+  process.env.PAYLOAD_BLOB_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
 
 export default buildConfig({
   admin: {
@@ -23,10 +25,40 @@ export default buildConfig({
       baseDir: dirname,
     },
     meta: {
+      applicationName: "CareShare CMS",
+      defaultOGImageType: "off",
+      description: "CareShare content and support administration.",
+      icons: {
+        apple: "/apple-touch-icon.png",
+        icon: "/favicon.ico",
+      },
+      openGraph: {
+        description: "CareShare content and support administration.",
+        images: [
+          {
+            url: "/careshare-logo.png",
+          },
+        ],
+        siteName: "CareShare",
+        title: "CareShare CMS",
+      },
       titleSuffix: " - CareShare CMS",
     },
     components: {
+      graphics: {
+        Icon: "/payload/admin/CareShareBrand.tsx#CareShareAdminIcon",
+        Logo: "/payload/admin/CareShareBrand.tsx#CareShareAdminLogo",
+      },
+      beforeLogin: ["/payload/admin/CareShareBrand.tsx#CareShareLoginBranding"],
+      afterLogin: ["/payload/admin/CareShareBrand.tsx#CareShareLoginFooter"],
+      beforeNav: ["/payload/admin/CareShareBrand.tsx#CareShareAdminNavBrand"],
       views: {
+        dashboard: {
+          Component: "/payload/admin/CareShareDashboard.tsx#CareShareDashboard",
+          meta: {
+            title: "CareShare CMS",
+          },
+        },
         support: {
           path: "/support",
           Component: "/payload/admin/SupportOverview.tsx#SupportOverview",
@@ -36,6 +68,7 @@ export default buildConfig({
         },
       },
     },
+    theme: "light",
   },
   bin: [
     {
@@ -67,7 +100,7 @@ export default buildConfig({
       collections: {
         media: true,
       },
-      token: process.env.PAYLOAD_BLOB_READ_WRITE_TOKEN,
+      token: payloadBlobToken,
     }),
   ],
   routes: {

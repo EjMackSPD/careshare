@@ -29,27 +29,27 @@
 }
 
 .banner.demo {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  background: linear-gradient(135deg, var(--cs-color-warm) 0%, var(--cs-color-warm-dark) 100%);
   color: white;
 }
 
 .banner.alert {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  background: linear-gradient(135deg, var(--cs-color-rose) 0%, var(--cs-color-rose-dark) 100%);
   color: white;
 }
 
 .banner.warning {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  background: linear-gradient(135deg, var(--cs-color-warm) 0%, var(--cs-color-warm-dark) 100%);
   color: white;
 }
 
 .banner.info {
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  background: linear-gradient(135deg, var(--cs-color-brand) 0%, var(--cs-color-brand) 100%);
   color: white;
 }
 
 .banner.success {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, var(--cs-color-care) 0%, var(--cs-color-care-dark) 100%);
   color: white;
 }
 
@@ -88,9 +88,9 @@
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.78) 0%, rgba(255, 255, 255, 0.62) 100%);
   border: 1px solid rgba(255, 255, 255, 0.55);
-  border-radius: 1.35rem;
+  border-radius: var(--cs-radius-lg);
   box-shadow:
-    0 20px 45px rgba(15, 23, 42, 0.08),
+    var(--cs-shadow-soft),
     inset 0 1px 0 rgba(255, 255, 255, 0.5);
   backdrop-filter: blur(18px) saturate(145%);
   -webkit-backdrop-filter: blur(18px) saturate(145%);
@@ -124,7 +124,7 @@
 }
 
 .backLink {
-  color: #52606d;
+  color: var(--cs-color-muted);
   text-decoration: none;
   font-weight: 500;
   padding: 0.55rem 0.9rem;
@@ -135,7 +135,7 @@
 }
 
 .backLink:hover {
-  color: #1d4ed8;
+  color: var(--cs-color-brand-dark);
   background: rgba(255, 255, 255, 0.72);
   transform: translateY(-1px);
 }
@@ -152,7 +152,7 @@
 }
 
 .navLinks a {
-  color: #334155;
+  color: var(--cs-color-muted-strong);
   text-decoration: none;
   font-weight: 500;
   font-size: 0.95rem;
@@ -169,7 +169,7 @@
 }
 
 .navLinks a:hover {
-  color: #0f172a;
+  color: var(--cs-color-brand-deep);
   background: rgba(255, 255, 255, 0.72);
   box-shadow: 0 8px 18px rgba(148, 163, 184, 0.16);
   transform: translateY(-1px);
@@ -192,13 +192,13 @@
 }
 
 .demoLink {
-  background: linear-gradient(135deg, #0f766e 0%, #0ea5a4 100%);
+  background: linear-gradient(135deg, var(--cs-color-care) 0%, var(--cs-color-brand) 100%);
   color: white !important;
   padding: 0.72rem 1.2rem;
   border-radius: 999px;
   font-weight: 600;
   box-shadow:
-    0 10px 24px rgba(13, 148, 136, 0.24),
+    var(--cs-shadow-care),
     inset 0 1px 0 rgba(255, 255, 255, 0.24);
   transition: all 0.2s ease;
 }
@@ -206,7 +206,7 @@
 .demoLink:hover {
   transform: translateY(-2px);
   box-shadow:
-    0 14px 30px rgba(13, 148, 136, 0.32),
+    var(--cs-shadow-brand),
     inset 0 1px 0 rgba(255, 255, 255, 0.28) !important;
 }
 

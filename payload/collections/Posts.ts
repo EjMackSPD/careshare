@@ -68,7 +68,7 @@ export const Posts: CollectionConfig = {
       name: "coverImageUrl",
       type: "text",
       admin: {
-        description: "Optional external cover image URL.",
+        description: "Legacy fallback only. Prefer Cover Image from Payload Media.",
       },
     },
     {

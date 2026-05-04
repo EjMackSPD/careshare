@@ -12,6 +12,10 @@ export type CTA = {
 export type SectionMedia =
   | {
       kind: "carousel";
+      images?: Array<{
+        src: string;
+        alt: string;
+      }>;
     }
   | {
       kind: "image";
@@ -24,10 +28,14 @@ export type FeatureItem = {
   body: string;
   icon?: IconValue;
   bullets?: string[];
-  accent?: {
-    background: string;
-    foreground: string;
-  };
+  accentPreset?:
+    | "brandBlue"
+    | "careGreen"
+    | "warmGold"
+    | "familyPurple"
+    | "alertRose"
+    | "supportOrange"
+    | "brandGradient";
 };
 
 export type StatItem = {
@@ -140,6 +148,15 @@ export type PageSection =
       actions: CTA[];
       note?: string;
       theme?: "brand" | "slate";
+    }
+  | {
+      id?: string;
+      type: "media";
+      src: string;
+      alt: string;
+      caption?: string;
+      layout?: "contained" | "wide";
+      background?: "plain" | "muted";
     }
   | {
       id?: string;

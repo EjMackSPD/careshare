@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Footer from "@/app/components/Footer";
 import MarketingNav from "@/app/components/MarketingNav";
 import SectionRenderer from "@/app/components/sections/SectionRenderer";
-import { getPageBySlug, getPublishedPosts, mapCMSLayout } from "@/lib/cms";
+import { getPageBySlug, getPublishedPosts, mapCMSPageSections } from "@/lib/cms";
 
 type CMSMarketingPageProps = {
   slug: string;
@@ -15,7 +15,7 @@ export default async function CMSMarketingPage({ slug }: CMSMarketingPageProps) 
     notFound();
   }
 
-  const sections = mapCMSLayout(page.layout);
+  const sections = mapCMSPageSections(page);
   const posts = slug === "blog" ? await getPublishedPosts(12) : undefined;
 
   return (

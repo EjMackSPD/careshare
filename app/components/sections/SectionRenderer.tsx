@@ -23,13 +23,23 @@ const categoryLabels: Record<string, string> = {
 };
 
 const categoryColors: Record<string, string> = {
-  CAREGIVING_TIPS: "#6366f1",
-  FAMILY_STORIES: "#ec4899",
-  HEALTH_WELLNESS: "#10b981",
-  FINANCIAL_PLANNING: "#f59e0b",
-  TECHNOLOGY: "#8b5cf6",
-  LEGAL_MATTERS: "#ef4444",
-  COMPANY_NEWS: "#06b6d4",
+  CAREGIVING_TIPS: styles.categoryCaregiving,
+  FAMILY_STORIES: styles.categoryStories,
+  HEALTH_WELLNESS: styles.categoryHealth,
+  FINANCIAL_PLANNING: styles.categoryFinancial,
+  TECHNOLOGY: styles.categoryTechnology,
+  LEGAL_MATTERS: styles.categoryLegal,
+  COMPANY_NEWS: styles.categoryCompany,
+};
+
+const featureAccentClasses: Record<string, string> = {
+  brandBlue: styles.featureIconBrandBlue,
+  careGreen: styles.featureIconCareGreen,
+  warmGold: styles.featureIconWarmGold,
+  familyPurple: styles.featureIconFamilyPurple,
+  alertRose: styles.featureIconAlertRose,
+  supportOrange: styles.featureIconSupportOrange,
+  brandGradient: styles.featureIconBrandGradient,
 };
 
 function cx(...classNames: Array<string | false | null | undefined>) {
@@ -175,7 +185,7 @@ function renderSection(section: PageSection, index: number, posts: BlogListItem[
           {section.media?.kind === "carousel" ? (
             <>
               <div className={styles.heroCarousel} aria-hidden="true">
-                <ImageCarousel />
+                <ImageCarousel images={section.media.images} />
               </div>
               <div className={styles.heroOverlay} aria-hidden="true" />
             </>
@@ -222,11 +232,10 @@ function renderSection(section: PageSection, index: number, posts: BlogListItem[
                 >
                   {Icon ? (
                     <div
-                      className={styles.featureIcon}
-                      style={{
-                        background: item.accent?.background ?? "#dbeafe",
-                        color: item.accent?.foreground ?? "#2563eb",
-                      }}
+                      className={cx(
+                        styles.featureIcon,
+                        featureAccentClasses[item.accentPreset ?? "brandBlue"]
+                      )}
                     >
                       <Icon size={32} />
                     </div>
@@ -349,6 +358,22 @@ function renderSection(section: PageSection, index: number, posts: BlogListItem[
         </section>
       );
     }
+
+    case "media":
+      return (
+        <SectionShell
+          key={sectionId}
+          id={sectionId}
+          innerClassName={cx(section.background === "muted" && styles.surfaceMuted)}
+        >
+          <figure className={cx(styles.mediaBlock, section.layout === "wide" && styles.mediaBlockWide)}>
+            <div className={styles.mediaFrame}>
+              <Image src={section.src} alt={section.alt} fill sizes="(min-width: 1024px) 1024px, 100vw" />
+            </div>
+            {section.caption ? <figcaption className={styles.mediaCaption}>{section.caption}</figcaption> : null}
+          </figure>
+        </SectionShell>
+      );
 
     case "testimonial":
       return (
@@ -529,8 +554,10 @@ function renderSection(section: PageSection, index: number, posts: BlogListItem[
                   ) : null}
                   <div className={styles.blogCardContent}>
                     <span
-                      className={styles.blogCategory}
-                      style={{ background: categoryColors[post.category] ?? "#6366f1" }}
+                      className={cx(
+                        styles.blogCategory,
+                        categoryColors[post.category] ?? styles.categoryCaregiving
+                      )}
                     >
                       <Tag size={14} />
                       {categoryLabels[post.category] ?? post.category}

@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "doctor": "node scripts/local-doctor.mjs",
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint .",
@@ -12,6 +13,7 @@
     "generate:payload-importmap": "payload generate:importmap",
     "payload:migrate": "payload migrate",
     "seed:payload": "payload seed:payload",
+    "sync:site-assets": "node scripts/sync-site-assets-to-payload.mjs",
     "migrate:payload-users": "payload migrate:payload-users",
     "postinstall": "prisma generate",
     "seed": "tsx prisma/seed.ts"

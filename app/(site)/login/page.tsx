@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Heart, Shield, Users, Sparkles } from "lucide-react";
-import MarketingNav from "../components/MarketingNav";
-import Footer from "../components/Footer";
-import { payloadLogin } from "../components/AuthProvider";
+import MarketingNav from "../../components/MarketingNav";
+import Footer from "../../components/Footer";
+import { payloadLogin } from "../../components/AuthProvider";
 import styles from "./page.module.css";
 
 export default function Login() {

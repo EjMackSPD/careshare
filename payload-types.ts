@@ -168,17 +168,27 @@ export interface User {
  */
 export interface Page {
   id: number;
+  /**
+   * Internal page title used in the admin list.
+   */
   title: string;
   /**
    * Use "home" for the homepage.
    */
   slug: string;
+  /**
+   * The primary page hero. Add exactly one hero block.
+   */
+  hero?: HeroBlock[] | null;
+  /**
+   * Reusable content sections that render below the hero.
+   */
   layout: (
-    | HeroBlock
     | FeatureGridBlock
     | StatsBlock
     | ContentBlock
     | CTABlock
+    | MediaBlock
     | TestimonialBlock
     | FAQBlock
     | LegalArticleBlock
@@ -255,12 +265,69 @@ export interface HeroBlock {
     | null;
   media?: {
     kind?: ('none' | 'carousel' | 'image') | null;
-    src?: string | null;
+    /**
+     * Choose an image from Payload Media.
+     */
+    image?: (number | null) | Media;
+    /**
+     * Choose carousel images from Payload Media.
+     */
+    images?:
+      | {
+          image: number | Media;
+          /**
+           * Optional override. Defaults to the Media alt text.
+           */
+          alt?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Optional override. Defaults to the Media alt text.
+     */
     alt?: string | null;
   };
   id?: string | null;
   blockName?: string | null;
   blockType: 'hero';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  alt: string;
+  prefix?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    hero?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -312,10 +379,9 @@ export interface FeatureGridBlock {
           | 'zap'
         )
       | null;
-    accent?: {
-      background?: string | null;
-      foreground?: string | null;
-    };
+    accentPreset?:
+      | ('brandBlue' | 'careGreen' | 'warmGold' | 'familyPurple' | 'alertRose' | 'supportOrange' | 'brandGradient')
+      | null;
     bullets?:
       | {
           text: string;
@@ -522,6 +588,27 @@ export interface CTABlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'cta';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MediaBlock".
+ */
+export interface MediaBlock {
+  /**
+   * Optional HTML id for anchor links.
+   */
+  sectionId?: string | null;
+  image: number | Media;
+  /**
+   * Optional override. Defaults to the Media alt text.
+   */
+  alt?: string | null;
+  caption?: string | null;
+  layout?: ('contained' | 'wide') | null;
+  background?: ('plain' | 'muted') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'media';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -806,44 +893,6 @@ export interface BlogArchiveBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: number;
-  alt: string;
-  prefix?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-  sizes?: {
-    thumbnail?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    hero?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts".
  */
 export interface Post {
@@ -863,7 +912,7 @@ export interface Post {
   authorTitle?: string | null;
   coverImage?: (number | null) | Media;
   /**
-   * Optional external cover image URL.
+   * Legacy fallback only. Prefer Cover Image from Payload Media.
    */
   coverImageUrl?: string | null;
   content: string;
@@ -1017,14 +1066,19 @@ export interface UsersSelect<T extends boolean = true> {
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
-  layout?:
+  hero?:
     | T
     | {
         hero?: T | HeroBlockSelect<T>;
+      };
+  layout?:
+    | T
+    | {
         featureGrid?: T | FeatureGridBlockSelect<T>;
         stats?: T | StatsBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
         cta?: T | CTABlockSelect<T>;
+        media?: T | MediaBlockSelect<T>;
         testimonial?: T | TestimonialBlockSelect<T>;
         faq?: T | FAQBlockSelect<T>;
         legalArticle?: T | LegalArticleBlockSelect<T>;
@@ -1069,7 +1123,14 @@ export interface HeroBlockSelect<T extends boolean = true> {
     | T
     | {
         kind?: T;
-        src?: T;
+        image?: T;
+        images?:
+          | T
+          | {
+              image?: T;
+              alt?: T;
+              id?: T;
+            };
         alt?: T;
       };
   id?: T;
@@ -1091,12 +1152,7 @@ export interface FeatureGridBlockSelect<T extends boolean = true> {
         title?: T;
         body?: T;
         iconKey?: T;
-        accent?:
-          | T
-          | {
-              background?: T;
-              foreground?: T;
-            };
+        accentPreset?: T;
         bullets?:
           | T
           | {
@@ -1193,6 +1249,20 @@ export interface CTABlockSelect<T extends boolean = true> {
       };
   note?: T;
   theme?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MediaBlock_select".
+ */
+export interface MediaBlockSelect<T extends boolean = true> {
+  sectionId?: T;
+  image?: T;
+  alt?: T;
+  caption?: T;
+  layout?: T;
+  background?: T;
   id?: T;
   blockName?: T;
 }

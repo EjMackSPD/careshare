@@ -45,16 +45,43 @@ function mediaURL(media: unknown): string | null {
   return null;
 }
 
+function mediaAlt(media: unknown): string | null {
+  if (typeof media === "object" && media && "alt" in media && typeof media.alt === "string") {
+    return media.alt;
+  }
+
+  return null;
+}
+
 function mapCMSBlock(block: PayloadDoc): PageSection | null {
   const id = block.sectionId || undefined;
 
   switch (block.blockType) {
     case "hero": {
+      const heroImage = mediaURL(block.media?.image) || block.media?.src;
+      const carouselImages = Array.isArray(block.media?.images)
+        ? block.media.images
+            .map((item: PayloadDoc) => {
+              const src = mediaURL(item.image);
+
+              return src
+                ? {
+                    src,
+                    alt: item.alt || mediaAlt(item.image) || block.title,
+                  }
+                : null;
+            })
+            .filter(Boolean)
+        : [];
       const media =
-        block.media?.kind === "carousel"
-          ? ({ kind: "carousel" } as const)
-          : block.media?.kind === "image" && block.media?.src
-            ? ({ kind: "image", src: block.media.src, alt: block.media.alt || block.title } as const)
+        block.media?.kind === "carousel" && carouselImages.length
+          ? ({ kind: "carousel", images: carouselImages } as const)
+          : block.media?.kind === "image" && heroImage
+            ? ({
+                kind: "image",
+                src: heroImage,
+                alt: block.media.alt || mediaAlt(block.media.image) || block.title,
+              } as const)
             : undefined;
 
       return {
@@ -84,13 +111,7 @@ function mapCMSBlock(block: PayloadDoc): PageSection | null {
             title: item.title,
             body: item.body,
             icon: item.iconKey,
-            accent:
-              item.accent?.background || item.accent?.foreground
-                ? {
-                    background: item.accent?.background,
-                    foreground: item.accent?.foreground,
-                  }
-                : undefined,
+            accentPreset: item.accentPreset,
             bullets: textArray(item.bullets),
           })) ?? [],
       };
@@ -142,6 +163,22 @@ function mapCMSBlock(block: PayloadDoc): PageSection | null {
         note: block.note,
         theme: block.theme || "brand",
       };
+
+    case "media": {
+      const src = mediaURL(block.image);
+
+      return src
+        ? {
+            id,
+            type: "media",
+            src,
+            alt: block.alt || mediaAlt(block.image) || "",
+            caption: block.caption,
+            layout: block.layout || "contained",
+            background: block.background || "plain",
+          }
+        : null;
+    }
 
     case "testimonial":
       return {
@@ -235,6 +272,17 @@ function mapCMSBlock(block: PayloadDoc): PageSection | null {
 
 export function mapCMSLayout(layout: PayloadDoc[] | undefined): PageSection[] {
   return layout?.map(mapCMSBlock).filter((section): section is PageSection => Boolean(section)) ?? [];
+}
+
+export function mapCMSPageSections(page: PayloadDoc): PageSection[] {
+  const heroSections = mapCMSLayout(page.hero);
+  const layoutSections = mapCMSLayout(page.layout);
+
+  if (heroSections.length) {
+    return [heroSections[0], ...layoutSections.filter((section) => section.type !== "hero")];
+  }
+
+  return layoutSections;
 }
 
 export async function getPageBySlug(slug: string) {
@@ -331,7 +379,7 @@ export function mapPostForList(post: PayloadDoc): BlogListItem {
     category: post.category,
     author: post.author,
     authorTitle: post.authorTitle,
-    coverImage: post.coverImageUrl || mediaURL(post.coverImage),
+    coverImage: mediaURL(post.coverImage) || post.coverImageUrl,
     readTime: post.readTime,
     publishedAt: post.publishedAt,
   };
@@ -367,7 +415,7 @@ export function postMetadata(post: PayloadDoc | null): Metadata {
 
   const title = post.seo?.title || post.title;
   const description = post.seo?.description || post.excerpt;
-  const image = mediaURL(post.seo?.image) || post.coverImageUrl || mediaURL(post.coverImage);
+  const image = mediaURL(post.seo?.image) || mediaURL(post.coverImage) || post.coverImageUrl;
 
   return {
     title,

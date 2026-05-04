@@ -3,6 +3,7 @@ import { getPayload } from "payload";
 import config from "../payload.config.ts";
 import * as seedDataModule from "../payload/seed-data.ts";
 import * as syncUserModule from "../payload/hooks/syncUserToPrisma.ts";
+import { siteMediaAssets, syncSiteAssetsToPayload } from "./sync-site-assets-to-payload.mjs";
 
 const { seedPages, seedPosts } = seedDataModule.default ?? seedDataModule;
 const { syncPayloadUserToPrisma } = syncUserModule.default ?? syncUserModule;
@@ -88,6 +89,168 @@ async function upsertBySlug(payload, collection, doc) {
   });
 }
 
+function filenameForAsset(asset) {
+  return asset.kind === "local" ? asset.path.split("/").pop() : asset.filename;
+}
+
+async function getMediaLookup(payload) {
+  const result = await payload.find({
+    collection: "media",
+    limit: 1000,
+    overrideAccess: true,
+  });
+
+  const byAlt = new Map();
+  const byFilename = new Map();
+  const byKey = new Map();
+  const byURL = new Map();
+
+  for (const doc of result.docs) {
+    if (doc.alt) {
+      byAlt.set(doc.alt, doc.id);
+    }
+
+    if (doc.filename) {
+      byFilename.set(doc.filename, doc.id);
+    }
+  }
+
+  for (const asset of siteMediaAssets) {
+    const filename = filenameForAsset(asset);
+    const id = byAlt.get(asset.alt) ?? byFilename.get(filename);
+
+    if (id) {
+      byKey.set(asset.key, id);
+
+      if (asset.url) {
+        byURL.set(asset.url, id);
+      }
+    }
+  }
+
+  return { byAlt, byFilename, byKey, byURL };
+}
+
+function resolveMediaId(mediaLookup, value, alt) {
+  if (!value && !alt) {
+    return null;
+  }
+
+  if (typeof value === "number") {
+    return value;
+  }
+
+  if (typeof value === "object" && value?.id) {
+    return value.id;
+  }
+
+  if (typeof value === "string") {
+    return mediaLookup.byURL.get(value) ?? mediaLookup.byFilename.get(value) ?? mediaLookup.byAlt.get(value) ?? null;
+  }
+
+  return alt ? mediaLookup.byAlt.get(alt) ?? null : null;
+}
+
+const defaultHeroCarouselAssetKeys = [
+  "carousel-care-professional",
+  "carousel-family-table",
+  "carousel-hands-care",
+  "carousel-medical-team",
+];
+
+function normalizeHeroMedia(media, mediaLookup) {
+  if (!media) {
+    return media;
+  }
+
+  if (media.kind === "image") {
+    const image = resolveMediaId(mediaLookup, media.image ?? media.src, media.alt);
+
+    return image
+      ? {
+          kind: "image",
+          image,
+          alt: media.alt,
+        }
+      : media;
+  }
+
+  if (media.kind === "carousel") {
+    const sourceImages = Array.isArray(media.images) && media.images.length
+      ? media.images
+      : defaultHeroCarouselAssetKeys.map((key) => ({ image: mediaLookup.byKey.get(key) })).filter((item) => item.image);
+
+    return {
+      kind: "carousel",
+      images: sourceImages
+        .map((item) => {
+          const image = resolveMediaId(mediaLookup, item.image ?? item.src ?? item.url, item.alt);
+
+          return image
+            ? {
+                image,
+                alt: item.alt,
+              }
+            : null;
+        })
+        .filter(Boolean),
+    };
+  }
+
+  return media;
+}
+
+function normalizeHeroBlock(block, mediaLookup) {
+  if (block?.blockType !== "hero") {
+    return block;
+  }
+
+  return {
+    ...block,
+    media: normalizeHeroMedia(block.media, mediaLookup),
+  };
+}
+
+function normalizePageDoc(page, mediaLookup) {
+  const layout = Array.isArray(page.layout) ? page.layout : [];
+  const existingHero = Array.isArray(page.hero) && page.hero.length ? page.hero : null;
+  const layoutHero = layout.find((block) => block?.blockType === "hero");
+  const hero = existingHero ?? (layoutHero ? [layoutHero] : [
+    {
+      blockType: "hero",
+      sectionId: `${page.slug}-hero`,
+      variant: "marketing",
+      theme: page.slug === "home" ? "light" : "brand",
+      title: page.title,
+      body: page.seo?.description,
+    },
+  ]);
+
+  return {
+    ...page,
+    hero: hero.map((block) => normalizeHeroBlock(block, mediaLookup)),
+    layout: layout.filter((block) => block?.blockType !== "hero").map((block) => normalizeHeroBlock(block, mediaLookup)),
+  };
+}
+
+function normalizePostDoc(post, mediaLookup) {
+  const coverImage = resolveMediaId(mediaLookup, post.coverImage, null) ?? resolveMediaId(mediaLookup, post.coverImageUrl, null);
+
+  if (!coverImage) {
+    return post;
+  }
+
+  return {
+    ...post,
+    coverImage,
+    coverImageUrl: null,
+    seo: {
+      ...post.seo,
+      image: post.seo?.image ?? coverImage,
+    },
+  };
+}
+
 export async function script(payloadConfig = config) {
   const payload = await getPayload({ config: payloadConfig });
 
@@ -106,12 +269,15 @@ export async function script(payloadConfig = config) {
     });
   }
 
+  await syncSiteAssetsToPayload(payload);
+  const mediaLookup = await getMediaLookup(payload);
+
   for (const page of seedPages) {
-    await upsertBySlug(payload, "pages", page);
+    await upsertBySlug(payload, "pages", normalizePageDoc(page, mediaLookup));
   }
 
   for (const post of seedPosts) {
-    await upsertBySlug(payload, "posts", post);
+    await upsertBySlug(payload, "posts", normalizePostDoc(post, mediaLookup));
   }
 
   await payload.destroy();

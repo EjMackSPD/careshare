@@ -5,7 +5,7 @@ import Link from "next/link";
 import MarketingNav from "@/app/components/MarketingNav";
 import Footer from "@/app/components/Footer";
 import { payloadLogout } from "@/app/components/AuthProvider";
-import styles from "@/app/login/page.module.css";
+import styles from "../login/page.module.css";
 
 export default function ResetPasswordRequiredPage() {
   useEffect(() => {

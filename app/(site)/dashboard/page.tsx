@@ -3,17 +3,17 @@ import { getCurrentUser } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
 import { hydrateStoredDraft } from "@/lib/onboarding";
 import Link from "next/link";
-import Navigation from "../components/Navigation";
-import LeftNavigation from "../components/LeftNavigation";
-import DemoInitButton from "../components/DemoInitButton";
-import Footer from "../components/Footer";
-import CareRecipientWidget from "../components/widgets/CareRecipientWidget";
-import TasksWidget from "../components/widgets/TasksWidget";
-import FinancialWidget from "../components/widgets/FinancialWidget";
-import CalendarWidget from "../components/widgets/CalendarWidget";
-import CollaborationWidget from "../components/widgets/CollaborationWidget";
-import ResourcesWidget from "../components/widgets/ResourcesWidget";
-import CarePlanWidget from "../components/widgets/CarePlanWidget";
+import Navigation from "../../components/Navigation";
+import LeftNavigation from "../../components/LeftNavigation";
+import DemoInitButton from "../../components/DemoInitButton";
+import Footer from "../../components/Footer";
+import CareRecipientWidget from "../../components/widgets/CareRecipientWidget";
+import TasksWidget from "../../components/widgets/TasksWidget";
+import FinancialWidget from "../../components/widgets/FinancialWidget";
+import CalendarWidget from "../../components/widgets/CalendarWidget";
+import CollaborationWidget from "../../components/widgets/CollaborationWidget";
+import ResourcesWidget from "../../components/widgets/ResourcesWidget";
+import CarePlanWidget from "../../components/widgets/CarePlanWidget";
 import {
   CheckSquare,
   Calendar as CalendarIcon,
