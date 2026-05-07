@@ -59,6 +59,10 @@ function normalizeMediaURL(url: string): string {
     const parsed = new URL(url);
     const siteURL = process.env.NEXT_PUBLIC_SITE_URL ? new URL(process.env.NEXT_PUBLIC_SITE_URL) : null;
 
+    if (parsed.hostname.endsWith(".private.blob.vercel-storage.com")) {
+      return `/api/blob?url=${encodeURIComponent(url)}`;
+    }
+
     if (siteURL && parsed.origin === siteURL.origin) {
       return `${parsed.pathname}${parsed.search}`;
     }

@@ -308,8 +308,12 @@ async function runStandalone() {
   loadEnvConfig(projectRoot);
 
   const { getPayload } = await import("payload");
-  const configModule = await import("../payload.config.ts");
-  const payload = await getPayload({ config: configModule.default });
+  const { createJiti } = await import("jiti");
+  const jiti = createJiti(import.meta.url);
+  const configModule = await jiti.import("../payload.config.ts", {
+    default: true,
+  });
+  const payload = await getPayload({ config: configModule });
 
   try {
     const results = await syncSiteAssetsToPayload(payload, {

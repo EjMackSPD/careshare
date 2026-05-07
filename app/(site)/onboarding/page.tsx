@@ -23,7 +23,7 @@ import {
   type OnboardingDraft,
   type OnboardingInvite,
 } from '@/types/onboarding'
-import { payloadLogin, useSession } from '@/app/components/AuthProvider'
+import { useSession } from '@/app/components/AuthProvider'
 
 type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6
 
@@ -519,11 +519,7 @@ export default function OnboardingPage() {
       throw new Error(data.error || 'Failed to create account')
     }
 
-    const result = await payloadLogin(email, password)
-
-    if (!result.ok) {
-      throw new Error('Failed to sign in')
-    }
+    router.push('/login')
   }
 
   const handleNext = async () => {
@@ -536,8 +532,6 @@ export default function OnboardingPage() {
     try {
       if (step === 1 && !isAuthenticated) {
         await handleAccountStep()
-        setStep(2)
-        router.refresh()
         return
       }
 

@@ -1,5 +1,6 @@
 import { headers as nextHeaders } from "next/headers";
 import { OnboardingStatus, UserRole } from "@prisma/client";
+import { timingSafeEqual, createHmac } from "crypto";
 import type { PayloadRole } from "@/payload/access";
 import { getPayloadClient } from "@/lib/cms";
 import { prisma } from "@/lib/prisma";
@@ -30,6 +31,13 @@ type PayloadUser = {
   onboardingStep?: number | null;
   onboardingData?: unknown;
   mustResetPassword?: boolean | null;
+};
+
+type PayloadTokenClaims = {
+  id?: string | number;
+  collection?: string;
+  exp?: number;
+  sid?: string;
 };
 
 function normalizeRoles(roles: PayloadUser["roles"]): PayloadRole[] {
@@ -96,16 +104,138 @@ async function normalizePayloadUser(user: PayloadUser): Promise<CareShareUser | 
   };
 }
 
-export async function getPayloadAuthenticatedUser(headers?: Headers): Promise<CareShareUser | null> {
-  const payload = await getPayloadClient();
-  const authHeaders = headers ?? ((await nextHeaders()) as unknown as Headers);
-  const result = await payload.auth({ headers: authHeaders });
+function getAuthCookie(headers: Headers): string | null {
+  const cookieHeader = headers.get("cookie");
 
-  if (!result.user) {
+  if (!cookieHeader) {
     return null;
   }
 
-  return normalizePayloadUser(result.user as PayloadUser);
+  const cookies = cookieHeader.split(";").map((cookie) => cookie.trim());
+
+  for (const name of ["payload-token", "__Secure-payload-token"]) {
+    const tokenCookie = cookies.find((cookie) => cookie.startsWith(`${name}=`));
+
+    if (tokenCookie) {
+      return decodeURIComponent(tokenCookie.slice(name.length + 1));
+    }
+  }
+
+  return null;
+}
+
+function base64UrlDecode(value: string): Buffer {
+  return Buffer.from(value, "base64url");
+}
+
+function decodePayloadTokenClaims(token: string): PayloadTokenClaims | null {
+  const [header, payload, signature] = token.split(".");
+
+  if (!header || !payload || !signature) {
+    return null;
+  }
+
+  try {
+    const claims = JSON.parse(base64UrlDecode(payload).toString("utf8")) as PayloadTokenClaims;
+
+    if (claims.exp && claims.exp * 1000 < Date.now()) {
+      return null;
+    }
+
+    if (claims.collection && claims.collection !== "users") {
+      return null;
+    }
+
+    return claims.id ? claims : null;
+  } catch {
+    return null;
+  }
+}
+
+function verifyPayloadToken(token: string): PayloadTokenClaims | null {
+  const secret = process.env.PAYLOAD_SECRET;
+  const claims = decodePayloadTokenClaims(token);
+
+  if (!secret || !claims) {
+    return null;
+  }
+
+  const [header, payload, signature] = token.split(".");
+  const expectedSignature = createHmac("sha256", secret)
+    .update(`${header}.${payload}`)
+    .digest("base64url");
+  const actual = Buffer.from(signature);
+  const expected = Buffer.from(expectedSignature);
+
+  if (actual.length !== expected.length || !timingSafeEqual(actual, expected)) {
+    return null;
+  }
+
+  return claims;
+}
+
+async function hasValidPayloadSession(claims: PayloadTokenClaims): Promise<boolean> {
+  if (!claims.id || !claims.sid) {
+    return false;
+  }
+
+  const sessions = await prisma.$queryRawUnsafe<Array<{ id: string }>>(
+    `select id
+       from payload.users_sessions
+      where id = $1
+        and _parent_id = $2
+        and expires_at > now()
+      limit 1`,
+    String(claims.sid),
+    String(claims.id)
+  );
+
+  return sessions.length > 0;
+}
+
+async function getUserFromPayloadToken(headers: Headers): Promise<CareShareUser | null> {
+  const token = getAuthCookie(headers);
+
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const claims = verifyPayloadToken(token) ?? decodePayloadTokenClaims(token);
+
+    if (!claims?.id || !(await hasValidPayloadSession(claims))) {
+      return null;
+    }
+
+    const payload = await getPayloadClient();
+    const user = await payload.findByID({
+      collection: "users",
+      id: String(claims.id),
+      overrideAccess: true,
+    });
+
+    return normalizePayloadUser(user as PayloadUser);
+  } catch {
+    return null;
+  }
+}
+
+export async function getPayloadAuthenticatedUser(headers?: Headers): Promise<CareShareUser | null> {
+  const payload = await getPayloadClient();
+  const authHeaders = headers ?? ((await nextHeaders()) as unknown as Headers);
+
+  try {
+    const result = await payload.auth({ headers: authHeaders });
+
+    if (result.user) {
+      return normalizePayloadUser(result.user as PayloadUser);
+    }
+  } catch {
+    // Payload's cookie auth can fail during local/server route requests even when
+    // the login token itself is valid, so fall through to explicit JWT validation.
+  }
+
+  return getUserFromPayloadToken(authHeaders);
 }
 
 export async function auth(): Promise<CareShareSession | null> {

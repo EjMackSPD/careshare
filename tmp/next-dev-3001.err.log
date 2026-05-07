@@ -1,0 +1,39 @@
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[browser] Error fetching families: TypeError: Failed to fetch
+    at fetchFamilies (app/components/LeftNavigation.tsx:95:27)
+    at LeftNavigation.useEffect (app/components/LeftNavigation.tsx:109:7)
+  93 |     async function fetchFamilies() {
+  94 |       try {
+> 95 |         const res = await fetch("/api/families");
+     |                           ^
+  96 |         if (res.ok) {
+  97 |           const data = await res.json();
+  98 |           setFamilies(data); (app/components/LeftNavigation.tsx:105:17)
+[browser] CalendarWidget - Error fetching events: TypeError: Failed to fetch
+    at fetchEvents (app/components/widgets/CalendarWidget.tsx:51:33)
+  49 |       for (const family of families) {
+  50 |         console.log('CalendarWidget - Fetching events for family:', family.id)
+> 51 |         const eventsRes = await fetch(`/api/families/${family.id}/events`)
+     |                                 ^
+  52 |         if (eventsRes.ok) {
+  53 |           const eventsData = await eventsRes.json()
+  54 |           console.log(`CalendarWidget - Family ${family.id} events:`, eventsData.length) (app/components/widgets/CalendarWidget.tsx:63:15)
+[browser] Error fetching notes: TypeError: Failed to fetch
+    at fetchNotes (app/components/widgets/CareRecipientWidget.tsx:44:27)
+    at CareRecipientWidget.useEffect (app/components/widgets/CareRecipientWidget.tsx:54:5)
+  42 |     async function fetchNotes() {
+  43 |       try {
+> 44 |         const res = await fetch(`/api/families/${familyId}/notes`)
+     |                           ^
+  45 |         if (res.ok) {
+  46 |           const data = await res.json()
+  47 |           setNotes(data.slice(0, 2)) // Show only 2 most recent (app/components/widgets/CareRecipientWidget.tsx:50:17)
+[browser] Error fetching tasks: TypeError: Failed to fetch
+    at fetchTasks (app/components/widgets/TasksWidget.tsx:37:34)
+  35 |           
+  36 |           // Fetch tasks for the family
+> 37 |           const tasksRes = await fetch(`/api/families/${family.id}/tasks`);
+     |                                  ^
+  38 |           if (tasksRes.ok) {
+  39 |             const tasksData = await tasksRes.json();
+  40 |             // Filter to incomplete tasks, sort by due date, take first 4 (app/components/widgets/TasksWidget.tsx:54:17)

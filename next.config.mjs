@@ -11,6 +11,15 @@ const nextConfig = {
     root: dirname,
   },
   images: {
+    localPatterns: [
+      {
+        pathname: "/**",
+        search: "",
+      },
+      {
+        pathname: "/api/blob",
+      },
+    ],
     remotePatterns: [
       {
         protocol: "https",

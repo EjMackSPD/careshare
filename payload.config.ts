@@ -94,7 +94,7 @@ export default buildConfig({
   }),
   plugins: [
     vercelBlobStorage({
-      access: "public",
+      access: "private" as "public",
       addRandomSuffix: true,
       alwaysInsertFields: true,
       collections: {

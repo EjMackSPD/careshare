@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Footer from "@/app/components/Footer";
+import { useSession } from "@/app/components/AuthProvider";
 import {
   BarChart,
   Bar,
@@ -73,6 +74,8 @@ const CATEGORY_COLORS: { [key: string]: string } = {
 };
 
 export default function FinancesPage() {
+  const { data: session } = useSession();
+  const isDemoAccount = session?.user?.email === "demo@careshare.app";
   const [activeTab, setActiveTab] = useState("Overview");
   const tabs = ["Overview", "Expenses", "Bills", "Family Contributions"];
 
@@ -1968,9 +1971,11 @@ export default function FinancesPage() {
         <main className={styles.main}>
           <div className={styles.pageHeader}>
             <div>
-              <h1>Finances</h1>
+              <h1>{isDemoAccount ? "Sample care finances" : "Finances"}</h1>
               <p className={styles.subtitle}>
-                Manage expenses, bills, and budgeting for care
+                {isDemoAccount
+                  ? "Explore how a family can track shared care costs, contributions, and upcoming bills."
+                  : "Manage expenses, bills, and budgeting for care"}
               </p>
             </div>
             <div className={styles.headerButtons}>
@@ -1978,7 +1983,7 @@ export default function FinancesPage() {
                 className={styles.addBillBtn}
                 onClick={() => setShowAddBill(true)}
               >
-                📄 Add Bill
+                {isDemoAccount ? "Try a sample bill" : "Add Bill"}
               </button>
             </div>
           </div>
