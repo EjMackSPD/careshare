@@ -98,6 +98,9 @@ export default function FinancesPage() {
   const [editingBill, setEditingBill] = useState<Bill | null>(null);
   const [showEditBill, setShowEditBill] = useState(false);
 
+  const [paymentBill, setPaymentBill] = useState<Bill | null>(null);
+  const [paymentAmount, setPaymentAmount] = useState("");
+
   // History Modal State
   const [showHistory, setShowHistory] = useState(false);
   const [selectedMember, setSelectedMember] = useState<Contribution | null>(
@@ -1603,29 +1606,59 @@ export default function FinancesPage() {
   const getOutstandingAmount = (bill: Bill) =>
     Math.max(0, bill.amount - bill.amountPaid);
 
-  const handlePayNow = (bill: Bill) => {
+  const openPaymentDialog = (bill: Bill) => {
     const outstandingAmount = getOutstandingAmount(bill);
 
     if (outstandingAmount <= 0) {
       return;
     }
 
-    if (confirm(`Pay ${bill.name} now for $${outstandingAmount.toFixed(2)}?`)) {
-      const today = new Date().toISOString().split("T")[0];
-      setBills((currentBills) =>
-        currentBills.map((currentBill) =>
-          currentBill.id === bill.id
-            ? {
-                ...currentBill,
-                amountPaid: currentBill.amount,
-                status: "paid" as const,
-                datePaid: today,
-              }
-            : currentBill
-        )
-      );
-      alert(`${bill.name} is now paid.`);
+    setPaymentBill(bill);
+    setPaymentAmount(outstandingAmount.toFixed(2));
+  };
+
+  const closePaymentDialog = () => {
+    setPaymentBill(null);
+    setPaymentAmount("");
+  };
+
+  const handlePaymentSubmit = () => {
+    if (!paymentBill) {
+      return;
     }
+
+    const outstandingAmount = getOutstandingAmount(paymentBill);
+    const amount = Number(paymentAmount);
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+      alert("Enter a payment amount greater than $0.00");
+      return;
+    }
+
+    if (amount > outstandingAmount) {
+      alert(`Payment cannot exceed the remaining balance of $${outstandingAmount.toFixed(2)}`);
+      return;
+    }
+
+    const today = new Date().toISOString().split("T")[0];
+    setBills((currentBills) =>
+      currentBills.map((currentBill) => {
+        if (currentBill.id !== paymentBill.id) {
+          return currentBill;
+        }
+
+        const nextAmountPaid = Math.min(currentBill.amount, currentBill.amountPaid + amount);
+        const isFullyPaid = nextAmountPaid >= currentBill.amount;
+
+        return {
+          ...currentBill,
+          amountPaid: nextAmountPaid,
+          status: isFullyPaid ? ("paid" as const) : ("partial" as const),
+          datePaid: isFullyPaid ? today : currentBill.datePaid,
+        };
+      })
+    );
+    closePaymentDialog();
   };
 
   // Handler for editing bill
@@ -2533,6 +2566,91 @@ export default function FinancesPage() {
             </div>
           )}
 
+          {paymentBill && (
+            <div className={styles.modal} onClick={closePaymentDialog}>
+              <div
+                className={styles.paymentModal}
+                onClick={(event) => event.stopPropagation()}
+              >
+                <div className={styles.modalHeader}>
+                  <div>
+                    <p className={styles.modalEyebrow}>Record payment</p>
+                    <h2>{paymentBill.name}</h2>
+                  </div>
+                  <button
+                    className={styles.closeBtn}
+                    onClick={closePaymentDialog}
+                    aria-label="Close payment dialog"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+
+                <div className={styles.modalBody}>
+                  <div className={styles.paymentSummary}>
+                    <div>
+                      <span>Total bill</span>
+                      <strong>${paymentBill.amount.toFixed(2)}</strong>
+                    </div>
+                    <div>
+                      <span>Already paid</span>
+                      <strong>${paymentBill.amountPaid.toFixed(2)}</strong>
+                    </div>
+                    <div>
+                      <span>Remaining</span>
+                      <strong>${getOutstandingAmount(paymentBill).toFixed(2)}</strong>
+                    </div>
+                  </div>
+
+                  <div className={styles.paymentChoices}>
+                    <button
+                      type="button"
+                      className={styles.paymentChoice}
+                      onClick={() =>
+                        setPaymentAmount(getOutstandingAmount(paymentBill).toFixed(2))
+                      }
+                    >
+                      Pay full balance
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.paymentChoice}
+                      onClick={() => setPaymentAmount("")}
+                    >
+                      Enter partial amount
+                    </button>
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label>Payment amount</label>
+                    <div className={styles.amountInput}>
+                      <span className={styles.currencySymbol}>$</span>
+                      <input
+                        type="number"
+                        min="0"
+                        max={getOutstandingAmount(paymentBill)}
+                        step="0.01"
+                        value={paymentAmount}
+                        onChange={(event) => setPaymentAmount(event.target.value)}
+                        placeholder="0.00"
+                        autoFocus
+                      />
+                    </div>
+                  </div>
+
+                  <div className={styles.modalActions}>
+                    <button className={styles.cancelBtn} onClick={closePaymentDialog}>
+                      Cancel
+                    </button>
+                    <button className={styles.submitBtn} onClick={handlePaymentSubmit}>
+                      Save payment
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* View History Modal */}
           {showHistory && selectedMember && (
             <div className={styles.modal} onClick={() => setShowHistory(false)}>
@@ -3145,7 +3263,7 @@ export default function FinancesPage() {
                               className={styles.payNowSmallBtn}
                               onClick={(event) => {
                                 event.stopPropagation();
-                                handlePayNow(bill);
+                                openPaymentDialog(bill);
                               }}
                             >
                               <CreditCard size={15} />
@@ -3492,7 +3610,7 @@ export default function FinancesPage() {
                         {bill.status !== "paid" && (
                           <button
                             className={styles.payBtn}
-                            onClick={() => handlePayNow(bill)}
+                            onClick={() => openPaymentDialog(bill)}
                           >
                             <CreditCard size={16} />
                             Pay now
