@@ -42,6 +42,13 @@ const featureAccentClasses: Record<string, string> = {
   brandGradient: styles.featureIconBrandGradient,
 };
 
+const ctaPatternClasses: Record<string, string> = {
+  softGrid: styles.ctaPatternSoftGrid,
+  careDots: styles.ctaPatternCareDots,
+  diagonalLines: styles.ctaPatternDiagonalLines,
+  gentleWaves: styles.ctaPatternGentleWaves,
+};
+
 function cx(...classNames: Array<string | false | null | undefined>) {
   return classNames.filter(Boolean).join(" ");
 }
@@ -343,7 +350,12 @@ function renderSection(section: PageSection, index: number, posts: BlogListItem[
           key={sectionId}
           id={sectionId}
           aria-labelledby={headingId}
-          className={cx(styles.section, styles.cta, section.theme === "slate" ? styles.ctaSlate : styles.ctaBrand)}
+          className={cx(
+            styles.section,
+            styles.cta,
+            section.theme === "slate" ? styles.ctaSlate : styles.ctaBrand,
+            section.pattern && section.pattern !== "none" && ctaPatternClasses[section.pattern]
+          )}
         >
           <div className={styles.ctaSurface}>
             <div className={styles.ctaInner}>

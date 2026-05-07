@@ -148,6 +148,7 @@ export type PageSection =
       actions: CTA[];
       note?: string;
       theme?: "brand" | "slate";
+      pattern?: "none" | "softGrid" | "careDots" | "diagonalLines" | "gentleWaves";
     }
   | {
       id?: string;

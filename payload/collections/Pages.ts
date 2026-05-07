@@ -26,7 +26,7 @@ export const Pages: CollectionConfig = {
       type: "tabs",
       tabs: [
         {
-          label: "Hero",
+          label: "Hero Block",
           fields: [
             {
               name: "title",
@@ -59,7 +59,7 @@ export const Pages: CollectionConfig = {
               },
               admin: {
                 initCollapsed: false,
-                description: "The primary page hero. Add exactly one hero block.",
+                description: "The primary page hero is a reusable Payload block. Add exactly one hero block.",
               },
             },
           ],

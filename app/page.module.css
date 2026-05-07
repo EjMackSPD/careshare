@@ -4,18 +4,32 @@
 }
 
 .nav {
-  background: rgba(255, 255, 255, 0.94);
-  border-bottom: 1px solid var(--cs-color-border);
+  min-height: var(--cs-marketing-nav-height);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.86) 0%, rgba(255, 255, 255, 0.74) 100%);
+  border-bottom: 1px solid rgba(216, 232, 228, 0.78);
   padding: 1rem 0;
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 100;
-  backdrop-filter: blur(16px);
-  box-shadow: 0 1px 0 rgba(18, 56, 77, 0.04);
+  left: 0;
+  right: 0;
+  z-index: 200;
+  backdrop-filter: blur(20px) saturate(145%);
+  -webkit-backdrop-filter: blur(20px) saturate(145%);
+  box-shadow:
+    0 16px 38px rgba(18, 56, 77, 0.1),
+    0 1px 0 rgba(255, 255, 255, 0.72) inset;
+  isolation: isolate;
+}
+
+.navSpacer {
+  height: var(--cs-marketing-nav-height);
+  background: var(--cs-color-surface-raised);
 }
 
 .navContainer {
   max-width: 1200px;
+  min-height: 60px;
   margin: 0 auto;
   padding: 0 2rem;
   display: flex;
@@ -59,18 +73,18 @@
 }
 
 .demoBtn {
-  background: linear-gradient(135deg, var(--cs-color-warm) 0%, var(--cs-color-warm-dark) 100%);
+  background: var(--cs-button-accent-bg);
   color: white !important;
   padding: 0.65rem 1.25rem !important;
-  border-radius: var(--cs-radius-md);
+  border-radius: var(--cs-button-radius);
   transition: all 0.2s;
-  box-shadow: 0 10px 24px rgba(242, 173, 75, 0.22);
+  box-shadow: var(--cs-shadow-care);
 }
 
 .demoBtn:hover {
-  background: linear-gradient(135deg, var(--cs-color-warm) 0%, var(--cs-color-warm-dark) 100%) !important;
+  background: var(--cs-button-accent-bg-hover) !important;
   transform: translateY(-2px);
-  box-shadow: 0 14px 28px rgba(242, 173, 75, 0.3);
+  box-shadow: var(--cs-shadow-lift);
 }
 
 /* Mobile Menu Styles */
@@ -87,12 +101,14 @@
 .mobileMenu {
   display: none;
   position: fixed;
-  top: 80px;
+  top: var(--cs-marketing-nav-height);
   left: 0;
   right: 0;
-  background: var(--cs-color-surface-raised);
-  border-bottom: 1px solid var(--cs-color-border);
-  box-shadow: var(--cs-shadow-soft);
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom: 1px solid rgba(216, 232, 228, 0.86);
+  box-shadow: 0 18px 38px rgba(18, 56, 77, 0.12);
+  backdrop-filter: blur(18px) saturate(145%);
+  -webkit-backdrop-filter: blur(18px) saturate(145%);
   z-index: 1000;
   animation: slideDown 0.3s ease-out;
 }
@@ -124,18 +140,18 @@
 }
 
 .mobileSignupBtn {
-  background: linear-gradient(135deg, var(--cs-color-warm) 0%, var(--cs-color-warm-dark) 100%);
+  background: var(--cs-button-accent-bg);
   color: white !important;
   margin: 1rem 1.5rem;
   padding: 0.75rem 2rem;
-  border-radius: var(--cs-radius-md);
+  border-radius: var(--cs-button-radius);
   text-align: center;
-  box-shadow: 0 10px 24px rgba(242, 173, 75, 0.22);
+  box-shadow: var(--cs-shadow-care);
 }
 
 .mobileSignupBtn:hover {
-  background: linear-gradient(135deg, var(--cs-color-warm-dark) 0%, var(--cs-color-warm-dark) 100%) !important;
-  box-shadow: 0 14px 28px rgba(242, 173, 75, 0.3) !important;
+  background: var(--cs-button-accent-bg-hover) !important;
+  box-shadow: var(--cs-shadow-lift) !important;
 }
 
 .hero {
@@ -188,10 +204,10 @@
 }
 
 .primaryBtn {
-  background: var(--cs-color-brand);
+  background: var(--cs-button-primary-bg);
   color: white;
   padding: 1rem 2rem;
-  border-radius: var(--cs-radius-md);
+  border-radius: var(--cs-button-radius);
   text-decoration: none;
   font-weight: 600;
   font-size: 1.1rem;
@@ -200,16 +216,16 @@
 }
 
 .primaryBtn:hover {
-  background: var(--cs-color-brand-dark);
+  background: var(--cs-button-primary-bg-hover);
   transform: translateY(-2px);
   box-shadow: var(--cs-shadow-brand);
 }
 
 .secondaryBtn {
-  background: white;
+  background: var(--cs-button-secondary-bg);
   color: var(--cs-color-brand);
   padding: 1rem 2rem;
-  border-radius: var(--cs-radius-md);
+  border-radius: var(--cs-button-radius);
   text-decoration: none;
   font-weight: 600;
   font-size: 1.1rem;
@@ -342,20 +358,21 @@
 
 .demoBtn {
   display: inline-block;
-  background: linear-gradient(135deg, var(--cs-color-warm) 0%, var(--cs-color-warm-dark) 100%);
+  background: var(--cs-button-accent-bg);
   color: white;
   padding: 1.25rem 2.5rem;
-  border-radius: var(--cs-radius-md);
+  border-radius: var(--cs-button-radius);
   text-decoration: none;
   font-weight: 700;
   font-size: 1.25rem;
   transition: all 0.3s;
-  box-shadow: 0 10px 24px rgba(242, 173, 75, 0.24);
+  box-shadow: var(--cs-shadow-care);
 }
 
 .demoBtn:hover {
   transform: translateY(-4px);
-  box-shadow: 0 14px 30px rgba(242, 173, 75, 0.32);
+  background: var(--cs-button-accent-bg-hover);
+  box-shadow: var(--cs-shadow-lift);
 }
 
 .demoNote {

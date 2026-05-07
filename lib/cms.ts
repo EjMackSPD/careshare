@@ -162,6 +162,7 @@ function mapCMSBlock(block: PayloadDoc): PageSection | null {
         actions: mapActions(block.actions) ?? [],
         note: block.note,
         theme: block.theme || "brand",
+        pattern: block.pattern || "softGrid",
       };
 
     case "media": {

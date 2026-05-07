@@ -40,7 +40,7 @@ Reusable action fields support:
 - `variant`: `primary`, `secondary`, `accent`
 - `iconKey`: controlled icon key from `iconOptions`
 
-Use `primary` for the main conversion path, `secondary` for supporting navigation, and `accent` sparingly for demo or high-attention actions.
+Use `primary` for the main conversion path, `secondary` for supporting navigation, and `accent` for care-teal demo/support actions. Do not use amber/orange button treatments.
 
 ### Backgrounds
 
@@ -164,6 +164,7 @@ Fields:
 - `actions`
 - `note`
 - `theme`: `brand` or `slate`
+- `pattern`: `none`, `softGrid`, `careDots`, `diagonalLines`, or `gentleWaves`
 
 Use once near the end of a page, or after a major section when the next action is obvious.
 

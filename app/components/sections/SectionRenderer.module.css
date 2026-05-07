@@ -5,6 +5,7 @@
 
 .section {
   width: 100%;
+  scroll-margin-top: calc(var(--cs-marketing-nav-height) + 24px);
 }
 
 .sectionSurface {
@@ -55,7 +56,7 @@
 
 .heroBrand {
   background:
-    linear-gradient(135deg, rgba(40, 127, 174, 0.92) 0%, rgba(18, 56, 77, 0.94) 100%),
+    linear-gradient(135deg, rgba(40, 127, 174, 0.76) 0%, rgba(18, 56, 77, 0.82) 100%),
     var(--hero-image, none) center/cover;
   color: white;
 }
@@ -80,9 +81,9 @@
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.54) 0%,
-    rgba(255, 255, 255, 0.78) 35%,
-    rgba(255, 255, 255, 0.92) 100%
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(255, 255, 255, 0.58) 42%,
+    rgba(255, 255, 255, 0.82) 100%
   );
 }
 
@@ -172,9 +173,9 @@
   align-items: center;
   justify-content: center;
   gap: 0.625rem;
-  min-height: 3.5rem;
-  padding: 0.95rem 1.75rem;
-  border-radius: var(--cs-radius-md);
+  min-height: var(--cs-button-height);
+  padding: 0.85rem var(--cs-button-padding-x);
+  border-radius: var(--cs-button-radius);
   border: 2px solid transparent;
   text-decoration: none;
   font-size: 1rem;
@@ -192,34 +193,35 @@
 }
 
 .actionPrimary {
-  background: var(--cs-color-brand);
+  background: var(--cs-button-primary-bg);
   color: white;
   box-shadow: var(--cs-shadow-brand);
 }
 
 .actionPrimary:hover {
-  background: var(--cs-color-brand-dark);
+  background: var(--cs-button-primary-bg-hover);
   box-shadow: var(--cs-shadow-lift);
 }
 
 .actionSecondary {
-  background: white;
+  background: var(--cs-button-secondary-bg);
   border-color: var(--cs-color-border-strong);
   color: var(--cs-color-brand);
 }
 
 .actionSecondary:hover {
-  background: var(--cs-color-brand-soft);
+  background: var(--cs-button-secondary-bg-hover);
 }
 
 .actionAccent {
-  background: linear-gradient(135deg, var(--cs-color-warm) 0%, var(--cs-color-warm-dark) 100%);
+  background: var(--cs-button-accent-bg);
   color: white;
-  box-shadow: 0 10px 24px rgba(242, 173, 75, 0.22);
+  box-shadow: var(--cs-shadow-care);
 }
 
 .actionAccent:hover {
-  box-shadow: 0 14px 28px rgba(242, 173, 75, 0.3);
+  background: var(--cs-button-accent-bg-hover);
+  box-shadow: var(--cs-shadow-lift);
 }
 
 .heroBrand .actionPrimary,
@@ -230,6 +232,12 @@
   box-shadow: 0 12px 28px rgba(18, 56, 77, 0.22);
 }
 
+.heroBrand .actionPrimary:hover,
+.ctaSlate .actionPrimary:hover,
+.ctaBrand .actionPrimary:hover {
+  background: var(--cs-color-surface);
+}
+
 .heroBrand .actionSecondary,
 .ctaSlate .actionSecondary,
 .ctaBrand .actionSecondary {
@@ -237,6 +245,22 @@
   border-color: rgba(255, 255, 255, 0.4);
   color: white;
   backdrop-filter: blur(10px);
+}
+
+.heroBrand .actionAccent,
+.ctaSlate .actionAccent,
+.ctaBrand .actionAccent {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.34);
+  color: white;
+  box-shadow: none;
+  backdrop-filter: blur(10px);
+}
+
+.heroBrand .actionAccent:hover,
+.ctaSlate .actionAccent:hover,
+.ctaBrand .actionAccent:hover {
+  background: rgba(255, 255, 255, 0.24);
 }
 
 .featureGrid {
@@ -533,7 +557,29 @@
   text-align: center;
 }
 
+.cta::before,
+.cta::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.cta::before {
+  z-index: 0;
+  opacity: 0.46;
+}
+
+.cta::after {
+  z-index: 0;
+  background:
+    radial-gradient(circle at 22% 20%, rgba(255, 255, 255, 0.18), transparent 28%),
+    radial-gradient(circle at 78% 74%, rgba(217, 249, 157, 0.14), transparent 32%);
+}
+
 .ctaSurface {
+  position: relative;
+  z-index: 1;
   max-width: 100%;
   margin: 0;
   padding: 6rem 2rem;
@@ -547,6 +593,47 @@
 .ctaSlate {
   background: linear-gradient(135deg, var(--cs-color-ink) 0%, var(--cs-color-muted-strong) 100%);
   color: white;
+}
+
+.ctaPatternSoftGrid::before {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.14) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(90deg, transparent 0%, black 18%, black 82%, transparent 100%);
+}
+
+.ctaPatternCareDots::before {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.3) 1.5px, transparent 1.8px),
+    radial-gradient(circle, rgba(217, 249, 157, 0.28) 1px, transparent 1.4px);
+  background-position:
+    0 0,
+    18px 18px;
+  background-size:
+    36px 36px,
+    36px 36px;
+}
+
+.ctaPatternDiagonalLines::before {
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.16) 0,
+      rgba(255, 255, 255, 0.16) 1px,
+      transparent 1px,
+      transparent 18px
+    );
+}
+
+.ctaPatternGentleWaves::before {
+  background-image:
+    radial-gradient(60% 120% at 10% 50%, transparent 48%, rgba(255, 255, 255, 0.18) 49%, transparent 51%),
+    radial-gradient(60% 120% at 90% 50%, transparent 48%, rgba(217, 249, 157, 0.18) 49%, transparent 51%);
+  background-size: 180px 72px;
+  background-position:
+    0 0,
+    90px 36px;
 }
 
 .ctaInner {
@@ -772,14 +859,25 @@
   align-items: center;
   justify-content: center;
   gap: 0.65rem;
-  min-height: 3.25rem;
+  min-height: var(--cs-button-height);
   border: none;
-  border-radius: var(--cs-radius-md);
-  background: var(--cs-color-brand);
+  border-radius: var(--cs-button-radius);
+  background: var(--cs-button-primary-bg);
   color: white;
   font: inherit;
   font-weight: 800;
   cursor: pointer;
+  box-shadow: var(--cs-shadow-brand);
+  transition:
+    background 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.contactSubmit:hover:not(:disabled) {
+  background: var(--cs-button-primary-bg-hover);
+  box-shadow: var(--cs-shadow-lift);
+  transform: translateY(-1px);
 }
 
 .contactSubmit:disabled {

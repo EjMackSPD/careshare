@@ -20,7 +20,7 @@ Primary public navigation stays focused:
 - Login
 - Try Demo
 
-Navigation should use white or translucent raised surfaces, blue hover/focus states, and one warm or care-colored primary action. Avoid adding extra labels, badges, or decorative controls to the header unless the product flow requires them.
+Navigation should use white or translucent raised surfaces, blue hover/focus states, and one care-colored action. Avoid adding extra labels, badges, or decorative controls to the header unless the product flow requires them.
 
 ## Color System
 
@@ -33,7 +33,7 @@ Navigation should use white or translucent raised surfaces, blue hover/focus sta
 - Mint surface: `--cs-color-care-soft` / `#e4f6ef`
   Used for selected rows, soft panels, and quiet healthcare backgrounds.
 - Warm amber: `--cs-color-warm` / `#f2ad4b`
-  Used sparingly for guided actions like demo/onboarding CTAs.
+  Reserved for small semantic accents and icon presets only. Do not use amber/orange for buttons.
 - Rose: `--cs-color-rose` / `#d94f5c`
   Used only for destructive, risk, or error states.
 - Ink/text: `--cs-color-ink`, `--cs-color-text`, `--cs-color-muted`
@@ -52,11 +52,18 @@ Use `--cs-font-sans` everywhere. Headings should be confident but not oversized 
 
 Cards should be quiet and purposeful. Avoid nested cards and avoid heavy shadows.
 
+## Button System
+
+- Primary buttons: brand blue gradient, white text, brand shadow. Use for the main action in a view.
+- Secondary buttons: white or glass surface, brand text, restrained border. Use for supporting navigation.
+- Care accent buttons: care teal to brand blue gradient, white text, care shadow. Use for demo/support/help actions that need distinction without using orange.
+- Ghost buttons: transparent or lightly tinted surface. Use only in dense nav, admin chrome, and compact toolbars.
+- Destructive buttons: rose, only for destructive or high-risk actions.
+
+Shared button tokens live in `app/globals.css` as `--cs-button-*`. Payload action variant values remain `primary`, `secondary`, and `accent`; `accent` means Care Accent, not orange.
+
 ## Components
 
-- Primary buttons: brand blue, white text, subtle brand shadow.
-- Demo/onboarding buttons: warm amber gradient, reserved for guided conversion actions.
-- Secondary buttons: white surface, brand border/text.
 - Feature icons: semantic presets only. Do not store raw hex values in CMS content.
 - Media: images should come from Payload Media and sit in stable aspect-ratio frames.
 - Footer: deep clinical blue with muted copy and mint/blue hover states.
@@ -65,4 +72,3 @@ Cards should be quiet and purposeful. Avoid nested cards and avoid heavy shadows
 ## Accessibility
 
 All focus states should use a visible brand or care outline. Text on brand/deep surfaces must be white or near-white. Do not place small text on image backgrounds without a strong overlay or surface.
-

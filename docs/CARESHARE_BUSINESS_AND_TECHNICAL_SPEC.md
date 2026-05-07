@@ -150,7 +150,7 @@ The product consists of:
 | Database tools | Export/import and DB utilities | `/admin/database` |
 | System settings | Placeholder | `/admin/settings` |
 
-Access: restricted to users with email `admin@careshare.app` or `demo@careshare.app`.
+Access: restricted to users with approved Payload admin roles.
 
 ### 4.8 Blog (Public and Admin)
 
@@ -340,7 +340,7 @@ docs/                        # This spec
 
 - **NextAuth.js:** Session-based auth; credentials (email/password) with bcrypt.
 - **Protected routes:** Middleware or server-side checks; redirect to `/login` when unauthenticated.
-- **Role checks:** Admin routes and APIs validate `session.user.email` (e.g. `admin@careshare.app`, `demo@careshare.app`).
+- **Role checks:** Admin routes and APIs validate Payload role assignments instead of hardcoded email addresses.
 - **Family scoping:** Family APIs verify the current user is a member of the family (or admin) before returning or modifying data.
 - **Secrets:** `NEXTAUTH_SECRET` and `DATABASE_URL` in environment; no secrets in client bundle.
 

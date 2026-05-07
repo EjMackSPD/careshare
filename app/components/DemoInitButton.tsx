@@ -28,20 +28,21 @@ export default function DemoInitButton() {
 
   return (
     <>
-      <p style={{ color: '#f59e0b', fontWeight: 600, marginBottom: '1rem' }}>
+      <p style={{ color: 'var(--cs-color-care-dark)', fontWeight: 600, marginBottom: '1rem' }}>
         It looks like demo data wasn't set up. Click below to initialize:
       </p>
       <button 
         onClick={handleInit}
         style={{
-          background: '#2563eb',
+          background: 'var(--cs-button-primary-bg)',
           color: 'white',
           padding: '1rem 2rem',
           border: 'none',
-          borderRadius: '0.5rem',
+          borderRadius: 'var(--cs-button-radius)',
           fontSize: '1rem',
           fontWeight: 600,
           cursor: 'pointer',
+          boxShadow: 'var(--cs-shadow-brand)',
           transition: 'all 0.2s'
         }}
       >
@@ -50,4 +51,3 @@ export default function DemoInitButton() {
     </>
   )
 }
-

@@ -27,10 +27,7 @@ export const homeSections: PageSection[] = [
     highlight: "together",
     body:
       "CareShare helps caregivers, families, care centers, and individuals start the right care workflow from day one.",
-    actions: [
-      { href: "/onboarding", label: "Choose Your Onboarding Path", variant: "primary" },
-      { href: "/login", label: "Quick Demo", variant: "accent" },
-    ],
+    actions: [{ href: "/onboarding", label: "Choose Your Onboarding Path", variant: "primary" }],
     media: { kind: "carousel" },
   },
   {

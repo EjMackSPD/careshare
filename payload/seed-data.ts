@@ -17,10 +17,7 @@ export const seedPages = [
         highlight: "together",
         body:
           "CareShare helps caregivers, families, care centers, and individuals start the right care workflow from day one.",
-        actions: [
-          { href: "/onboarding", label: "Choose Your Onboarding Path", variant: "primary" },
-          { href: "/login", label: "Quick Demo", variant: "accent" },
-        ],
+        actions: [{ href: "/onboarding", label: "Choose Your Onboarding Path", variant: "primary" }],
         media: { kind: "carousel" },
       },
       {
@@ -78,6 +75,7 @@ export const seedPages = [
         blockType: "cta",
         sectionId: "home-cta",
         theme: "brand",
+        pattern: "softGrid",
         title: "Ready to get started?",
         body: "Choose the setup flow that matches how you care and who you support.",
         actions: [{ href: "/onboarding", label: "Start Setup", variant: "primary" }],
@@ -185,6 +183,7 @@ export const seedPages = [
         blockType: "cta",
         sectionId: "features-cta",
         theme: "slate",
+        pattern: "diagonalLines",
         title: "Ready to Transform Family Caregiving?",
         body: "Join families who are caring better, together.",
         actions: [
@@ -234,6 +233,7 @@ export const seedPages = [
       {
         blockType: "cta",
         sectionId: "about-cta",
+        pattern: "careDots",
         title: "Join Us in Transforming Caregiving",
         body: "Whether you are a family caregiver, care provider, or partner, CareShare gives coordination a calmer center.",
         actions: [
@@ -338,7 +338,7 @@ export const seedPages = [
           { label: "Product Feedback", value: "feedback" },
         ],
         contactCards: [
-          { title: "Email", body: "support@careshare.app", href: "mailto:support@careshare.app", iconKey: "mail", note: "Response within 24 hours" },
+          { title: "Email", body: "support@yourcareshare.com", href: "mailto:support@yourcareshare.com", iconKey: "mail", note: "Response within 24 hours" },
           { title: "Phone", body: "(800) 555-1234", href: "tel:+18005551234", iconKey: "phone", note: "Monday - Friday, 9AM - 5PM EST" },
           { title: "Office", body: "123 Care Street\nSan Francisco, CA 94102", iconKey: "mapPin", note: "By appointment only" },
           { title: "Support Hours", body: "Monday - Friday: 9AM - 5PM EST\nWeekend: Emergency support only", iconKey: "clock", note: "Average response: 2 hours" },
@@ -419,13 +419,13 @@ export const seedPages = [
             anchor: "rights",
             title: "Your Rights",
             iconKey: "eye",
-            body: "You may request access, correction, deletion, portability, or restriction of certain processing activities by contacting privacy@careshare.app.",
+            body: "You may request access, correction, deletion, portability, or restriction of certain processing activities by contacting support@yourcareshare.com.",
           },
           {
             anchor: "contact",
             title: "Contact Us About Privacy",
             iconKey: "mail",
-            body: "Questions about this Privacy Policy can be sent to privacy@careshare.app.",
+            body: "Questions about this Privacy Policy can be sent to support@yourcareshare.com.",
           },
         ],
       },
@@ -481,7 +481,7 @@ export const seedPages = [
             anchor: "contact",
             title: "Contact",
             iconKey: "mail",
-            body: "Questions about these Terms can be sent to support@careshare.app.",
+            body: "Questions about these Terms can be sent to support@yourcareshare.com.",
           },
         ],
       },

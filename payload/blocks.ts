@@ -64,7 +64,7 @@ const actionsField: Field = {
       options: [
         { label: "Primary", value: "primary" },
         { label: "Secondary", value: "secondary" },
-        { label: "Accent", value: "accent" },
+        { label: "Care Accent", value: "accent" },
       ],
     },
     {
@@ -315,6 +315,21 @@ export const CTABlock: Block = {
       options: [
         { label: "Brand", value: "brand" },
         { label: "Slate", value: "slate" },
+      ],
+    },
+    {
+      name: "pattern",
+      type: "select",
+      defaultValue: "softGrid",
+      admin: {
+        description: "Optional decorative background pattern for the CTA band.",
+      },
+      options: [
+        { label: "None", value: "none" },
+        { label: "Soft Grid", value: "softGrid" },
+        { label: "Care Dots", value: "careDots" },
+        { label: "Diagonal Lines", value: "diagonalLines" },
+        { label: "Gentle Waves", value: "gentleWaves" },
       ],
     },
   ],

@@ -177,7 +177,7 @@ export interface Page {
    */
   slug: string;
   /**
-   * The primary page hero. Add exactly one hero block.
+   * The primary page hero is a reusable Payload block. Add exactly one hero block.
    */
   hero?: HeroBlock[] | null;
   /**
@@ -585,6 +585,10 @@ export interface CTABlock {
     | null;
   note?: string | null;
   theme?: ('brand' | 'slate') | null;
+  /**
+   * Optional decorative background pattern for the CTA band.
+   */
+  pattern?: ('none' | 'softGrid' | 'careDots' | 'diagonalLines' | 'gentleWaves') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'cta';
@@ -1249,6 +1253,7 @@ export interface CTABlockSelect<T extends boolean = true> {
       };
   note?: T;
   theme?: T;
+  pattern?: T;
   id?: T;
   blockName?: T;
 }

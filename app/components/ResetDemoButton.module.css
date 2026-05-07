@@ -1,9 +1,9 @@
 .resetButton {
   background: white;
-  color: #d97706;
-  border: none;
+  color: var(--cs-color-care-dark);
+  border: 1px solid rgba(255, 255, 255, 0.58);
   padding: 0.625rem 1.25rem;
-  border-radius: 0.5rem;
+  border-radius: var(--cs-button-radius);
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
@@ -13,6 +13,7 @@
 
 .resetButton:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.9);
+  color: var(--cs-color-brand-deep);
   transform: translateY(-1px);
 }
 

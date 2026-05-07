@@ -139,7 +139,7 @@ export default function Footer() {
               <li>
                 <strong>Email:</strong>
                 <br />
-                <a href="mailto:support@careshare.app">support@careshare.app</a>
+                <a href="mailto:support@yourcareshare.com">support@yourcareshare.com</a>
               </li>
               <li>
                 <strong>Phone:</strong>
