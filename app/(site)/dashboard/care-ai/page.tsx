@@ -1,8 +1,6 @@
 "use client"
 
 import { useEffect, useMemo, useState, useTransition } from "react"
-import Navigation from "@/app/components/Navigation"
-import LeftNavigation from "@/app/components/LeftNavigation"
 import Footer from "@/app/components/Footer"
 import {
   ArrowUp,
@@ -267,11 +265,7 @@ export default function CareAIPage() {
 
   return (
     <div className={styles.container}>
-      <Navigation showAuthLinks />
-
       <div className={styles.layout}>
-        <LeftNavigation />
-
         <main className={styles.main}>
           <section className={styles.topbar}>
             <div className={styles.topbarTitle}>

@@ -24,28 +24,37 @@ export const seedPages = [
         blockType: "featureGrid",
         sectionId: "home-benefits",
         title: "Why CareShare?",
+        cardsPerRow: "4",
         items: [
           {
             title: "Split Costs Fairly",
             body: "Track expenses and contributions transparently without awkward money conversations.",
+            image: "home-feature-costs",
+            imageAlt: "Family reviewing shared care expenses",
             iconKey: "wallet",
             accentPreset: "brandBlue",
           },
           {
             title: "Coordinate Events",
             body: "Plan birthdays, appointments, and food deliveries together so everyone stays in the loop.",
+            image: "home-feature-calendar",
+            imageAlt: "Care calendar and planning notes on a desk",
             iconKey: "calendarDays",
             accentPreset: "careGreen",
           },
           {
             title: "Bring Family Together",
             body: "Share the responsibility of care and help each person contribute in their own way.",
+            image: "home-feature-family",
+            imageAlt: "Family members spending time together",
             iconKey: "users",
             accentPreset: "familyPurple",
           },
           {
             title: "For Care Providers",
             body: "Support families with a shared workspace that keeps plans, updates, and responsibilities organized.",
+            image: "home-feature-providers",
+            imageAlt: "Care provider reviewing a plan with a patient",
             iconKey: "heart",
             accentPreset: "supportOrange",
           },
@@ -65,10 +74,8 @@ export const seedPages = [
         layout: "split",
         background: "muted",
         aside: {
-          title: "Try the Demo Walkthrough",
-          body: "Open the login page and jump in with demo mode to explore the product from a real family workspace.",
-          actions: [{ href: "/login", label: "Try Demo Walkthrough", variant: "accent", iconKey: "video" }],
-          note: "Use the Quick Demo option on the login page.",
+          image: "home-dashboard-screenshot",
+          imageAlt: "CareShare dashboard showing care tasks, finances, calendar, and quick actions",
         },
       },
       {
@@ -191,6 +198,47 @@ export const seedPages = [
           { href: "/login", label: "Try Demo Account", variant: "secondary" },
         ],
         note: "No credit card required. Cancel anytime.",
+      },
+    ],
+  },
+  {
+    title: "Onboarding",
+    slug: "onboarding",
+    seo: {
+      title: "Start CareShare Setup",
+      description:
+        "Create a CareShare workspace for family caregiving, personal planning, or care-center coordination.",
+    },
+    hero: [
+      {
+        blockType: "hero",
+        sectionId: "onboarding-hero",
+        variant: "marketing",
+        theme: "light",
+        title: "Start your CareShare setup",
+        body:
+          "Choose the care path that fits your role and build a workspace with the right details from day one.",
+        media: { kind: "none" },
+      },
+    ],
+    layout: [
+      {
+        blockType: "content",
+        sectionId: "onboarding-info",
+        prose: "Guided setup",
+        title: "Build the right care workspace from the start",
+        intro:
+          "CareShare adapts setup around your role, the people involved, and the decisions that need to stay organized.",
+        bullets: [
+          { text: "Choose the path that matches how you support care today" },
+          { text: "Capture the details your family or care team needs first" },
+          { text: "Leave with a workspace ready for tasks, bills, events, and updates" },
+        ],
+        aside: {
+          body: "You can refine everything later from your dashboard.",
+        },
+        layout: "centered",
+        background: "plain",
       },
     ],
   },

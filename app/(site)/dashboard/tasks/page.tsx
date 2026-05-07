@@ -3,8 +3,6 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSession } from "@/app/components/AuthProvider";
 import { useRouter, useSearchParams } from "next/navigation";
-import Navigation from "@/app/components/Navigation";
-import LeftNavigation from "@/app/components/LeftNavigation";
 import Footer from "@/app/components/Footer";
 import {
   AlertCircle,
@@ -572,11 +570,7 @@ function TasksPageContent() {
 
   return (
     <div className={styles.container}>
-      <Navigation showAuthLinks={true} />
-
       <div className={styles.layout}>
-        <LeftNavigation />
-
         <main className={styles.main}>
           <section className={styles.workspace}>
             <header className={styles.header}>
@@ -1218,9 +1212,7 @@ export default function TasksPage() {
     <Suspense
       fallback={
         <div className={styles.container}>
-          <Navigation showAuthLinks={true} />
           <div className={styles.layout}>
-            <LeftNavigation />
             <main className={styles.main}>
               <div className={styles.loadingState}>
                 <Loader2 size={28} className={styles.spinner} />

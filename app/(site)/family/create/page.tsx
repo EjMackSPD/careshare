@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Navigation from '@/app/components/Navigation'
 import styles from './page.module.css'
 
 export default function CreateFamily() {
@@ -50,8 +49,6 @@ export default function CreateFamily() {
 
   return (
     <div className={styles.container}>
-      <Navigation backLink={{ href: '/dashboard', label: 'Back to Dashboard' }} />
-
       <main className={styles.main}>
         <div className={styles.formContainer}>
           <h1>Create Family Group</h1>

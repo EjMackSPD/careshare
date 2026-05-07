@@ -3,8 +3,6 @@ import { getCurrentUser } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
 import { hydrateStoredDraft } from "@/lib/onboarding";
 import Link from "next/link";
-import Navigation from "../../components/Navigation";
-import LeftNavigation from "../../components/LeftNavigation";
 import DemoInitButton from "../../components/DemoInitButton";
 import Footer from "../../components/Footer";
 import CareRecipientWidget from "../../components/widgets/CareRecipientWidget";
@@ -21,10 +19,6 @@ import {
   Heart,
   Gift,
   UtensilsCrossed,
-  Cake,
-  Stethoscope,
-  UserCheck,
-  Clock,
   ClipboardList,
   DollarSign,
   CalendarDays,
@@ -108,63 +102,58 @@ export default async function Dashboard() {
 
   return (
     <div className={styles.container}>
-      <Navigation showAuthLinks={true} />
-
       <div className={styles.layout}>
-        <LeftNavigation />
-
         <main className={styles.main}>
           <section className={styles.hero}>
             <div className={styles.heroContent}>
-              <div className={styles.eyebrow}>Care Dashboard</div>
+              <div className={styles.heroCopy}>
+                <div className={styles.eyebrow}>Care Dashboard</div>
 
-              <div className={styles.header}>
-                <div>
-                  <h1>Welcome back, {user.name || "there"}.</h1>
-                  <p className={styles.headerSubtitle}>
-                    Track care activity, upcoming obligations, and family coordination from one working view.
-                  </p>
+                <div className={styles.header}>
+                  <div>
+                    <h1>Welcome back, {user.name || "there"}.</h1>
+                    <p className={styles.headerSubtitle}>
+                      Track care activity, upcoming obligations, and family coordination from one working view.
+                    </p>
+                  </div>
+                </div>
+
+                <div className={styles.heroMeta}>
+                  <div className={styles.heroMetaItem}>
+                    <span className={styles.heroMetaLabel}>Active workspace</span>
+                    <strong>{activeFamilyName}</strong>
+                  </div>
+                  <div className={styles.heroMetaItem}>
+                    <span className={styles.heroMetaLabel}>Care recipient</span>
+                    <strong>{careRecipientName}</strong>
+                  </div>
+                  <div className={styles.heroMetaItem}>
+                    <span className={styles.heroMetaLabel}>Families</span>
+                    <strong>{families.length}</strong>
+                  </div>
                 </div>
               </div>
 
-              <div className={styles.heroMeta}>
-                <div className={styles.heroMetaItem}>
-                  <span className={styles.heroMetaLabel}>Active workspace</span>
-                  <strong>{activeFamilyName}</strong>
+              {families.length > 0 && (
+                <div className={styles.careGraphic} aria-hidden="true">
+                  <div className={styles.careGraphicHalo} />
+                  <div className={styles.careGraphicCard}>
+                    <div className={styles.careGraphicAvatar}>
+                      {careRecipientName.charAt(0).toUpperCase()}
+                    </div>
+                    <div className={styles.careGraphicLine} />
+                    <div className={styles.careGraphicLineShort} />
+                    <div className={styles.careGraphicStats}>
+                      <span>{openTasks}</span>
+                      <span>{upcomingEvents}</span>
+                      <span>{pendingBills}</span>
+                    </div>
+                  </div>
+                  <div className={styles.careGraphicNodePrimary} />
+                  <div className={styles.careGraphicNodeSecondary} />
                 </div>
-                <div className={styles.heroMetaItem}>
-                  <span className={styles.heroMetaLabel}>Care recipient</span>
-                  <strong>{careRecipientName}</strong>
-                </div>
-                <div className={styles.heroMetaItem}>
-                  <span className={styles.heroMetaLabel}>Families</span>
-                  <strong>{families.length}</strong>
-                </div>
-              </div>
+              )}
             </div>
-
-            {families.length > 0 && (
-              <div className={styles.heroAside}>
-                <div className={styles.heroAvatar}>
-                  {careRecipientName.charAt(0).toUpperCase()}
-                </div>
-                <div className={styles.heroAsideBody}>
-                  <p className={styles.heroAsideLabel}>Current focus</p>
-                  <h2>{careRecipientName}</h2>
-                  <p className={styles.heroAsideText}>
-                    {openTasks} open tasks, {upcomingEvents} upcoming events, and {pendingBills} pending bills across your workspace.
-                  </p>
-                </div>
-                <div className={styles.heroActionRow}>
-                  <Link href="/dashboard/tasks" className={styles.heroActionPrimary}>
-                    Review Tasks
-                  </Link>
-                  <Link href="/family" className={styles.heroActionSecondary}>
-                    Open Families
-                  </Link>
-                </div>
-              </div>
-            )}
           </section>
 
           {families.length > 0 && (
@@ -404,93 +393,6 @@ export default async function Dashboard() {
                 </div>
               </section>
 
-              <section className={styles.dashboard}>
-                <div className={styles.sectionHeading}>
-                  <div>
-                    <h2>Family snapshots</h2>
-                    <p>Recent events and pending costs for each family you support.</p>
-                  </div>
-                </div>
-
-                {families.map((family) => (
-                  <div key={family.id} className={styles.familySection}>
-                    <div className={styles.familyHeader}>
-                      <div>
-                        <h2>{family.name}</h2>
-                        {family.elderName && (
-                          <p className={styles.elderName}>Care for {family.elderName}</p>
-                        )}
-                      </div>
-                      <Link href={`/family/${family.id}`} className={styles.viewLink}>
-                        View details
-                      </Link>
-                    </div>
-
-                    <div className={styles.cards}>
-                      <div className={styles.card}>
-                        <h3>Upcoming events</h3>
-                        {family.events.length === 0 ? (
-                          <p className={styles.emptyText}>No upcoming events</p>
-                        ) : (
-                          <ul className={styles.list}>
-                            {family.events.map((event) => (
-                              <li key={event.id}>
-                                <div className={styles.eventIconWrapper}>
-                                  {event.type === "BIRTHDAY" && <Cake size={16} />}
-                                  {event.type === "APPOINTMENT" && <Stethoscope size={16} />}
-                                  {event.type === "FOOD_DELIVERY" && (
-                                    <UtensilsCrossed size={16} />
-                                  )}
-                                  {event.type === "VISIT" && <UserCheck size={16} />}
-                                  {event.type === "OTHER" && <Clock size={16} />}
-                                </div>
-                                <div>
-                                  <strong>{event.title}</strong>
-                                  <br />
-                                  <small>
-                                    {new Date(event.eventDate).toLocaleDateString()}
-                                  </small>
-                                </div>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                        <Link
-                          href={`/family/${family.id}/events`}
-                          className={styles.cardLink}
-                        >
-                          View all events
-                        </Link>
-                      </div>
-
-                      <div className={styles.card}>
-                        <h3>Pending costs</h3>
-                        {family.costs.length === 0 ? (
-                          <p className={styles.emptyText}>No pending costs</p>
-                        ) : (
-                          <ul className={styles.list}>
-                            {family.costs.map((cost) => (
-                              <li key={cost.id}>
-                                <div>
-                                  <strong>{cost.description}</strong>
-                                  <br />
-                                  <small>${cost.amount.toFixed(2)}</small>
-                                </div>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                        <Link
-                          href={`/family/${family.id}/costs`}
-                          className={styles.cardLink}
-                        >
-                          View all costs
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </section>
             </>
           )}
         </main>

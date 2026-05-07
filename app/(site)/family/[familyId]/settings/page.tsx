@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import Navigation from "@/app/components/Navigation";
-import LeftNavigation from "@/app/components/LeftNavigation";
 import Footer from "@/app/components/Footer";
 import { Bell, Mail, Phone, MessageSquare } from "lucide-react";
 import styles from "./page.module.css";
@@ -126,9 +124,7 @@ export default function FamilySettings() {
   if (loading) {
     return (
       <div className={styles.container}>
-        <Navigation showAuthLinks={true} />
         <div className={styles.layout}>
-          <LeftNavigation />
           <main className={styles.main}>
             <div className={styles.loading}>Loading...</div>
           </main>
@@ -139,13 +135,7 @@ export default function FamilySettings() {
 
   return (
     <div className={styles.container}>
-      <Navigation
-        showAuthLinks={true}
-        backLink={{ href: `/family/${familyId}`, label: "Back to Family" }}
-      />
-
       <div className={styles.layout}>
-        <LeftNavigation />
         <main className={styles.main}>
           <div className={styles.header}>
             <h1>Family Settings</h1>

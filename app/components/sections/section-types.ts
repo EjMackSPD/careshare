@@ -26,6 +26,10 @@ export type SectionMedia =
 export type FeatureItem = {
   title: string;
   body: string;
+  image?: {
+    src: string;
+    alt: string;
+  };
   icon?: IconValue;
   bullets?: string[];
   accentPreset?:
@@ -112,6 +116,7 @@ export type PageSection =
       intro?: string;
       items: FeatureItem[];
       layout?: "cards" | "compact";
+      cardsPerRow?: 2 | 3 | 4;
       background?: "plain" | "muted";
     }
   | {
@@ -132,8 +137,12 @@ export type PageSection =
       bullets?: string[];
       actions?: CTA[];
       aside?: {
-        title: string;
+        title?: string;
         body?: string;
+        image?: {
+          src: string;
+          alt: string;
+        };
         actions?: CTA[];
         note?: string;
       };

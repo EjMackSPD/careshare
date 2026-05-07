@@ -1,8 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Navigation from '@/app/components/Navigation'
-import LeftNavigation from '@/app/components/LeftNavigation'
 import Footer from '@/app/components/Footer'
 import { Check, Info, Users, Calendar, Wallet, UtensilsCrossed, Gift, Shield, Upload, Image as ImageIcon, Mic, Video, Book, Share2 } from 'lucide-react'
 import styles from './page.module.css'
@@ -133,10 +131,7 @@ export default function SubscriptionPage() {
 
   return (
     <div className={styles.container}>
-      <Navigation showAuthLinks={true} />
-      
       <div className={styles.layout}>
-        <LeftNavigation />
         <main className={styles.main}>
           <div className={styles.pageHeader}>
             <h1>Choose Your Plan</h1>

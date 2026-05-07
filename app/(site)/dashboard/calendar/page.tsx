@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Navigation from "@/app/components/Navigation";
-import LeftNavigation from "@/app/components/LeftNavigation";
 import Footer from "@/app/components/Footer";
 import {
   CalendarDays,
@@ -394,11 +392,7 @@ export default function CalendarPage() {
 
   return (
     <div className={styles.container}>
-      <Navigation showAuthLinks={true} />
-
       <div className={styles.layout}>
-        <LeftNavigation />
-
         <main className={styles.main}>
           <section className={styles.header}>
             <div>

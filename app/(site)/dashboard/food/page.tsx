@@ -1,8 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Navigation from '@/app/components/Navigation'
-import LeftNavigation from '@/app/components/LeftNavigation'
 import Footer from '@/app/components/Footer'
 import { Search, ShoppingCart, Clock, DollarSign, ExternalLink } from 'lucide-react'
 import styles from './page.module.css'
@@ -128,10 +126,7 @@ export default function FoodDeliveryPage() {
 
   return (
     <div className={styles.container}>
-      <Navigation showAuthLinks={true} />
-      
       <div className={styles.layout}>
-        <LeftNavigation />
         <main className={styles.main}>
           <div className={styles.pageHeader}>
             <div>

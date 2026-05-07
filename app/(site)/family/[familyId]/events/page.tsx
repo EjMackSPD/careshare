@@ -3,8 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import Navigation from '@/app/components/Navigation'
-import LeftNavigation from '@/app/components/LeftNavigation'
 import Footer from '@/app/components/Footer'
 import styles from './page.module.css'
 
@@ -76,10 +74,7 @@ export default function FamilyEvents() {
 
   return (
     <div className={styles.container}>
-      <Navigation backLink={{ href: `/family/${familyId}`, label: 'Back to Family' }} />
-      
       <div className={styles.layout}>
-        <LeftNavigation />
         <main className={styles.main}>
         <div className={styles.header}>
           <h1>Events & Appointments</h1>

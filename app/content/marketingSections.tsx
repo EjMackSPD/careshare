@@ -34,28 +34,45 @@ export const homeSections: PageSection[] = [
     id: "home-benefits",
     type: "feature-grid",
     title: "Why CareShare?",
+    cardsPerRow: 4,
     items: [
       {
         title: "Split Costs Fairly",
         body: "Track expenses and contributions transparently without awkward money conversations.",
+        image: {
+          src: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1200&q=80",
+          alt: "Family reviewing shared care expenses",
+        },
         icon: Wallet,
         accentPreset: "brandBlue",
       },
       {
         title: "Coordinate Events",
         body: "Plan birthdays, appointments, and food deliveries together so everyone stays in the loop.",
+        image: {
+          src: "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=1200&q=80",
+          alt: "Care calendar and planning notes on a desk",
+        },
         icon: CalendarDays,
         accentPreset: "careGreen",
       },
       {
         title: "Bring Family Together",
         body: "Share the responsibility of care and help each person contribute in their own way.",
+        image: {
+          src: "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=1200&q=80",
+          alt: "Family members spending time together",
+        },
         icon: Users,
         accentPreset: "familyPurple",
       },
       {
         title: "For Care Providers",
         body: "Support families with a shared workspace that keeps plans, updates, and responsibilities organized.",
+        image: {
+          src: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&q=80",
+          alt: "Care provider reviewing a plan with a patient",
+        },
         icon: Heart,
         accentPreset: "supportOrange",
       },
@@ -75,10 +92,10 @@ export const homeSections: PageSection[] = [
     layout: "split",
     background: "muted",
     aside: {
-      title: "Try the Demo Walkthrough",
-      body: "Open the login page and jump in with demo mode to explore the product from a real family workspace.",
-      actions: [{ href: "/login", label: "Try Demo Walkthrough", variant: "accent", icon: Video }],
-      note: 'Use the "Try Demo Mode" option on the login page.',
+      image: {
+        src: "/cms/dashboard-screenshot.png",
+        alt: "CareShare dashboard showing care tasks, finances, calendar, and quick actions",
+      },
     },
   },
   {

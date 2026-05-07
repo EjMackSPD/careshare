@@ -2,8 +2,6 @@ import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
-import Navigation from '@/app/components/Navigation'
-import LeftNavigation from '@/app/components/LeftNavigation'
 import Footer from '@/app/components/Footer'
 import styles from './page.module.css'
 
@@ -42,10 +40,7 @@ export default async function FamiliesPage() {
 
   return (
     <div className={styles.container}>
-      <Navigation showAuthLinks={true} />
-      
       <div className={styles.layout}>
-        <LeftNavigation />
         <main className={styles.main}>
         <div className={styles.header}>
           <h1>My Families</h1>

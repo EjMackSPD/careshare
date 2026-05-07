@@ -341,10 +341,13 @@ export interface FeatureGridBlock {
   title: string;
   intro?: string | null;
   layout?: ('cards' | 'compact') | null;
+  cardsPerRow?: ('2' | '3' | '4') | null;
   background?: ('plain' | 'muted') | null;
   items: {
     title: string;
     body: string;
+    image?: (number | null) | Media;
+    imageAlt?: string | null;
     iconKey?:
       | (
           | 'arrowRight'
@@ -1149,12 +1152,15 @@ export interface FeatureGridBlockSelect<T extends boolean = true> {
   title?: T;
   intro?: T;
   layout?: T;
+  cardsPerRow?: T;
   background?: T;
   items?:
     | T
     | {
         title?: T;
         body?: T;
+        image?: T;
+        imageAlt?: T;
         iconKey?: T;
         accentPreset?: T;
         bullets?:

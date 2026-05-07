@@ -2,16 +2,18 @@
   background: linear-gradient(135deg, var(--cs-color-ink) 0%, var(--cs-color-brand-deep) 100%);
   color: var(--cs-color-border-strong);
   margin-top: auto;
-  width: 100%;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
   clear: both;
   position: relative;
   z-index: 60;
 }
 
 .footerContent {
-  max-width: 1400px;
+  width: min(98vw, 1680px);
   margin: 0 auto;
-  padding: 4rem 2rem 2rem 2rem;
+  padding: 4rem 0 2rem;
 }
 
 .footerGrid {
@@ -176,7 +178,8 @@
 
 @media (max-width: 768px) {
   .footerContent {
-    padding: 3rem 1.5rem 1.5rem 1.5rem;
+    width: 100%;
+    padding: 3rem 1rem 1.5rem;
   }
 
   .footerGrid {

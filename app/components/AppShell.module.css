@@ -1,0 +1,42 @@
+.shell {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, rgba(56, 189, 248, 0.08), transparent 28%),
+    linear-gradient(180deg, #f6f8fb 0%, #eef2f7 100%);
+  padding-top: 100px;
+}
+
+.railLayout {
+  display: flex;
+  width: min(98vw, 1680px);
+  min-height: calc(100vh - 110px);
+  margin: 0 auto;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+}
+
+.content > [class*="container"] {
+  min-height: auto;
+  background: transparent;
+  padding-top: 0;
+}
+
+.content [class*="layout"] {
+  display: block;
+  width: 100%;
+  min-height: auto;
+  margin: 0;
+}
+
+@media (max-width: 968px) {
+  .shell {
+    padding-top: 88px;
+  }
+
+  .railLayout {
+    width: 100%;
+  }
+}

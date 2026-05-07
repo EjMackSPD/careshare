@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 import Link from 'next/link'
 import {
   ArrowRight,
@@ -16,6 +15,8 @@ import {
   UserRound,
 } from 'lucide-react'
 import styles from './page.module.css'
+import MarketingNav from '@/app/components/MarketingNav'
+import Footer from '@/app/components/Footer'
 import {
   DEFAULT_ONBOARDING_DRAFT,
   type OnboardingAudienceType,
@@ -25,6 +26,27 @@ import {
 import { payloadLogin, useSession } from '@/app/components/AuthProvider'
 
 type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6
+
+type OnboardingPanelContent = {
+  eyebrow: string
+  title: string
+  body: string
+  bullets: string[]
+  note: string
+}
+
+const DEFAULT_PANEL_CONTENT: OnboardingPanelContent = {
+  eyebrow: 'Guided setup',
+  title: 'Build the right care workspace from the start',
+  body:
+    'CareShare adapts setup around your role, the people involved, and the decisions that need to stay organized.',
+  bullets: [
+    'Choose the path that matches how you support care today',
+    'Capture the details your family or care team needs first',
+    'Leave with a workspace ready for tasks, bills, events, and updates',
+  ],
+  note: 'You can refine everything later from your dashboard.',
+}
 
 const TOP_NEEDS = [
   'Bills',
@@ -142,6 +164,7 @@ export default function OnboardingPage() {
   const [pageLoading, setPageLoading] = useState(true)
   const [error, setError] = useState('')
   const [formData, setFormData] = useState<OnboardingDraft>(DEFAULT_ONBOARDING_DRAFT)
+  const [panelContent, setPanelContent] = useState<OnboardingPanelContent>(DEFAULT_PANEL_CONTENT)
 
   const isAuthenticated = status === 'authenticated'
   const audienceContent = useMemo(
@@ -150,6 +173,42 @@ export default function OnboardingPage() {
   )
   const stepLabels = STEP_LABELS[formData.audienceType]
   const progressStep = useMemo(() => (isAuthenticated ? step : 1), [isAuthenticated, step])
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadPanelContent() {
+      try {
+        const response = await fetch('/api/onboarding-content', { cache: 'no-store' })
+
+        if (!response.ok) {
+          return
+        }
+
+        const data = await response.json()
+
+        if (!cancelled && data?.content) {
+          setPanelContent({
+            eyebrow: data.content.eyebrow || DEFAULT_PANEL_CONTENT.eyebrow,
+            title: data.content.title || DEFAULT_PANEL_CONTENT.title,
+            body: data.content.body || DEFAULT_PANEL_CONTENT.body,
+            bullets: data.content.bullets?.length
+              ? data.content.bullets
+              : DEFAULT_PANEL_CONTENT.bullets,
+            note: data.content.note || DEFAULT_PANEL_CONTENT.note,
+          })
+        }
+      } catch {
+        // Keep the local fallback content if Payload content is unavailable.
+      }
+    }
+
+    void loadPanelContent()
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     if (status === 'loading') {
@@ -1220,126 +1279,126 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className={styles.page}>
-      <div className={styles.shell}>
-        <section className={styles.heroPanel}>
-          <Link href="/" className={styles.logo}>
-            <Image
-              src="/careshare-logo.png"
-              alt="CareShare Logo"
-              width={200}
-              height={76}
-              priority
-            />
-          </Link>
+    <>
+      <MarketingNav />
+      <div className={styles.page}>
+        <div className={styles.shell}>
+          <section className={styles.heroPanel}>
+            <div className={styles.heroCopy}>
+              <span className={styles.heroEyebrow}>{panelContent.eyebrow}</span>
+              <h1>{panelContent.title}</h1>
+              <p>{panelContent.body}</p>
+            </div>
 
-          <div className={styles.heroCopy}>
-            <span className={styles.heroEyebrow}>Adaptive Onboarding</span>
-            <h1>{audienceContent.title}</h1>
-            <p>{audienceContent.description}</p>
-          </div>
-
-          <div className={styles.heroHighlights}>
-            {audienceContent.bullets.map((bullet) => (
-              <div key={bullet} className={styles.heroHighlight}>
-                <Check size={18} />
-                <span>{bullet}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className={styles.heroFootnote}>
-            <Sparkles size={16} />
-            <span>One onboarding route, tailored guidance for four kinds of care support.</span>
-          </div>
-        </section>
-
-        <section className={styles.formPanel}>
-          <div className={styles.progressBar}>
-            <div className={styles.progressSteps}>
-              {[1, 2, 3, 4, 5, 6].map((stepNumber) => (
-                <div key={stepNumber} className={styles.progressStepWrapper}>
-                  <div
-                    className={`${styles.progressStep} ${
-                      stepNumber <= progressStep ? styles.progressStepActive : ''
-                    } ${stepNumber < progressStep ? styles.progressStepCompleted : ''}`}
-                  >
-                    {stepNumber < progressStep ? <Check size={15} /> : stepNumber}
-                  </div>
-                  {stepNumber < 6 && (
-                    <div
-                      className={`${styles.progressLine} ${
-                        stepNumber < progressStep ? styles.progressLineCompleted : ''
-                      }`}
-                    />
-                  )}
+            <div className={styles.heroHighlights}>
+              {panelContent.bullets.map((bullet) => (
+                <div key={bullet} className={styles.heroHighlight}>
+                  <Check size={18} />
+                  <span>{bullet}</span>
                 </div>
               ))}
             </div>
 
-            <div className={styles.progressLabels}>
-              {stepLabels.map((label, index) => (
-                <span key={label} className={index + 1 === progressStep ? styles.activeLabel : ''}>
-                  {label}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div className={styles.formCard}>
-            {error && <div className={styles.error}>{error}</div>}
-
-            {renderStep()}
-
-            <div className={styles.stepActions}>
-              {step > 1 ? (
-                <button
-                  type="button"
-                  onClick={handleBack}
-                  className={styles.secondaryAction}
-                  disabled={loading}
-                >
-                  <ChevronLeft size={18} />
-                  Back
-                </button>
-              ) : (
-                <span />
-              )}
-
-              {step < 6 ? (
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  className={styles.primaryAction}
-                  disabled={loading || pageLoading}
-                >
-                  Continue
-                  <ArrowRight size={18} />
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleComplete}
-                  className={styles.primaryAction}
-                  disabled={loading || pageLoading}
-                >
-                  {loading
-                    ? 'Finishing setup...'
-                    : formData.audienceType === 'CARE_CENTER'
-                      ? 'Submit partnership intake'
-                      : 'Launch workspace'}
-                </button>
-              )}
+            <div className={styles.heroPathCard}>
+              <span>Current path</span>
+              <strong>{audienceContent.title}</strong>
+              <p>{audienceContent.description}</p>
             </div>
 
-            <div className={styles.footerNote}>
-              <p>
-                Already have an account? <Link href="/login">Sign in</Link>
-              </p>
+            <div className={styles.heroFootnote}>
+              <Sparkles size={16} />
+              <span>{panelContent.note}</span>
             </div>
-          </div>
-        </section>
+          </section>
+
+          <section className={styles.formPanel}>
+            <div className={styles.progressBar}>
+              <div className={styles.progressSteps}>
+                {[1, 2, 3, 4, 5, 6].map((stepNumber) => (
+                  <div key={stepNumber} className={styles.progressStepWrapper}>
+                    <div
+                      className={`${styles.progressStep} ${
+                        stepNumber <= progressStep ? styles.progressStepActive : ''
+                      } ${stepNumber < progressStep ? styles.progressStepCompleted : ''}`}
+                    >
+                      {stepNumber < progressStep ? <Check size={15} /> : stepNumber}
+                    </div>
+                    {stepNumber < 6 && (
+                      <div
+                        className={`${styles.progressLine} ${
+                          stepNumber < progressStep ? styles.progressLineCompleted : ''
+                        }`}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className={styles.progressLabels}>
+                {stepLabels.map((label, index) => (
+                  <span key={label} className={index + 1 === progressStep ? styles.activeLabel : ''}>
+                    {label}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div className={styles.formCard}>
+              {error && <div className={styles.error}>{error}</div>}
+
+              {renderStep()}
+
+              <div className={styles.stepActions}>
+                {step > 1 ? (
+                  <button
+                    type="button"
+                    onClick={handleBack}
+                    className={styles.secondaryAction}
+                    disabled={loading}
+                  >
+                    <ChevronLeft size={18} />
+                    Back
+                  </button>
+                ) : (
+                  <span />
+                )}
+
+                {step < 6 ? (
+                  <button
+                    type="button"
+                    onClick={handleNext}
+                    className={styles.primaryAction}
+                    disabled={loading || pageLoading}
+                  >
+                    Continue
+                    <ArrowRight size={18} />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleComplete}
+                    className={styles.primaryAction}
+                    disabled={loading || pageLoading}
+                  >
+                    {loading
+                      ? 'Finishing setup...'
+                      : formData.audienceType === 'CARE_CENTER'
+                        ? 'Submit partnership intake'
+                        : 'Launch workspace'}
+                  </button>
+                )}
+              </div>
+
+              <div className={styles.footerNote}>
+                <p>
+                  Already have an account? <Link href="/login">Sign in</Link>
+                </p>
+              </div>
+            </div>
+          </section>
+        </div>
       </div>
-    </div>
+      <Footer />
+    </>
   )
 }

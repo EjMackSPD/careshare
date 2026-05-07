@@ -2,8 +2,6 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import Navigation from '@/app/components/Navigation'
-import LeftNavigation from '@/app/components/LeftNavigation'
 import Footer from '@/app/components/Footer'
 import {
   ArrowUpRight,
@@ -136,11 +134,7 @@ export default function ResourcesPage() {
 
   return (
     <div className={styles.container}>
-      <Navigation showAuthLinks={true} />
-
       <div className={styles.layout}>
-        <LeftNavigation />
-
         <main className={styles.main}>
           <section className={styles.header}>
             <div className={styles.headerCopy}>

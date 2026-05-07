@@ -3,8 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Navigation from '@/app/components/Navigation'
-import LeftNavigation from '@/app/components/LeftNavigation'
 import Footer from '@/app/components/Footer'
 import { ArrowLeft, ExternalLink, Bookmark, Share2, FileText, Phone, MapPin } from 'lucide-react'
 import styles from './page.module.css'
@@ -82,9 +80,7 @@ export default function ResourceDetailPage() {
   if (loading) {
     return (
       <div className={styles.container}>
-        <Navigation showAuthLinks={true} />
         <div className={styles.layout}>
-          <LeftNavigation />
           <main className={styles.main}>
             <div className={styles.loading}>
               <div className={styles.spinner}></div>
@@ -99,9 +95,7 @@ export default function ResourceDetailPage() {
   if (!resource) {
     return (
       <div className={styles.container}>
-        <Navigation showAuthLinks={true} />
         <div className={styles.layout}>
-          <LeftNavigation />
           <main className={styles.main}>
             <div className={styles.error}>
               <h2>Resource not found</h2>
@@ -117,10 +111,7 @@ export default function ResourceDetailPage() {
 
   return (
     <div className={styles.container}>
-      <Navigation showAuthLinks={true} />
-      
       <div className={styles.layout}>
-        <LeftNavigation />
         <main className={styles.main}>
           {/* Header */}
           <div className={styles.header}>

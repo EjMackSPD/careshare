@@ -1,34 +1,36 @@
 .page {
-  min-height: 100vh;
+  min-height: auto;
   background:
     radial-gradient(circle at top left, rgba(34, 197, 94, 0.12), transparent 28%),
     radial-gradient(circle at right, rgba(59, 130, 246, 0.12), transparent 30%),
     linear-gradient(180deg, #f7f8f4 0%, #eef2f6 100%);
-  padding: 2rem;
+  padding: 4rem 1.5rem;
 }
 
 .shell {
-  min-height: calc(100vh - 4rem);
+  width: min(1180px, 100%);
+  margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(320px, 0.95fr) minmax(0, 1.15fr);
-  border-radius: 2rem;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.74);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.12);
-  backdrop-filter: blur(18px);
+  grid-template-columns: minmax(280px, 0.82fr) minmax(0, 1.18fr);
+  gap: 1.5rem;
+  align-items: start;
 }
 
 .heroPanel {
-  position: relative;
+  position: sticky;
+  top: 7rem;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  padding: 2.5rem;
+  gap: 1.5rem;
+  padding: 2rem;
   background:
-    linear-gradient(155deg, rgba(15, 23, 42, 0.92), rgba(12, 74, 110, 0.86)),
-    linear-gradient(180deg, #0f172a, #0f3d4d);
-  color: #f8fafc;
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(247, 252, 250, 0.98)),
+    #fff;
+  color: #0f172a;
+  border: 1px solid rgba(155, 184, 178, 0.42);
+  border-radius: 1.5rem;
+  box-shadow: 0 20px 48px rgba(17, 64, 72, 0.08);
+  overflow: hidden;
 }
 
 .heroPanel::before {
@@ -36,28 +38,21 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at top right, rgba(255, 255, 255, 0.16), transparent 24%),
-    radial-gradient(circle at bottom left, rgba(74, 222, 128, 0.18), transparent 28%);
+    radial-gradient(circle at top right, rgba(20, 128, 150, 0.14), transparent 26%),
+    radial-gradient(circle at bottom left, rgba(34, 197, 94, 0.12), transparent 28%);
   pointer-events: none;
 }
 
-.logo,
 .heroCopy,
 .heroHighlights,
+.heroPathCard,
 .heroFootnote {
   position: relative;
   z-index: 1;
 }
 
-.logo {
-  display: inline-flex;
-  width: fit-content;
-  filter: brightness(0) invert(1);
-}
-
 .heroCopy {
   max-width: 30rem;
-  margin-top: 3rem;
 }
 
 .heroEyebrow,
@@ -73,14 +68,15 @@
 }
 
 .heroEyebrow {
-  background: rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.9);
+  background: rgba(14, 116, 144, 0.1);
+  color: #0e7490;
 }
 
 .heroCopy h1 {
   margin: 1rem 0 0;
-  font-size: clamp(2.3rem, 5vw, 4.4rem);
-  line-height: 0.95;
+  font-size: clamp(2rem, 3.2vw, 3.15rem);
+  line-height: 1;
+  color: #082f49;
 }
 
 .heroCopy p {
@@ -88,7 +84,7 @@
   max-width: 28rem;
   font-size: 1rem;
   line-height: 1.75;
-  color: rgba(226, 232, 240, 0.92);
+  color: #475569;
 }
 
 .heroHighlights {
@@ -103,9 +99,9 @@
   align-items: flex-start;
   padding: 1rem 1.05rem;
   border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: rgba(241, 245, 249, 0.96);
+  background: rgba(236, 253, 245, 0.72);
+  border: 1px solid rgba(20, 184, 166, 0.16);
+  color: #164e63;
 }
 
 .heroHighlight svg {
@@ -118,15 +114,43 @@
   align-items: center;
   gap: 0.55rem;
   margin-top: 2rem;
-  color: rgba(191, 219, 254, 0.95);
+  color: #0f766e;
   font-size: 0.95rem;
 }
 
+.heroPathCard {
+  padding: 1rem;
+  border-radius: 1rem;
+  background: #f8fafc;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.heroPathCard span {
+  display: block;
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.heroPathCard strong {
+  display: block;
+  margin-top: 0.45rem;
+  color: #0f172a;
+  font-size: 1.1rem;
+}
+
+.heroPathCard p {
+  margin: 0.45rem 0 0;
+  color: #475569;
+  line-height: 1.55;
+}
+
 .formPanel {
-  padding: 2rem;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .progressBar {
@@ -547,6 +571,8 @@
   }
 
   .heroPanel {
+    position: relative;
+    top: auto;
     gap: 1.5rem;
   }
 }

@@ -16,6 +16,11 @@ function textArray(items: Array<{ text?: string } | string> | undefined): string
   return values?.length ? values : undefined;
 }
 
+function cardColumnCount(value: unknown): 2 | 3 | 4 {
+  const count = Number(value);
+  return count === 2 || count === 3 || count === 4 ? count : 3;
+}
+
 function mapActions(actions: PayloadDoc[] | undefined): CTA[] | undefined {
   const mapped = actions
     ?.map((action) => ({
@@ -35,14 +40,33 @@ function mediaURL(media: unknown): string | null {
   }
 
   if (typeof media === "string") {
-    return media;
+    return normalizeMediaURL(media);
   }
 
   if (typeof media === "object" && "url" in media && typeof media.url === "string") {
-    return media.url;
+    return normalizeMediaURL(media.url);
   }
 
   return null;
+}
+
+function normalizeMediaURL(url: string): string {
+  if (url.startsWith("/")) {
+    return url;
+  }
+
+  try {
+    const parsed = new URL(url);
+    const siteURL = process.env.NEXT_PUBLIC_SITE_URL ? new URL(process.env.NEXT_PUBLIC_SITE_URL) : null;
+
+    if (siteURL && parsed.origin === siteURL.origin) {
+      return `${parsed.pathname}${parsed.search}`;
+    }
+  } catch {
+    return url;
+  }
+
+  return url;
 }
 
 function mediaAlt(media: unknown): string | null {
@@ -105,11 +129,18 @@ function mapCMSBlock(block: PayloadDoc): PageSection | null {
         title: block.title,
         intro: block.intro,
         layout: block.layout || "cards",
+        cardsPerRow: cardColumnCount(block.cardsPerRow),
         background: block.background || "plain",
         items:
           block.items?.map((item: PayloadDoc) => ({
             title: item.title,
             body: item.body,
+            image: mediaURL(item.image)
+              ? {
+                  src: mediaURL(item.image) as string,
+                  alt: item.imageAlt || mediaAlt(item.image) || item.title,
+                }
+              : undefined,
             icon: item.iconKey,
             accentPreset: item.accentPreset,
             bullets: textArray(item.bullets),
@@ -132,7 +163,9 @@ function mapCMSBlock(block: PayloadDoc): PageSection | null {
           })) ?? [],
       };
 
-    case "content":
+    case "content": {
+      const asideImage = mediaURL(block.aside?.image);
+
       return {
         id,
         type: "content",
@@ -141,10 +174,16 @@ function mapCMSBlock(block: PayloadDoc): PageSection | null {
         prose: block.prose,
         bullets: textArray(block.bullets),
         actions: mapActions(block.actions),
-        aside: block.aside?.title
+        aside: block.aside?.title || asideImage
           ? {
               title: block.aside.title,
               body: block.aside.body,
+              image: asideImage
+                ? {
+                    src: asideImage,
+                    alt: block.aside.imageAlt || mediaAlt(block.aside.image) || block.aside.title || block.title || "",
+                  }
+                : undefined,
               actions: mapActions(block.aside.actions),
               note: block.aside.note,
             }
@@ -152,6 +191,7 @@ function mapCMSBlock(block: PayloadDoc): PageSection | null {
         layout: block.layout || "centered",
         background: block.background || "plain",
       };
+    }
 
     case "cta":
       return {

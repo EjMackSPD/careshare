@@ -3,8 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import Navigation from '@/app/components/Navigation'
-import LeftNavigation from '@/app/components/LeftNavigation'
 import Footer from '@/app/components/Footer'
 import styles from './page.module.css'
 
@@ -125,9 +123,7 @@ export default function FamilyMembers() {
   if (loading) {
     return (
       <div className={styles.container}>
-        <Navigation showAuthLinks={true} />
         <div className={styles.layout}>
-          <LeftNavigation />
           <main className={styles.main}>
             <div className={styles.loadingState}>
               <div className={styles.spinner}></div>
@@ -143,9 +139,7 @@ export default function FamilyMembers() {
   if (!family) {
     return (
       <div className={styles.container}>
-        <Navigation showAuthLinks={true} />
         <div className={styles.layout}>
-          <LeftNavigation />
           <main className={styles.main}>
             <div className={styles.errorState}>
               <h2>Family not found</h2>
@@ -163,10 +157,7 @@ export default function FamilyMembers() {
 
   return (
     <div className={styles.container}>
-      <Navigation backLink={{ href: `/family/${familyId}`, label: 'Back to Family' }} />
-      
       <div className={styles.layout}>
-        <LeftNavigation />
         <main className={styles.main}>
         <div className={styles.header}>
           <div>

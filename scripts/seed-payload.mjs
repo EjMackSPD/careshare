@@ -145,7 +145,13 @@ function resolveMediaId(mediaLookup, value, alt) {
   }
 
   if (typeof value === "string") {
-    return mediaLookup.byURL.get(value) ?? mediaLookup.byFilename.get(value) ?? mediaLookup.byAlt.get(value) ?? null;
+    return (
+      mediaLookup.byKey.get(value) ??
+      mediaLookup.byURL.get(value) ??
+      mediaLookup.byFilename.get(value) ??
+      mediaLookup.byAlt.get(value) ??
+      null
+    );
   }
 
   return alt ? mediaLookup.byAlt.get(alt) ?? null : null;
@@ -211,6 +217,48 @@ function normalizeHeroBlock(block, mediaLookup) {
   };
 }
 
+function normalizeFeatureGridBlock(block, mediaLookup) {
+  if (block?.blockType !== "featureGrid" || !Array.isArray(block.items)) {
+    return block;
+  }
+
+  return {
+    ...block,
+    items: block.items.map((item) => {
+      const image = resolveMediaId(mediaLookup, item.image, item.imageAlt);
+
+      return image
+        ? {
+            ...item,
+            image,
+          }
+        : item;
+    }),
+  };
+}
+
+function normalizeContentBlock(block, mediaLookup) {
+  if (block?.blockType !== "content" || !block.aside) {
+    return block;
+  }
+
+  const image = resolveMediaId(mediaLookup, block.aside.image, block.aside.imageAlt);
+
+  return image
+    ? {
+        ...block,
+        aside: {
+          ...block.aside,
+          image,
+        },
+      }
+    : block;
+}
+
+function normalizeLayoutBlock(block, mediaLookup) {
+  return normalizeContentBlock(normalizeFeatureGridBlock(normalizeHeroBlock(block, mediaLookup), mediaLookup), mediaLookup);
+}
+
 function normalizePageDoc(page, mediaLookup) {
   const layout = Array.isArray(page.layout) ? page.layout : [];
   const existingHero = Array.isArray(page.hero) && page.hero.length ? page.hero : null;
@@ -228,8 +276,8 @@ function normalizePageDoc(page, mediaLookup) {
 
   return {
     ...page,
-    hero: hero.map((block) => normalizeHeroBlock(block, mediaLookup)),
-    layout: layout.filter((block) => block?.blockType !== "hero").map((block) => normalizeHeroBlock(block, mediaLookup)),
+    hero: hero.map((block) => normalizeLayoutBlock(block, mediaLookup)),
+    layout: layout.filter((block) => block?.blockType !== "hero").map((block) => normalizeLayoutBlock(block, mediaLookup)),
   };
 }
 

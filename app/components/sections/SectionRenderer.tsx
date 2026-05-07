@@ -213,6 +213,7 @@ function renderSection(section: PageSection, index: number, posts: BlogListItem[
 
     case "feature-grid": {
       const compact = section.layout === "compact";
+      const cardsPerRow = section.cardsPerRow ?? 3;
 
       return (
         <SectionShell
@@ -226,7 +227,10 @@ function renderSection(section: PageSection, index: number, posts: BlogListItem[
           <div
             className={cx(
               styles.featureGrid,
-              compact ? styles.featureGridCompact : styles.featureGridCards
+              compact ? styles.featureGridCompact : styles.featureGridCards,
+              cardsPerRow === 2 && styles.featureGridColumns2,
+              cardsPerRow === 3 && styles.featureGridColumns3,
+              cardsPerRow === 4 && styles.featureGridColumns4
             )}
           >
             {section.items.map((item) => {
@@ -235,9 +239,23 @@ function renderSection(section: PageSection, index: number, posts: BlogListItem[
               return (
                 <article
                   key={item.title}
-                  className={cx(styles.featureCard, compact && styles.featureCardCompact)}
+                  className={cx(
+                    styles.featureCard,
+                    item.image && styles.featureCardWithImage,
+                    compact && styles.featureCardCompact
+                  )}
                 >
-                  {Icon ? (
+                  {item.image ? (
+                    <div className={styles.featureImageWrap}>
+                      <Image
+                        src={item.image.src}
+                        alt={item.image.alt}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 45vw, 280px"
+                        className={styles.featureImage}
+                      />
+                    </div>
+                  ) : Icon ? (
                     <div
                       className={cx(
                         styles.featureIcon,
@@ -330,10 +348,20 @@ function renderSection(section: PageSection, index: number, posts: BlogListItem[
             </div>
 
             {section.layout === "split" && section.aside ? (
-              <aside className={styles.contentAside}>
-                <h3 className={styles.contentAsideTitle}>{section.aside.title}</h3>
+              <aside className={cx(styles.contentAside, section.aside.image && styles.contentAsideImagePanel)}>
+                {section.aside.image ? (
+                  <div className={styles.contentAsideImageFrame}>
+                    <Image
+                      src={section.aside.image.src}
+                      alt={section.aside.image.alt}
+                      fill
+                      sizes="(max-width: 900px) 100vw, 520px"
+                    />
+                  </div>
+                ) : null}
+                {section.aside.title ? <h3 className={styles.contentAsideTitle}>{section.aside.title}</h3> : null}
                 {section.aside.body ? <p className={styles.contentAsideBody}>{section.aside.body}</p> : null}
-                {renderActions(section.aside.actions ?? section.actions)}
+                {!section.aside.image ? renderActions(section.aside.actions ?? section.actions) : null}
                 {section.aside.note ? <p className={styles.contentAsideNote}>{section.aside.note}</p> : null}
               </aside>
             ) : null}

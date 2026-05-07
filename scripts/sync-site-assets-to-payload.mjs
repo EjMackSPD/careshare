@@ -83,6 +83,12 @@ export const siteMediaAssets = [
     alt: "Window icon asset",
   },
   {
+    key: "home-dashboard-screenshot",
+    kind: "local",
+    path: "public/cms/dashboard-screenshot.png",
+    alt: "CareShare dashboard showing care tasks, finances, calendar, and quick actions",
+  },
+  {
     key: "features-care-team",
     kind: "remote",
     url: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=1920&q=80",
@@ -158,6 +164,34 @@ export const siteMediaAssets = [
     url: "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=1600&q=80",
     filename: "blog-family-gathering.jpg",
     alt: "Family gathering for a care planning story",
+  },
+  {
+    key: "home-feature-costs",
+    kind: "remote",
+    url: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1200&q=80",
+    filename: "home-feature-costs.jpg",
+    alt: "Family reviewing shared care expenses",
+  },
+  {
+    key: "home-feature-calendar",
+    kind: "remote",
+    url: "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=1200&q=80",
+    filename: "home-feature-calendar.jpg",
+    alt: "Care calendar and planning notes on a desk",
+  },
+  {
+    key: "home-feature-family",
+    kind: "remote",
+    url: "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=1200&q=80",
+    filename: "home-feature-family.jpg",
+    alt: "Family members spending time together",
+  },
+  {
+    key: "home-feature-providers",
+    kind: "remote",
+    url: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&q=80",
+    filename: "home-feature-providers.jpg",
+    alt: "Care provider reviewing a plan with a patient",
   },
 ];
 

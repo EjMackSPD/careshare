@@ -189,6 +189,20 @@ export const FeatureGridBlock: Block = {
       ],
     },
     {
+      name: "cardsPerRow",
+      label: "Cards per row",
+      type: "select",
+      defaultValue: "3",
+      options: [
+        { label: "2 cards", value: "2" },
+        { label: "3 cards", value: "3" },
+        { label: "4 cards", value: "4" },
+      ],
+      admin: {
+        description: "Controls desktop card columns. Overflow rows are centered automatically.",
+      },
+    },
+    {
       name: "background",
       type: "select",
       defaultValue: "plain",
@@ -204,6 +218,21 @@ export const FeatureGridBlock: Block = {
       fields: [
         { name: "title", type: "text", required: true },
         { name: "body", type: "textarea", required: true },
+        {
+          name: "image",
+          type: "upload",
+          relationTo: "media",
+          admin: {
+            description: "Optional card image from Payload Media. When set, it replaces the icon treatment.",
+          },
+        },
+        {
+          name: "imageAlt",
+          type: "text",
+          admin: {
+            description: "Optional override. Defaults to the Media alt text.",
+          },
+        },
         { name: "iconKey", type: "select", options: iconOptions },
         {
           name: "accentPreset",
@@ -273,6 +302,21 @@ export const ContentBlock: Block = {
       fields: [
         { name: "title", type: "text" },
         { name: "body", type: "textarea" },
+        {
+          name: "image",
+          type: "upload",
+          relationTo: "media",
+          admin: {
+            description: "Optional image from Payload Media. When set, the aside renders as an image panel.",
+          },
+        },
+        {
+          name: "imageAlt",
+          type: "text",
+          admin: {
+            description: "Optional override. Defaults to the Media alt text.",
+          },
+        },
         actionsField,
         { name: "note", type: "textarea" },
       ],
