@@ -23,7 +23,7 @@ import {
   type OnboardingDraft,
   type OnboardingInvite,
 } from '@/types/onboarding'
-import { useSession } from '@/app/components/AuthProvider'
+import { payloadLogout, useSession } from '@/app/components/AuthProvider'
 
 type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6
 
@@ -234,25 +234,6 @@ export default function OnboardingPage() {
         const saved = { ...DEFAULT_ONBOARDING_DRAFT, ...(data.data ?? {}) } as OnboardingDraft
         saved.workspaceMode = getWorkspaceMode(saved.audienceType)
 
-        if (data.hasCompletedOnboarding) {
-          if (saved.audienceType === 'CARE_CENTER') {
-            router.replace('/onboarding/partner-complete')
-            return
-          }
-
-          if (
-            saved.audienceType === 'FAMILY' &&
-            saved.careContext.familyIntent === 'JOIN' &&
-            !data.familyId
-          ) {
-            router.replace('/onboarding/join-family')
-            return
-          }
-
-          router.replace('/dashboard')
-          return
-        }
-
         setFormData({
           ...saved,
           currentStep: saved.currentStep ?? 1,
@@ -274,7 +255,11 @@ export default function OnboardingPage() {
             saved.notificationPreferences ?? DEFAULT_ONBOARDING_DRAFT.notificationPreferences,
           topNeeds: saved.topNeeds ?? [],
         })
-        setStep(Math.min(Math.max(data.onboardingStep ?? 2, 2), 6) as OnboardingStep)
+        setStep(
+          data.hasCompletedOnboarding
+            ? 1
+            : (Math.min(Math.max(data.onboardingStep ?? 2, 2), 6) as OnboardingStep)
+        )
       } catch (loadError) {
         setError('Unable to load your onboarding progress')
       } finally {
@@ -579,7 +564,8 @@ export default function OnboardingPage() {
         throw new Error(data.error || 'Failed to complete onboarding')
       }
 
-      router.push(data.redirectTo || '/dashboard')
+      await payloadLogout()
+      router.push(data.redirectTo && data.redirectTo !== '/dashboard' ? data.redirectTo : '/login')
       router.refresh()
     } catch (completeError: any) {
       setError(completeError.message || 'Something went wrong')
