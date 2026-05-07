@@ -23,6 +23,7 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
+  CreditCard,
 } from "lucide-react";
 import styles from "./page.module.css";
 
@@ -76,6 +77,13 @@ const CATEGORY_COLORS: { [key: string]: string } = {
 export default function FinancesPage() {
   const { data: session } = useSession();
   const isDemoAccount = session?.user?.email === "demo@careshare.app";
+  const today = React.useMemo(
+    () =>
+      isDemoAccount
+        ? new Date("2025-10-07T12:00:00")
+        : new Date(),
+    [isDemoAccount]
+  );
   const [activeTab, setActiveTab] = useState("Overview");
   const tabs = ["Overview", "Expenses", "Bills", "Family Contributions"];
 
@@ -1371,7 +1379,6 @@ export default function FinancesPage() {
 
   // Calculate upcoming bills (next 30 days)
   const upcomingBills = React.useMemo(() => {
-    const today = new Date();
     const thirtyDaysFromNow = new Date(today);
     thirtyDaysFromNow.setDate(today.getDate() + 30);
 
@@ -1388,10 +1395,9 @@ export default function FinancesPage() {
         (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
       )
       .slice(0, 5); // Show max 5 upcoming bills
-  }, [bills]);
+  }, [bills, today]);
 
   const upcomingBillsDateRange = React.useMemo(() => {
-    const today = new Date();
     const thirtyDaysFromNow = new Date(today);
     thirtyDaysFromNow.setDate(today.getDate() + 30);
 
@@ -1404,7 +1410,7 @@ export default function FinancesPage() {
     };
 
     return `${formatDate(today)} - ${formatDate(thirtyDaysFromNow)}`;
-  }, []);
+  }, [today]);
 
   // File upload handler
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1594,18 +1600,31 @@ export default function FinancesPage() {
   const canProceedToStep2 =
     billData.name && billData.amount && billData.dueDate;
 
-  // Handler for marking bill as paid
-  const handleMarkAsPaid = (bill: Bill) => {
-    if (confirm(`Mark "${bill.name}" as paid ($${bill.amount.toFixed(2)})?`)) {
-      const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
-      setBills(
-        bills.map((b) =>
-          b.id === bill.id
-            ? { ...b, amountPaid: b.amount, status: "paid" as const, datePaid: today }
-            : b
+  const getOutstandingAmount = (bill: Bill) =>
+    Math.max(0, bill.amount - bill.amountPaid);
+
+  const handlePayNow = (bill: Bill) => {
+    const outstandingAmount = getOutstandingAmount(bill);
+
+    if (outstandingAmount <= 0) {
+      return;
+    }
+
+    if (confirm(`Pay ${bill.name} now for $${outstandingAmount.toFixed(2)}?`)) {
+      const today = new Date().toISOString().split("T")[0];
+      setBills((currentBills) =>
+        currentBills.map((currentBill) =>
+          currentBill.id === bill.id
+            ? {
+                ...currentBill,
+                amountPaid: currentBill.amount,
+                status: "paid" as const,
+                datePaid: today,
+              }
+            : currentBill
         )
       );
-      alert(`✓ ${bill.name} marked as paid!`);
+      alert(`${bill.name} is now paid.`);
     }
   };
 
@@ -1823,6 +1842,30 @@ export default function FinancesPage() {
       return matchesMonth && matchesSearch;
     });
   }, [bills, selectedMonth, billSearchQuery]);
+
+  const openBills = React.useMemo(
+    () => bills.filter((bill) => bill.status !== "paid"),
+    [bills]
+  );
+  const openBillsTotal = React.useMemo(
+    () =>
+      openBills.reduce((sum, bill) => sum + getOutstandingAmount(bill), 0),
+    [openBills]
+  );
+  const paidThisMonth = React.useMemo(
+    () =>
+      bills
+        .filter((bill) => {
+          const dueDate = new Date(bill.dueDate);
+          return (
+            bill.status === "paid" &&
+            dueDate.getMonth() === selectedMonth &&
+            dueDate.getFullYear() === 2025
+          );
+        })
+        .reduce((sum, bill) => sum + bill.amountPaid, 0),
+    [bills, selectedMonth]
+  );
 
   // Get month name
   const getMonthName = (monthIndex: number) => {
@@ -3088,14 +3131,8 @@ export default function FinancesPage() {
                           <div className={styles.billAmount}>
                             <div>${bill.amount.toFixed(2)}</div>
                             {bill.amountPaid > 0 && (
-                              <div
-                                style={{
-                                  fontSize: "0.85rem",
-                                  color: "#6c757d",
-                                }}
-                              >
-                                Remaining: $
-                                {(bill.amount - bill.amountPaid).toFixed(2)}
+                              <div className={styles.billRemaining}>
+                                Remaining: ${getOutstandingAmount(bill).toFixed(2)}
                               </div>
                             )}
                             <ArrowRight
@@ -3103,6 +3140,18 @@ export default function FinancesPage() {
                               className={styles.billItemArrow}
                             />
                           </div>
+                          {bill.status !== "paid" && (
+                            <button
+                              className={styles.payNowSmallBtn}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                handlePayNow(bill);
+                              }}
+                            >
+                              <CreditCard size={15} />
+                              Pay now
+                            </button>
+                          )}
                         </div>
                       ))
                     ) : (
@@ -3311,10 +3360,28 @@ export default function FinancesPage() {
             <div className={styles.billsSection}>
               <div className={styles.billsHeader}>
                 <div>
-                  <h3>All Bills</h3>
+                  <h3>Bills</h3>
                   <p className={styles.subtitle}>
-                    Manage recurring and one-time bills
+                    Review, pay, and keep care expenses current.
                   </p>
+                </div>
+              </div>
+
+              <div className={styles.billSummaryGrid}>
+                <div className={styles.billSummaryCard}>
+                  <span>Open balance</span>
+                  <strong>${openBillsTotal.toFixed(2)}</strong>
+                  <p>{openBills.length} bills need attention</p>
+                </div>
+                <div className={styles.billSummaryCard}>
+                  <span>Paid in view</span>
+                  <strong>${paidThisMonth.toFixed(2)}</strong>
+                  <p>{getMonthName(selectedMonth)} activity</p>
+                </div>
+                <div className={styles.billSummaryCard}>
+                  <span>Upcoming soon</span>
+                  <strong>{upcomingBills.length}</strong>
+                  <p>Due in the next 30 days</p>
                 </div>
               </div>
 
@@ -3425,11 +3492,10 @@ export default function FinancesPage() {
                         {bill.status !== "paid" && (
                           <button
                             className={styles.payBtn}
-                            onClick={() => handleMarkAsPaid(bill)}
+                            onClick={() => handlePayNow(bill)}
                           >
-                            {bill.status === "partial"
-                              ? "Mark Rest as Paid"
-                              : "Mark as Paid"}
+                            <CreditCard size={16} />
+                            Pay now
                           </button>
                         )}
                         <button

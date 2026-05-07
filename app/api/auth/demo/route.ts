@@ -15,13 +15,6 @@ import {
 
 export async function POST() {
   try {
-    if (process.env.NODE_ENV === "production") {
-      return NextResponse.json(
-        { error: "Demo bootstrap is disabled in production" },
-        { status: 403 }
-      );
-    }
-
     // Check if demo user exists, create if not
     let demoUser = await prisma.user.findUnique({
       where: { email: "demo@careshare.app" },
