@@ -3,7 +3,14 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Footer from "@/app/components/Footer";
-import { Info, X } from "lucide-react";
+import {
+  CalendarDays,
+  ClipboardCheck,
+  FileText,
+  HeartPulse,
+  ShieldCheck,
+  X,
+} from "lucide-react";
 import styles from "./page.module.css";
 
 type Document = {
@@ -50,33 +57,99 @@ type Service = {
   link?: string;
 };
 
+type FamilyWorkspace = {
+  id: string;
+  name: string;
+  elderName?: string | null;
+  careRecipient?: {
+    name?: string | null;
+  } | null;
+};
+
 const recommendedServices: Service[] = [
   {
     id: "1",
-    title: "Regular Home Health Aide",
-    description: "10-20 hours weekly",
+    title: "In-home support",
+    description: "Personal care and household routines",
   },
   {
     id: "2",
-    title: "Medication Management",
-    description: "Daily reminders",
+    title: "Medication support",
+    description: "Reminders, refills, and adherence checks",
     link: "/dashboard/medications",
   },
   {
     id: "3",
-    title: "Transportation Services",
-    description: "For medical appointments and essential errands",
+    title: "Appointment transportation",
+    description: "Rides for medical visits and essential errands",
   },
   {
     id: "4",
-    title: "Meal Services",
-    description: "Meal delivery 3-5 days/week",
+    title: "Nutrition support",
+    description: "Meal planning, delivery, and monitoring",
   },
 ];
+
+const dailySupportItems = [
+  {
+    title: "Personal care",
+    description: "Bathing, dressing, grooming, and safe mobility.",
+    cadence: "Daily support",
+    owner: "Caregiver",
+  },
+  {
+    title: "Meals and hydration",
+    description: "Simple meal preparation with regular check-ins.",
+    cadence: "Routine support",
+    owner: "Family lead",
+  },
+  {
+    title: "Transportation",
+    description: "Appointments, pharmacy runs, and essential errands.",
+    cadence: "Weekly support",
+    owner: "Coordinator",
+  },
+  {
+    title: "Medication",
+    description: "Reminders, monitoring, and refill coordination.",
+    cadence: "Daily review",
+    owner: "Care team",
+  },
+];
+
+const formatCareLevel = (level?: string | null) => {
+  if (!level) return "Not set";
+  return level
+    .toLowerCase()
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+};
+
+const formatCurrency = (value?: number | null) => {
+  if (!value) return "Not set";
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(value);
+};
+
+const formatCostRange = (plan: CarePlan | null) => {
+  if (!plan?.estimatedCostMin && !plan?.estimatedCostMax) return "Not set";
+  if (plan?.estimatedCostMin && plan?.estimatedCostMax) {
+    return `${formatCurrency(plan.estimatedCostMin)} - ${formatCurrency(
+      plan.estimatedCostMax
+    )}/mo`;
+  }
+  return `${formatCurrency(plan?.estimatedCostMin || plan?.estimatedCostMax)}/mo`;
+};
 
 export default function CarePlanPage() {
   const [activeTab, setActiveTab] = useState("Current Care");
   const tabs = ["Current Care", "Important Documents", "Care Scenarios"];
+  const [currentFamilyId, setCurrentFamilyId] = useState<string | null>(null);
+  const [familyName, setFamilyName] = useState("Family workspace");
+  const [careRecipientName, setCareRecipientName] = useState("Care recipient");
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddDocument, setShowAddDocument] = useState(false);
@@ -99,33 +172,68 @@ export default function CarePlanPage() {
     null
   );
   const [showEditScenario, setShowEditScenario] = useState(false);
-  const [scenarioFormData, setScenarioFormData] = useState<any>({});
+  const [scenarioFormData, setScenarioFormData] = useState<
+    Record<string, string>
+  >({});
 
-  // Fetch documents, care plan, and scenarios on mount
+  // Load the active family first so real workspaces are not tied to demo data.
   useEffect(() => {
-    fetchDocuments();
-    fetchCarePlan();
-    fetchScenarios();
+    let cancelled = false;
+
+    const loadWorkspace = async () => {
+      try {
+        setLoading(true);
+        const familyResponse = await fetch("/api/families");
+
+        if (!familyResponse.ok) return;
+
+        const families: FamilyWorkspace[] = await familyResponse.json();
+        const family = families[0];
+
+        if (!family || cancelled) return;
+
+        setCurrentFamilyId(family.id);
+        setFamilyName(family.name || "Family workspace");
+        setCareRecipientName(
+          family.careRecipient?.name || family.elderName || "Care recipient"
+        );
+
+        await Promise.all([
+          fetchDocuments(family.id),
+          fetchCarePlan(family.id),
+          fetchScenarios(family.id),
+        ]);
+      } catch (error) {
+        console.error("Error loading care plan workspace:", error);
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadWorkspace();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const fetchDocuments = async () => {
+  const fetchDocuments = async (familyId: string) => {
     try {
-      setLoading(true);
-      const response = await fetch("/api/documents?familyId=demo-family-id");
+      const response = await fetch(`/api/documents?familyId=${familyId}`);
       if (response.ok) {
         const data = await response.json();
         setDocuments(data);
       }
     } catch (error) {
       console.error("Error fetching documents:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
-  const fetchCarePlan = async () => {
+  const fetchCarePlan = async (familyId: string) => {
     try {
-      const response = await fetch("/api/care-plan?familyId=demo-family-id");
+      const response = await fetch(`/api/care-plan?familyId=${familyId}`);
       if (response.ok) {
         const data = await response.json();
         setCarePlan(data);
@@ -135,11 +243,9 @@ export default function CarePlanPage() {
     }
   };
 
-  const fetchScenarios = async () => {
+  const fetchScenarios = async (familyId: string) => {
     try {
-      const response = await fetch(
-        "/api/care-scenarios?familyId=demo-family-id"
-      );
+      const response = await fetch(`/api/care-scenarios?familyId=${familyId}`);
       if (response.ok) {
         const data = await response.json();
         setScenarios(data);
@@ -164,12 +270,14 @@ export default function CarePlanPage() {
 
   const handleSaveCarePlan = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!currentFamilyId) return;
+
     try {
       const response = await fetch("/api/care-plan", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          familyId: "demo-family-id",
+          familyId: currentFamilyId,
           ...editingCarePlan,
         }),
       });
@@ -280,13 +388,15 @@ export default function CarePlanPage() {
 
   const handleAddDocument = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!currentFamilyId) return;
+
     try {
       const response = await fetch("/api/documents", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...newDocument,
-          familyId: "demo-family-id",
+          familyId: currentFamilyId,
         }),
       });
 
@@ -329,17 +439,17 @@ export default function CarePlanPage() {
   const getCategoryTitle = (category: string) => {
     switch (category) {
       case "MEDICAL":
-        return "📋 Medical Records";
+        return "Medical Records";
       case "LEGAL":
-        return "⚖️ Legal Documents";
+        return "Legal Documents";
       case "INSURANCE":
-        return "🏥 Insurance & Financial";
+        return "Insurance";
       case "FINANCIAL":
-        return "💰 Financial Documents";
+        return "Financial Documents";
       case "OTHER":
-        return "📁 Other Documents";
+        return "Other Documents";
       default:
-        return "📁 Documents";
+        return "Documents";
     }
   };
 
@@ -351,7 +461,7 @@ export default function CarePlanPage() {
       return fields.map((field) => (
         <div key={field.key} className={styles.scenarioItem}>
           <strong>{field.label}:</strong>
-          <p style={{ whiteSpace: "pre-wrap" }}>
+          <p className={styles.preWrapText}>
             {content[field.key] || "Not set"}
           </p>
         </div>
@@ -367,9 +477,11 @@ export default function CarePlanPage() {
         <main className={styles.main}>
           <div className={styles.pageHeader}>
             <div>
-              <h1>Care Planning</h1>
+              <span className={styles.eyebrow}>Care coordination</span>
+              <h1>Care Plan</h1>
               <p className={styles.subtitle}>
-                Manage care details, documents, and future planning
+                Keep daily support, important records, and future decisions in
+                one shared view.
               </p>
             </div>
             <button className={styles.editBtn} onClick={handleEditCarePlan}>
@@ -395,6 +507,31 @@ export default function CarePlanPage() {
           {/* Current Care Tab */}
           {activeTab === "Current Care" && (
             <>
+              <section className={styles.planHero}>
+                <div>
+                  <span className={styles.eyebrow}>Current workspace</span>
+                  <h2>{careRecipientName}'s shared care plan</h2>
+                  <p>
+                    {familyName} can use this plan to stay aligned on routines,
+                    support needs, documents, and decision points.
+                  </p>
+                </div>
+                <div className={styles.planHeroStats}>
+                  <div className={styles.heroStat}>
+                    <span>Care level</span>
+                    <strong>{formatCareLevel(carePlan?.careLevel)}</strong>
+                  </div>
+                  <div className={styles.heroStat}>
+                    <span>Monthly estimate</span>
+                    <strong>{formatCostRange(carePlan)}</strong>
+                  </div>
+                  <div className={styles.heroStat}>
+                    <span>Documents</span>
+                    <strong>{documents.length}</strong>
+                  </div>
+                </div>
+              </section>
+
               {/* Care Level & Needs */}
               <div className={styles.careLevelSection}>
                 <h2>Care Level & Needs</h2>
@@ -402,8 +539,8 @@ export default function CarePlanPage() {
                 <div className={styles.careLevelGrid}>
                   <div className={styles.careLevelCard}>
                     <div className={styles.levelBadge}>
-                      <span>{carePlan?.careLevel || "Not Set"}</span>
-                      <Info size={16} />
+                      <HeartPulse size={17} />
+                      <span>{formatCareLevel(carePlan?.careLevel)}</span>
                     </div>
                     <p className={styles.levelDescription}>
                       {carePlan?.careLevelDescription ||
@@ -413,14 +550,7 @@ export default function CarePlanPage() {
                     <div className={styles.costEstimate}>
                       <strong>Estimated Monthly Costs</strong>
                       <p className={styles.costRange}>
-                        {carePlan?.estimatedCostMin &&
-                        carePlan?.estimatedCostMax
-                          ? `$${(carePlan.estimatedCostMin / 100).toFixed(
-                              0
-                            )}k - $${(carePlan.estimatedCostMax / 100).toFixed(
-                              0
-                            )}k`
-                          : "Not set"}
+                        {formatCostRange(carePlan)}
                       </p>
                     </div>
                   </div>
@@ -437,7 +567,7 @@ export default function CarePlanPage() {
 
               {/* Recommended Services */}
               <div className={styles.servicesSection}>
-                <h2>Recommended Services</h2>
+                <h2>Recommended Support</h2>
                 <div className={styles.servicesGrid}>
                   {recommendedServices.map((service) =>
                     service.link ? (
@@ -450,7 +580,7 @@ export default function CarePlanPage() {
                           <h3>{service.title}</h3>
                           <p>{service.description}</p>
                           <span className={styles.viewLink}>
-                            View & Manage →
+                            View and manage
                           </span>
                         </div>
                       </Link>
@@ -466,38 +596,33 @@ export default function CarePlanPage() {
 
               {/* Daily Activities */}
               <div className={styles.activitiesSection}>
-                <h2>Daily Activities & Support</h2>
+                <div className={styles.sectionHeadingRow}>
+                  <div>
+                    <h2>Daily Activities & Support</h2>
+                    <p className={styles.subtitle}>
+                      A quick view of the routine support areas that need shared
+                      attention.
+                    </p>
+                  </div>
+                </div>
                 <div className={styles.activitiesGrid}>
-                  <div className={styles.activityCard}>
-                    <div className={styles.activityIcon}>🛁</div>
-                    <h3>Personal Care</h3>
-                    <p>Needs assistance with bathing and dressing</p>
-                    <span className={styles.supportLevel}>
-                      Daily Support Required
-                    </span>
-                  </div>
-                  <div className={styles.activityCard}>
-                    <div className={styles.activityIcon}>🍽️</div>
-                    <h3>Meal Preparation</h3>
-                    <p>Can prepare simple meals with supervision</p>
-                    <span className={styles.supportLevel}>
-                      Occasional Support
-                    </span>
-                  </div>
-                  <div className={styles.activityCard}>
-                    <div className={styles.activityIcon}>🚗</div>
-                    <h3>Transportation</h3>
-                    <p>Requires transportation for appointments</p>
-                    <span className={styles.supportLevel}>Weekly Support</span>
-                  </div>
-                  <div className={styles.activityCard}>
-                    <div className={styles.activityIcon}>💊</div>
-                    <h3>Medication</h3>
-                    <p>Needs reminders and monitoring</p>
-                    <span className={styles.supportLevel}>
-                      Daily Support Required
-                    </span>
-                  </div>
+                  {dailySupportItems.map((item) => (
+                    <div key={item.title} className={styles.activityCard}>
+                      <div className={styles.activityMain}>
+                        <div className={styles.activityCheck}>
+                          <ClipboardCheck size={17} />
+                        </div>
+                        <div>
+                          <h3>{item.title}</h3>
+                          <p>{item.description}</p>
+                        </div>
+                      </div>
+                      <div className={styles.activityMeta}>
+                        <span>{item.owner}</span>
+                        <span className={styles.supportLevel}>{item.cadence}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </>
@@ -507,17 +632,23 @@ export default function CarePlanPage() {
           {activeTab === "Important Documents" && (
             <div className={styles.documentsSection}>
               <div className={styles.documentsHeader}>
-                <h2>Important Documents</h2>
+                <div>
+                  <h2>Important Documents</h2>
+                  <p className={styles.subtitle}>
+                    Keep the records the family reaches for most often close at
+                    hand.
+                  </p>
+                </div>
                 <button
                   className={styles.uploadBtn}
                   onClick={() => setShowAddDocument(true)}
                 >
-                  + Upload Document
+                  Add Document
                 </button>
               </div>
 
               {loading ? (
-                <div style={{ textAlign: "center", padding: "3rem" }}>
+                <div className={styles.loadingState}>
                   Loading documents...
                 </div>
               ) : (
@@ -536,7 +667,9 @@ export default function CarePlanPage() {
                           <div className={styles.documentsList}>
                             {categoryDocs.map((doc) => (
                               <div key={doc.id} className={styles.documentItem}>
-                                <div className={styles.documentIcon}>📄</div>
+                                <div className={styles.documentIcon}>
+                                  <FileText size={22} />
+                                </div>
                                 <div className={styles.documentInfo}>
                                   <h4>{doc.name}</h4>
                                   <p>
@@ -545,12 +678,7 @@ export default function CarePlanPage() {
                                         doc.createdAt
                                       ).toLocaleDateString()}`}
                                   </p>
-                                  <p
-                                    style={{
-                                      fontSize: "0.75rem",
-                                      color: "#6c757d",
-                                    }}
-                                  >
+                                  <p className={styles.documentMeta}>
                                     Last updated:{" "}
                                     {new Date(
                                       doc.updatedAt
@@ -561,15 +689,6 @@ export default function CarePlanPage() {
                                   <button
                                     className={styles.deleteBtn}
                                     onClick={() => handleDeleteDocument(doc.id)}
-                                    style={{
-                                      color: "#dc3545",
-                                      background: "none",
-                                      border: "1px solid #dc3545",
-                                      padding: "0.5rem 1rem",
-                                      borderRadius: "0.375rem",
-                                      cursor: "pointer",
-                                      transition: "all 0.2s",
-                                    }}
                                   >
                                     Delete
                                   </button>
@@ -581,16 +700,10 @@ export default function CarePlanPage() {
                       )
                   )}
                   {documents.length === 0 && (
-                    <div
-                      style={{
-                        textAlign: "center",
-                        padding: "3rem",
-                        color: "#6c757d",
-                      }}
-                    >
+                    <div className={styles.emptyState}>
                       <p>
-                        No documents yet. Click "+ Upload Document" to add your
-                        first document.
+                        No documents yet. Add the first record when you are
+                        ready.
                       </p>
                     </div>
                   )}
@@ -687,9 +800,10 @@ export default function CarePlanPage() {
           {activeTab === "Care Scenarios" && (
             <div className={styles.scenariosSection}>
               <div className={styles.scenariosHeader}>
-                <h2>Care Scenarios & Planning</h2>
+                <h2>Care Scenarios</h2>
                 <p className={styles.subtitle}>
-                  Prepare for different situations and plan ahead
+                  Document shared preferences before the family needs them in a
+                  hurry.
                 </p>
               </div>
 
@@ -707,7 +821,7 @@ export default function CarePlanPage() {
                       <div key={scenario.id} className={styles.scenarioCard}>
                         <div className={styles.scenarioHeader}>
                           <div className={styles.scenarioIcon}>
-                            {scenario.icon || "📋"}
+                            <ShieldCheck size={20} />
                           </div>
                           <h4>{scenario.title}</h4>
                         </div>
@@ -748,7 +862,7 @@ export default function CarePlanPage() {
                       <div key={scenario.id} className={styles.scenarioCard}>
                         <div className={styles.scenarioHeader}>
                           <div className={styles.scenarioIcon}>
-                            {scenario.icon || "📋"}
+                            <CalendarDays size={20} />
                           </div>
                           <h4>{scenario.title}</h4>
                         </div>
@@ -925,7 +1039,7 @@ export default function CarePlanPage() {
               <div
                 className={styles.modalContent}
                 onClick={(e) => e.stopPropagation()}
-                style={{ maxWidth: "600px" }}
+                data-wide="true"
               >
                 <div className={styles.modalHeader}>
                   <h2>Edit {editingScenario.title}</h2>

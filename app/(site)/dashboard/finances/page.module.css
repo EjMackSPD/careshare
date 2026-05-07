@@ -1090,6 +1090,123 @@
   background: #4f46e5;
 }
 
+.contributionSummaryCard {
+  padding: 1.15rem;
+  border: 1px solid #dbe7e8;
+  border-radius: 0.85rem;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbfb 100%);
+}
+
+.contributionSummaryCard span {
+  display: block;
+  margin-bottom: 0.45rem;
+  color: #64777b;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.contributionSummaryCard strong {
+  display: block;
+  color: #102a2d;
+  font-size: 1.65rem;
+  line-height: 1;
+}
+
+.contributionSummaryCard p {
+  margin: 0.55rem 0 0;
+  color: #52676b;
+  font-size: 0.9rem;
+}
+
+.contributionPlan {
+  overflow: hidden;
+  border: 1px solid #dbe7e8;
+  border-radius: 1rem;
+  background: white;
+  box-shadow: 0 14px 34px rgba(15, 43, 48, 0.07);
+}
+
+.contributionPlanHeader,
+.contributionPlanRow {
+  display: grid;
+  grid-template-columns: minmax(240px, 1.4fr) minmax(150px, 0.65fr) minmax(210px, 0.9fr) minmax(170px, 0.65fr);
+  align-items: center;
+  gap: 1rem;
+}
+
+.contributionPlanHeader {
+  padding: 0.85rem 1.1rem;
+  border-bottom: 1px solid #dbe7e8;
+  background: #f8fbfb;
+  color: #64777b;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.contributionPlanRow {
+  padding: 1rem 1.1rem;
+  border-bottom: 1px solid #edf3f4;
+}
+
+.contributionPlanRow:last-child {
+  border-bottom: 0;
+}
+
+.contributionMemberCell {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  min-width: 0;
+}
+
+.contributionAmountCell {
+  color: #102a2d;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.contributionAmountCell span {
+  margin-left: 0.25rem;
+  color: #64777b;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.contributionShareCell {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  color: #52676b;
+  font-weight: 700;
+}
+
+.contributionActionsCell {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.contributionActionsCell .viewHistoryBtn,
+.contributionActionsCell .adjustBtn {
+  flex: 0 0 auto;
+  min-height: 38px;
+  padding: 0 0.85rem;
+  border-radius: 0.6rem;
+}
+
+.contributionActionsCell .adjustBtn {
+  background: #123033;
+}
+
+.contributionActionsCell .adjustBtn:hover {
+  background: #0f766e;
+}
+
 /* Cost Allocation Step */
 .allocationHeader {
   margin-bottom: 2rem;
@@ -1783,6 +1900,25 @@
 
   .adjustmentInputs {
     grid-template-columns: 1fr;
+  }
+
+  .contributionPlanHeader {
+    display: none;
+  }
+
+  .contributionPlanRow {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .contributionActionsCell {
+    justify-content: stretch;
+  }
+
+  .contributionActionsCell .viewHistoryBtn,
+  .contributionActionsCell .adjustBtn {
+    flex: 1;
+    justify-content: center;
   }
 }
 

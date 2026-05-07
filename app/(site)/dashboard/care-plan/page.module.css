@@ -739,3 +739,544 @@
   text-align: center;
   padding: 2rem;
 }
+
+/* Care portal cleanup */
+.container {
+  background: linear-gradient(180deg, #f3f8f8 0%, #f7f9fb 34%, #ffffff 100%);
+  padding-top: 0;
+}
+
+.layout {
+  min-height: auto;
+}
+
+.main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+.pageHeader {
+  background: #ffffff;
+  border: 1px solid #dbe8e8;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 14px 35px rgba(19, 46, 52, 0.08);
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  color: #0d7180;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  margin-bottom: 0.45rem;
+}
+
+.pageHeader h1 {
+  color: #102a2f;
+  font-size: 2.35rem;
+  letter-spacing: 0;
+}
+
+.subtitle {
+  color: #526879;
+  line-height: 1.55;
+}
+
+.editBtn,
+.uploadBtn,
+.submitBtn {
+  background: #102a2f;
+  border-radius: 8px;
+  box-shadow: 0 12px 24px rgba(16, 42, 47, 0.14);
+}
+
+.editBtn:hover,
+.uploadBtn:hover,
+.submitBtn:hover {
+  background: #17424a;
+  transform: translateY(-1px);
+  box-shadow: 0 16px 28px rgba(16, 42, 47, 0.18);
+}
+
+.tabs {
+  display: inline-flex;
+  background: #ffffff;
+  border: 1px solid #dbe8e8;
+  border-radius: 999px;
+  padding: 0.28rem;
+  margin: 1.5rem 0;
+  box-shadow: 0 10px 24px rgba(19, 46, 52, 0.06);
+}
+
+.tab {
+  border: 0;
+  border-radius: 999px;
+  color: #526879;
+  margin-bottom: 0;
+  padding: 0.65rem 1.1rem;
+}
+
+.tab.activeTab {
+  background: #e2f4f1;
+  color: #0d5f69;
+  border-bottom-color: transparent;
+}
+
+.planHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.78fr);
+  gap: 1.5rem;
+  align-items: stretch;
+  background:
+    radial-gradient(circle at 88% 12%, rgba(35, 150, 160, 0.13), transparent 32%),
+    #ffffff;
+  border: 1px solid #cfe2e2;
+  border-radius: 8px;
+  padding: 1.75rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 18px 38px rgba(19, 46, 52, 0.08);
+}
+
+.planHero h2 {
+  color: #102a2f;
+  font-size: 1.85rem;
+  line-height: 1.15;
+  margin: 0 0 0.75rem;
+}
+
+.planHero p {
+  max-width: 720px;
+  color: #526879;
+  line-height: 1.65;
+  margin: 0;
+}
+
+.planHeroStats {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.heroStat {
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid #dbe8e8;
+  border-radius: 8px;
+  padding: 0.9rem 1rem;
+}
+
+.heroStat span,
+.costEstimate strong,
+.documentCount,
+.supportLevel {
+  color: #687b89;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.heroStat strong {
+  display: block;
+  color: #102a2f;
+  font-size: 1rem;
+  margin-top: 0.25rem;
+}
+
+.careLevelSection,
+.servicesSection,
+.activitiesSection,
+.documentsSection,
+.scenariosSection {
+  margin-bottom: 1.5rem;
+  margin-top: 0;
+}
+
+.careLevelSection h2,
+.servicesSection h2,
+.activitiesSection h2,
+.documentsHeader h2,
+.scenariosHeader h2 {
+  color: #102a2f;
+  font-size: 1.25rem;
+  margin-bottom: 0.35rem;
+}
+
+.sectionHeadingRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  background: #ffffff;
+  border: 1px solid #dbe8e8;
+  border-radius: 8px 8px 0 0;
+  padding: 1.15rem 1.2rem;
+}
+
+.careLevelGrid {
+  grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
+  gap: 1rem;
+}
+
+.careLevelCard,
+.careNotesCard,
+.serviceCard,
+.activityCard,
+.documentCategory,
+.scenarioCard,
+.endOfLifeCard {
+  background: #ffffff;
+  border: 1px solid #dbe8e8;
+  border-radius: 8px;
+  box-shadow: 0 14px 30px rgba(19, 46, 52, 0.07);
+}
+
+.careLevelCard,
+.careNotesCard {
+  padding: 1.35rem;
+}
+
+.levelBadge {
+  background: #e2f4f1;
+  color: #0d5f69;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  padding: 0.5rem 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.levelDescription,
+.careNotesCard p,
+.serviceCard p,
+.activityCard p,
+.scenarioItem p,
+.documentInfo p {
+  color: #526879;
+}
+
+.costEstimate {
+  border-top-color: #dbe8e8;
+}
+
+.costRange {
+  color: #102a2f;
+  font-size: 1.35rem;
+}
+
+.servicesGrid,
+.scenariosGrid {
+  gap: 1rem;
+}
+
+.serviceCard {
+  padding: 1.1rem;
+}
+
+.serviceCard:hover,
+.serviceCardLink .serviceCard:hover {
+  background: #fbfdfd;
+  border-color: #9fcfca;
+  box-shadow: 0 16px 30px rgba(19, 46, 52, 0.09);
+  transform: translateY(-1px);
+}
+
+.serviceCard h3,
+.activityCard h3,
+.documentInfo h4,
+.scenarioHeader h4 {
+  color: #102a2f;
+}
+
+.viewLink {
+  color: #007c74;
+}
+
+.activityCheck,
+.documentIcon,
+.scenarioIcon {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #e2f4f1;
+  color: #0d7180;
+  border: 1px solid #bee1dc;
+  border-radius: 8px;
+  margin-bottom: 0.85rem;
+}
+
+.activitiesGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  background: #ffffff;
+  border: 1px solid #dbe8e8;
+  border-top: 0;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 14px 30px rgba(19, 46, 52, 0.07);
+  overflow: hidden;
+}
+
+.activityCard {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+  background: #ffffff;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 1rem 1.2rem;
+  text-align: left;
+}
+
+.activityCard + .activityCard {
+  border-top: 1px solid #e5eeee;
+}
+
+.activityCard:hover {
+  background: #fbfdfd;
+  box-shadow: none;
+  transform: none;
+}
+
+.activityMain {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.activityMain .activityCheck {
+  width: 34px;
+  height: 34px;
+  border-radius: 7px;
+  margin-bottom: 0;
+}
+
+.activityCard h3 {
+  font-size: 0.98rem;
+  margin: 0 0 0.28rem;
+}
+
+.activityCard p {
+  color: #526879;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.activityMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: #687b89;
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.supportLevel {
+  display: inline-flex;
+  background: #f3f8f8;
+  color: #0d7180;
+  border-radius: 999px;
+  padding: 0.34rem 0.65rem;
+}
+
+.documentsHeader {
+  background: #ffffff;
+  border: 1px solid #dbe8e8;
+  border-radius: 8px;
+  padding: 1.2rem;
+  box-shadow: 0 14px 30px rgba(19, 46, 52, 0.06);
+}
+
+.documentCategories {
+  gap: 1rem;
+}
+
+.documentCategory {
+  padding: 1.2rem;
+}
+
+.categoryHeader {
+  border-bottom: 1px solid #dbe8e8;
+  padding-bottom: 0.85rem;
+  margin-bottom: 0.85rem;
+}
+
+.documentCount {
+  background: #f3f8f8;
+  color: #526879;
+  border-radius: 999px;
+}
+
+.documentItem {
+  background: #fbfdfd;
+  border: 1px solid #e5eeee;
+  border-radius: 8px;
+}
+
+.documentItem:hover {
+  background: #f3f8f8;
+}
+
+.documentIcon,
+.scenarioIcon {
+  flex-shrink: 0;
+  margin-bottom: 0;
+}
+
+.deleteBtn {
+  background: #ffffff;
+  border: 1px solid #f1c6c6;
+  border-radius: 8px;
+  color: #a33939;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 0.55rem 0.9rem;
+}
+
+.deleteBtn:hover {
+  background: #fff4f4;
+}
+
+.emptyState {
+  background: #ffffff;
+  border: 1px dashed #cfe2e2;
+  border-radius: 8px;
+  color: #526879;
+  padding: 2rem;
+  text-align: center;
+}
+
+.loadingState {
+  color: #526879;
+  padding: 3rem;
+  text-align: center;
+}
+
+.documentMeta {
+  color: #687b89;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.scenariosHeader {
+  background: #ffffff;
+  border: 1px solid #dbe8e8;
+  border-radius: 8px;
+  padding: 1.2rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 14px 30px rgba(19, 46, 52, 0.06);
+}
+
+.scenarioCategory {
+  margin-bottom: 1.5rem;
+}
+
+.scenarioCategory h3 {
+  color: #102a2f;
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.scenarioCard,
+.endOfLifeCard {
+  padding: 1.2rem;
+}
+
+.scenarioHeader {
+  border-bottom: 1px solid #dbe8e8;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.85rem;
+}
+
+.scenarioIcon {
+  background: #eef7f5;
+}
+
+.preWrapText {
+  white-space: pre-wrap;
+}
+
+.editScenarioBtn {
+  background: #ffffff;
+  border: 1px solid #cfe2e2;
+  border-radius: 8px;
+  color: #102a2f;
+}
+
+.editScenarioBtn:hover {
+  background: #102a2f;
+  border-color: #102a2f;
+}
+
+.modal {
+  background: rgba(16, 42, 47, 0.45);
+}
+
+.modalContent {
+  border: 1px solid #dbe8e8;
+  border-radius: 8px;
+}
+
+.modalContent[data-wide="true"] {
+  max-width: 600px;
+}
+
+.formGroup input,
+.formGroup select,
+.formGroup textarea {
+  border-color: #cfe2e2;
+  border-radius: 8px;
+}
+
+.formGroup input:focus,
+.formGroup select:focus,
+.formGroup textarea:focus {
+  border-color: #0d7180;
+  box-shadow: 0 0 0 3px rgba(13, 113, 128, 0.12);
+}
+
+@media (max-width: 900px) {
+  .planHero,
+  .careLevelGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .main {
+    padding-inline: 0.75rem;
+  }
+
+  .tabs {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 8px;
+  }
+
+  .tab {
+    white-space: nowrap;
+  }
+
+  .documentsHeader {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .activityCard {
+    grid-template-columns: 1fr;
+  }
+
+  .activityMeta {
+    justify-content: space-between;
+    white-space: normal;
+  }
+}

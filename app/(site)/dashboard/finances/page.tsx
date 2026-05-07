@@ -1899,6 +1899,14 @@ export default function FinancesPage() {
         .reduce((sum, bill) => sum + bill.amountPaid, 0),
     [bills, selectedMonth]
   );
+  const monthlyContributionTotal = React.useMemo(
+    () => familyContributions.reduce((sum, member) => sum + member.amount, 0),
+    [familyContributions]
+  );
+  const activeContributorCount = React.useMemo(
+    () => familyContributions.filter((member) => member.amount > 0).length,
+    [familyContributions]
+  );
 
   // Get month name
   const getMonthName = (monthIndex: number) => {
@@ -3674,75 +3682,80 @@ export default function FinancesPage() {
               </div>
 
               <div className={styles.contributionsSummary}>
-                <div className={styles.summaryCard}>
-                  <p className={styles.summaryLabel}>
-                    Total Monthly Contributions
-                  </p>
-                  <h3 className={styles.summaryAmount}>
-                    $
-                    {familyContributions
-                      .reduce((sum, m) => sum + m.amount, 0)
-                      .toFixed(2)}
-                  </h3>
+                <div className={styles.contributionSummaryCard}>
+                  <span>Monthly support</span>
+                  <strong>${monthlyContributionTotal.toFixed(2)}</strong>
+                  <p>Committed toward shared care costs</p>
                 </div>
-                <div className={styles.summaryCard}>
-                  <p className={styles.summaryLabel}>Active Contributors</p>
-                  <h3 className={styles.summaryAmount}>
-                    {familyContributions.filter((m) => m.amount > 0).length}
-                  </h3>
+                <div className={styles.contributionSummaryCard}>
+                  <span>Contributors</span>
+                  <strong>{activeContributorCount}</strong>
+                  <p>{familyContributions.length} family members listed</p>
+                </div>
+                <div className={styles.contributionSummaryCard}>
+                  <span>Average share</span>
+                  <strong>
+                    $
+                    {activeContributorCount
+                      ? (monthlyContributionTotal / activeContributorCount).toFixed(2)
+                      : "0.00"}
+                  </strong>
+                  <p>Per active contributor</p>
                 </div>
               </div>
 
-              <div className={styles.contributionsDetailList}>
+              <div className={styles.contributionPlan}>
+                <div className={styles.contributionPlanHeader}>
+                  <span>Family member</span>
+                  <span>Monthly amount</span>
+                  <span>Share</span>
+                  <span>Actions</span>
+                </div>
                 {familyContributions.map((member) => (
                   <div
                     key={member.name}
-                    className={styles.contributionDetailCard}
+                    className={styles.contributionPlanRow}
                   >
-                    <div className={styles.contributionCardHeader}>
-                      <div className={styles.memberInfo}>
-                        <div
-                          className={styles.memberAvatar}
-                          style={{ background: member.color }}
-                        >
-                          {member.initial}
-                        </div>
-                        <div>
-                          <h4 className={styles.memberName}>{member.name}</h4>
-                          <p className={styles.memberRole}>Family Member</p>
-                        </div>
-                      </div>
-                      <div className={styles.contributionCardAmount}>
-                        <h3>
-                          ${member.amount.toFixed(2)}
-                          <span className={styles.perMonth}>/month</span>
-                        </h3>
-                        <span className={styles.percentage}>
-                          {member.percentage}%
-                        </span>
-                      </div>
-                    </div>
-                    <div className={styles.contributionBar}>
+                    <div className={styles.contributionMemberCell}>
                       <div
-                        className={styles.contributionFill}
-                        style={{
-                          width: `${member.percentage}%`,
-                          background: member.color,
-                        }}
-                      ></div>
+                        className={styles.memberAvatar}
+                        style={{ background: member.color }}
+                      >
+                        {member.initial}
+                      </div>
+                      <div>
+                        <h4 className={styles.memberName}>{member.name}</h4>
+                        <p className={styles.memberRole}>Family Member</p>
+                      </div>
                     </div>
-                    <div className={styles.contributionCardFooter}>
+                    <div className={styles.contributionAmountCell}>
+                      ${member.amount.toFixed(2)}
+                      <span>/month</span>
+                    </div>
+                    <div className={styles.contributionShareCell}>
+                      <div className={styles.contributionBar}>
+                        <div
+                          className={styles.contributionFill}
+                          style={{
+                            width: `${member.percentage}%`,
+                            background: member.color,
+                          }}
+                        ></div>
+                      </div>
+                      <span>{member.percentage}%</span>
+                    </div>
+                    <div className={styles.contributionActionsCell}>
                       <button
                         className={styles.viewHistoryBtn}
                         onClick={() => handleViewHistory(member)}
                       >
-                        View History
+                        History
                       </button>
                       <button
                         className={styles.adjustBtn}
                         onClick={() => handleAdjustSplit(member)}
                       >
-                        Adjust Split
+                        Adjust
                       </button>
                     </div>
                   </div>
