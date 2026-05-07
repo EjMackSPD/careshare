@@ -6,13 +6,11 @@ import { useSession } from "@/app/components/AuthProvider";
 import {
   BarChart,
   Bar,
-  PieChart,
-  Pie,
-  Cell,
   ResponsiveContainer,
   XAxis,
   YAxis,
   Tooltip,
+  CartesianGrid,
 } from "recharts";
 import {
   X,
@@ -66,12 +64,12 @@ type CostAllocation = {
 };
 
 const CATEGORY_COLORS: { [key: string]: string } = {
-  Medical: "#6366f1",
-  Groceries: "#a855f7",
-  Housing: "#10b981",
-  Utilities: "#f59e0b",
-  Transportation: "#ef4444",
-  Other: "#6c757d",
+  Medical: "#0f766e",
+  Groceries: "#3f7f5f",
+  Housing: "#123033",
+  Utilities: "#b7791f",
+  Transportation: "#2f6f89",
+  Other: "#64777b",
 };
 
 export default function FinancesPage() {
@@ -1266,12 +1264,19 @@ export default function FinancesPage() {
   const totalRemaining = totalBillAmount - totalPaid;
   const spent = totalPaid; // Keep in regular dollars
   const remaining = monthlyBudget - spent;
+  const budgetUsedPercent = monthlyBudget
+    ? Math.min(Math.max((spent / monthlyBudget) * 100, 0), 100)
+    : 0;
   const averageShortfall = Math.max(
     0,
     (totalBillAmount -
       familyContributions.reduce((sum, c) => sum + c.amount, 0)) /
       6
   ); // Average over 6 months
+  const budgetHealthClass =
+    remaining >= 0 ? styles.positiveAmount : styles.negativeAmount;
+  const shortfallHealthClass =
+    averageShortfall > 0 ? styles.negativeAmount : styles.positiveAmount;
 
   // Calculate recommended budget based on historical spending
   // In a real app, this would use actual historical data
@@ -1379,6 +1384,21 @@ export default function FinancesPage() {
     const startIdx = Math.max(0, trendsStartIndex - 2); // Show 3 months: start-2, start-1, start
     return allExpenseTrends.slice(startIdx, startIdx + 3);
   }, [allExpenseTrends, trendsStartIndex]);
+
+  const totalExpenseTrends = React.useMemo(
+    () =>
+      expenseTrends.map((month) => ({
+        month: month.month,
+        Total:
+          month.Medical +
+          month.Housing +
+          month.Groceries +
+          month.Utilities +
+          month.Transportation +
+          month.Other,
+      })),
+    [expenseTrends]
+  );
 
   // Calculate upcoming bills (next 30 days)
   const upcomingBills = React.useMemo(() => {
@@ -3014,21 +3034,13 @@ export default function FinancesPage() {
                   </div>
                   <div className={styles.budgetCard}>
                     <p className={styles.budgetLabel}>Remaining</p>
-                    <h3
-                      className={styles.budgetAmount}
-                      style={{ color: remaining >= 0 ? "#10b981" : "#ef4444" }}
-                    >
+                    <h3 className={`${styles.budgetAmount} ${budgetHealthClass}`}>
                       ${remaining.toFixed(2)}
                     </h3>
                   </div>
                   <div className={styles.budgetCard}>
                     <p className={styles.budgetLabel}>Avg Monthly Shortfall</p>
-                    <h3
-                      className={styles.budgetAmount}
-                      style={{
-                        color: averageShortfall > 0 ? "#ef4444" : "#10b981",
-                      }}
-                    >
+                    <h3 className={`${styles.budgetAmount} ${shortfallHealthClass}`}>
                       ${averageShortfall.toFixed(2)}
                     </h3>
                   </div>
@@ -3037,13 +3049,15 @@ export default function FinancesPage() {
                 <div className={styles.progressSection}>
                   <div className={styles.progressLabels}>
                     <span>0%</span>
-                    <span className={styles.spentLabel}>0% spent</span>
+                    <span className={styles.spentLabel}>
+                      {Math.round(budgetUsedPercent)}% spent
+                    </span>
                     <span>100%</span>
                   </div>
                   <div className={styles.progressBar}>
                     <div
                       className={styles.progressFill}
-                      style={{ width: `${(spent / monthlyBudget) * 100}%` }}
+                      style={{ width: `${budgetUsedPercent}%` }}
                     ></div>
                   </div>
                 </div>
@@ -3053,7 +3067,12 @@ export default function FinancesPage() {
               <div className={styles.chartsGrid}>
                 <div className={styles.chartCard}>
                   <div className={styles.chartHeader}>
-                    <h3>Expense Trends</h3>
+                    <div>
+                      <h3>Monthly Care Spend</h3>
+                      <p className={styles.chartSubtitle}>
+                        Total paid costs by month
+                      </p>
+                    </div>
                     <div className={styles.trendsNavigation}>
                       <button
                         className={styles.trendsNavBtn}
@@ -3074,67 +3093,56 @@ export default function FinancesPage() {
                       </button>
                     </div>
                   </div>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={expenseTrends}>
-                      <XAxis dataKey="month" stroke="#6c757d" />
+                  <div className={styles.chartCanvas}>
+                    <ResponsiveContainer width="100%" height={260}>
+                      <BarChart
+                        data={totalExpenseTrends}
+                        margin={{ top: 10, right: 8, left: 0, bottom: 0 }}
+                        barCategoryGap="42%"
+                      >
+                      <CartesianGrid vertical={false} stroke="#e4eeee" />
+                      <XAxis
+                        dataKey="month"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: "#52676b", fontSize: 12 }}
+                      />
                       <YAxis
-                        stroke="#6c757d"
+                        axisLine={false}
+                        tickLine={false}
+                        tick={{ fill: "#52676b", fontSize: 12 }}
+                        width={58}
                         tickFormatter={(value) => `$${value}`}
                       />
                       <Tooltip
+                        cursor={{ fill: "#f3f8f8" }}
+                        contentStyle={{
+                          border: "1px solid #dbe7e8",
+                          borderRadius: "10px",
+                          boxShadow: "0 12px 28px rgba(15, 43, 48, 0.12)",
+                        }}
                         formatter={(value: number) => `$${value.toFixed(2)}`}
                       />
                       <Bar
-                        dataKey="Medical"
-                        stackId="a"
-                        fill={CATEGORY_COLORS.Medical}
-                      />
-                      <Bar
-                        dataKey="Housing"
-                        stackId="a"
-                        fill={CATEGORY_COLORS.Housing}
-                      />
-                      <Bar
-                        dataKey="Groceries"
-                        stackId="a"
-                        fill={CATEGORY_COLORS.Groceries}
-                      />
-                      <Bar
-                        dataKey="Utilities"
-                        stackId="a"
-                        fill={CATEGORY_COLORS.Utilities}
-                      />
-                      <Bar
-                        dataKey="Transportation"
-                        stackId="a"
-                        fill={CATEGORY_COLORS.Transportation}
-                      />
-                      <Bar
-                        dataKey="Other"
-                        stackId="a"
-                        fill={CATEGORY_COLORS.Other}
-                        radius={[8, 8, 0, 0]}
+                        dataKey="Total"
+                        name="Total spend"
+                        fill="#0f766e"
+                        maxBarSize={58}
+                        radius={[7, 7, 0, 0]}
                       />
                     </BarChart>
-                  </ResponsiveContainer>
-                  <div className={styles.chartLegend}>
-                    {Object.entries(CATEGORY_COLORS).map(
-                      ([category, color]) => (
-                        <div key={category} className={styles.legendItem}>
-                          <div
-                            className={styles.legendDot}
-                            style={{ background: color }}
-                          ></div>
-                          <span>{category}</span>
-                        </div>
-                      )
-                    )}
+                    </ResponsiveContainer>
                   </div>
                 </div>
 
                 <div className={styles.chartCard}>
                   <div className={styles.chartHeader}>
-                    <h3>Expense Breakdown</h3>
+                    <div>
+                      <h3>Category Detail</h3>
+                      <p className={styles.chartSubtitle}>
+                        Where care costs are concentrated
+                      </p>
+                    </div>
                     <div className={styles.trendsNavigation}>
                       <button
                         className={styles.trendsNavBtn}
@@ -3156,46 +3164,32 @@ export default function FinancesPage() {
                     </div>
                   </div>
                   {expenseBreakdown.length > 0 ? (
-                    <>
-                      <ResponsiveContainer width="100%" height={250}>
-                        <PieChart>
-                          <Pie
-                            data={expenseBreakdown}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={60}
-                            outerRadius={90}
-                            paddingAngle={5}
-                            dataKey="value"
-                            animationBegin={0}
-                            animationDuration={800}
-                          >
-                            {expenseBreakdown.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Pie>
-                          <Tooltip
-                            formatter={(value: number) =>
-                              `$${value.toFixed(2)}`
-                            }
-                          />
-                        </PieChart>
-                      </ResponsiveContainer>
-                      <div className={styles.legend}>
-                        {expenseBreakdown.map((item) => (
-                          <div key={item.name} className={styles.legendItem}>
-                            <div
-                              className={styles.legendDot}
-                              style={{ background: item.color }}
-                            ></div>
-                            <span>{item.name}</span>
-                            <strong>
-                              ${item.value.toFixed(2)} ({item.percentage}%)
-                            </strong>
+                    <div className={styles.breakdownList}>
+                      {expenseBreakdown.map((item) => (
+                        <div key={item.name} className={styles.breakdownRow}>
+                          <div className={styles.breakdownRowHeader}>
+                            <div className={styles.breakdownName}>
+                              <span
+                                className={styles.legendDot}
+                                style={{ background: item.color }}
+                              ></span>
+                              <span>{item.name}</span>
+                            </div>
+                            <strong>${item.value.toFixed(2)}</strong>
                           </div>
-                        ))}
-                      </div>
-                    </>
+                          <div className={styles.breakdownTrack}>
+                            <div
+                              className={styles.breakdownFill}
+                              style={{
+                                width: `${item.percentage}%`,
+                                background: item.color,
+                              }}
+                            ></div>
+                          </div>
+                          <p>{item.percentage}% of selected month</p>
+                        </div>
+                      ))}
+                    </div>
                   ) : (
                     <div className={styles.emptyChartState}>
                       <p>No expense data for {getBreakdownMonthName()}</p>
@@ -3341,7 +3335,12 @@ export default function FinancesPage() {
             <>
               <div className={styles.chartCard}>
                 <div className={styles.chartHeader}>
-                  <h3>Expense Trends</h3>
+                  <div>
+                    <h3>Monthly Care Spend</h3>
+                    <p className={styles.chartSubtitle}>
+                      Total paid costs by month
+                    </p>
+                  </div>
                   <div className={styles.trendsNavigation}>
                     <button
                       className={styles.trendsNavBtn}
@@ -3362,59 +3361,45 @@ export default function FinancesPage() {
                     </button>
                   </div>
                 </div>
-                <ResponsiveContainer width="100%" height={350}>
-                  <BarChart data={expenseTrends}>
-                    <XAxis dataKey="month" stroke="#6c757d" />
+                <div className={styles.chartCanvas}>
+                  <ResponsiveContainer width="100%" height={320}>
+                    <BarChart
+                      data={totalExpenseTrends}
+                      margin={{ top: 10, right: 8, left: 0, bottom: 0 }}
+                      barCategoryGap="48%"
+                    >
+                    <CartesianGrid vertical={false} stroke="#e4eeee" />
+                    <XAxis
+                      dataKey="month"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: "#52676b", fontSize: 12 }}
+                    />
                     <YAxis
-                      stroke="#6c757d"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: "#52676b", fontSize: 12 }}
+                      width={58}
                       tickFormatter={(value) => `$${value}`}
                     />
                     <Tooltip
+                      cursor={{ fill: "#f3f8f8" }}
+                      contentStyle={{
+                        border: "1px solid #dbe7e8",
+                        borderRadius: "10px",
+                        boxShadow: "0 12px 28px rgba(15, 43, 48, 0.12)",
+                      }}
                       formatter={(value: number) => `$${value.toFixed(2)}`}
                     />
                     <Bar
-                      dataKey="Medical"
-                      stackId="a"
-                      fill={CATEGORY_COLORS.Medical}
-                    />
-                    <Bar
-                      dataKey="Housing"
-                      stackId="a"
-                      fill={CATEGORY_COLORS.Housing}
-                    />
-                    <Bar
-                      dataKey="Groceries"
-                      stackId="a"
-                      fill={CATEGORY_COLORS.Groceries}
-                    />
-                    <Bar
-                      dataKey="Utilities"
-                      stackId="a"
-                      fill={CATEGORY_COLORS.Utilities}
-                    />
-                    <Bar
-                      dataKey="Transportation"
-                      stackId="a"
-                      fill={CATEGORY_COLORS.Transportation}
-                    />
-                    <Bar
-                      dataKey="Other"
-                      stackId="a"
-                      fill={CATEGORY_COLORS.Other}
-                      radius={[8, 8, 0, 0]}
+                      dataKey="Total"
+                      name="Total spend"
+                      fill="#0f766e"
+                      maxBarSize={64}
+                      radius={[7, 7, 0, 0]}
                     />
                   </BarChart>
-                </ResponsiveContainer>
-                <div className={styles.chartLegend}>
-                  {Object.entries(CATEGORY_COLORS).map(([category, color]) => (
-                    <div key={category} className={styles.legendItem}>
-                      <div
-                        className={styles.legendDot}
-                        style={{ background: color }}
-                      ></div>
-                      <span>{category}</span>
-                    </div>
-                  ))}
+                  </ResponsiveContainer>
                 </div>
               </div>
 

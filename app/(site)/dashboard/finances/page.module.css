@@ -2581,3 +2581,154 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Finance visual cleanup */
+.positiveAmount {
+  color: #0f766e;
+}
+
+.negativeAmount {
+  color: #b42318;
+}
+
+.progressSection {
+  margin-top: 1.35rem;
+  padding: 1rem;
+  border: 1px solid #dbe7e8;
+  border-radius: 0.85rem;
+  background: #fbfdfd;
+}
+
+.progressLabels {
+  color: #64777b;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.spentLabel {
+  color: #123033;
+}
+
+.progressBar {
+  height: 8px;
+  background: #e4eeee;
+  border-radius: 999px;
+}
+
+.progressFill {
+  background: #0f766e;
+  border-radius: 999px;
+}
+
+.chartsGrid {
+  grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
+  gap: 1rem;
+}
+
+.chartCard {
+  padding: 1.25rem;
+  border-radius: 0.9rem;
+}
+
+.chartHeader {
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.chartHeader h3 {
+  color: #102a2d;
+  font-size: 1.05rem;
+  line-height: 1.2;
+}
+
+.chartSubtitle {
+  margin: 0.3rem 0 0;
+  color: #64777b;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.chartCanvas {
+  padding: 0.35rem 0.25rem 0;
+  border: 1px solid #e2ecee;
+  border-radius: 0.85rem;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdfd 100%);
+}
+
+.legendDot {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.breakdownList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.breakdownRow {
+  padding: 0.95rem;
+  border: 1px solid #e2ecee;
+  border-radius: 0.8rem;
+  background: #fbfdfd;
+}
+
+.breakdownRowHeader,
+.breakdownName {
+  display: flex;
+  align-items: center;
+}
+
+.breakdownRowHeader {
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.65rem;
+}
+
+.breakdownName {
+  min-width: 0;
+  gap: 0.55rem;
+  color: #102a2d;
+  font-weight: 800;
+}
+
+.breakdownRowHeader strong {
+  color: #102a2d;
+  font-size: 0.98rem;
+  white-space: nowrap;
+}
+
+.breakdownTrack {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e4eeee;
+}
+
+.breakdownFill {
+  height: 100%;
+  min-width: 4px;
+  border-radius: 999px;
+}
+
+.breakdownRow p {
+  margin: 0.5rem 0 0;
+  color: #64777b;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.emptyChartState {
+  border: 1px dashed #cfe0e2;
+  border-radius: 0.85rem;
+  background: #fbfdfd;
+}
+
+@media (max-width: 1100px) {
+  .chartsGrid {
+    grid-template-columns: 1fr;
+  }
+}
