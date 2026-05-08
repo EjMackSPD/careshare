@@ -154,66 +154,98 @@
 }
 
 .progressBar {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.6rem;
+  padding: 0.25rem 0.25rem 0.75rem;
 }
 
 .progressSteps {
-  display: flex;
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   align-items: center;
 }
 
 .progressStepWrapper {
+  position: relative;
   display: flex;
   align-items: center;
-  flex: 1;
+  justify-content: center;
+  min-width: 0;
 }
 
 .progressStep {
-  width: 2.2rem;
-  height: 2.2rem;
+  position: relative;
+  z-index: 1;
+  width: 2.35rem;
+  height: 2.35rem;
   border-radius: 999px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #dfe6ec;
-  color: #64748b;
-  font-weight: 700;
-  transition: all 0.2s ease;
+  background: #e8f0f4;
+  border: 3px solid rgba(248, 250, 252, 0.96);
+  color: #5f7184;
+  font-size: 0.9rem;
+  font-weight: 800;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
 .progressStepActive {
-  background: #0f172a;
+  background: #071527;
   color: #fff;
+  box-shadow:
+    0 0 0 5px rgba(15, 118, 110, 0.1),
+    0 12px 24px rgba(7, 21, 39, 0.18);
+  transform: scale(1.03);
 }
 
 .progressStepCompleted {
-  background: #15803d;
+  background: #0f766e;
   color: #fff;
+  box-shadow: 0 8px 18px rgba(15, 118, 110, 0.18);
+  transform: none;
 }
 
 .progressLine {
-  flex: 1;
-  height: 2px;
-  margin: 0 0.5rem;
-  background: #dbe3eb;
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  left: calc(50% + 1.35rem);
+  right: calc(-50% + 1.35rem);
+  height: 3px;
+  margin: 0;
+  border-radius: 999px;
+  background: #d8e4e8;
+  transform: translateY(-50%);
 }
 
 .progressLineCompleted {
-  background: #15803d;
+  background: linear-gradient(90deg, #0f766e, #14a07d);
 }
 
 .progressLabels {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 0.45rem;
-  margin-top: 0.85rem;
-  font-size: 0.74rem;
+  margin-top: 0.7rem;
+  font-size: 0.72rem;
   color: #64748b;
   font-weight: 600;
+  text-align: center;
 }
 
 .activeLabel {
-  color: #0f172a;
+  color: #071527;
+  font-weight: 800;
+}
+
+.completedLabel {
+  color: #0f766e;
 }
 
 .formCard {
@@ -595,13 +627,30 @@
 
   .audienceGrid,
   .formRow,
-  .segmented,
-  .progressLabels {
+  .segmented {
     grid-template-columns: 1fr;
+  }
+
+  .progressBar {
+    padding-inline: 0;
+  }
+
+  .progressStep {
+    width: 2rem;
+    height: 2rem;
+    border-width: 2px;
+    font-size: 0.78rem;
+  }
+
+  .progressLine {
+    left: calc(50% + 1.1rem);
+    right: calc(-50% + 1.1rem);
   }
 
   .progressLabels {
     gap: 0.25rem;
+    font-size: 0.62rem;
+    line-height: 1.25;
   }
 
   .inviteHeader,

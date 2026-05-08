@@ -50,7 +50,7 @@
 }
 
 .heroLight {
-  min-height: 65vh;
+  min-height: 50vh;
   background: linear-gradient(to bottom, var(--cs-color-surface) 0%, #ffffff 100%);
 }
 
@@ -92,7 +92,7 @@
   z-index: 1;
   max-width: 860px;
   margin: 0 auto;
-  padding: 6rem 2rem;
+  padding: 4.25rem 2rem 3rem;
   text-align: center;
 }
 
@@ -1188,7 +1188,7 @@
   }
 
   .heroContent {
-    padding: 5rem 1.5rem 4rem;
+    padding: 3.75rem 1.5rem 2.75rem;
   }
 
   .contentSplit {
@@ -1224,6 +1224,10 @@
 }
 
 @media (max-width: 640px) {
+  .heroContent {
+    padding: 3.25rem 1rem 2.25rem;
+  }
+
   .featureGrid {
     --feature-grid-columns: 1;
   }

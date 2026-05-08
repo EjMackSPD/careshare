@@ -1315,11 +1315,18 @@ export default function OnboardingPage() {
               </div>
 
               <div className={styles.progressLabels}>
-                {stepLabels.map((label, index) => (
-                  <span key={label} className={index + 1 === progressStep ? styles.activeLabel : ''}>
-                    {label}
-                  </span>
-                ))}
+                {stepLabels.map((label, index) => {
+                  const stepNumber = index + 1
+                  const labelClassName = `${stepNumber === progressStep ? styles.activeLabel : ''} ${
+                    stepNumber < progressStep ? styles.completedLabel : ''
+                  }`
+
+                  return (
+                    <span key={label} className={labelClassName}>
+                      {label}
+                    </span>
+                  )
+                })}
               </div>
             </div>
 
