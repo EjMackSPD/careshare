@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Calendar, CheckCircle2, Clock, Tag, User } from "lucide-react";
 import HeroCarouselSection from "@/app/components/HeroCarouselSection";
+import Reveal from "@/app/components/Reveal";
 import styles from "./SectionRenderer.module.css";
 import ContactSubmissionForm from "./ContactSubmissionForm";
 import { resolveIcon } from "./icon-map";
@@ -245,12 +246,14 @@ function renderSection(section: PageSection, index: number, posts: BlogListItem[
               cardsPerRow === 4 && styles.featureGridColumns4
             )}
           >
-            {section.items.map((item) => {
+            {section.items.map((item, index) => {
               const Icon = resolveIcon(item.icon);
 
               return (
-                <article
+                <Reveal
+                  as="article"
                   key={item.title}
+                  delay={index * 80}
                   className={cx(
                     styles.featureCard,
                     item.image && styles.featureCardWithImage,
@@ -290,7 +293,7 @@ function renderSection(section: PageSection, index: number, posts: BlogListItem[
                       ))}
                     </ul>
                   ) : null}
-                </article>
+                </Reveal>
               );
             })}
           </div>
@@ -314,12 +317,17 @@ function renderSection(section: PageSection, index: number, posts: BlogListItem[
           <SectionHeader title={section.title} intro={section.intro} headingId={headingId} />
 
           <div className={cx(styles.statsGrid, steps ? styles.statsSteps : styles.statsMetrics)}>
-            {section.items.map((item) => (
-              <article key={`${item.value}-${item.label}`} className={cx(styles.statCard, steps && styles.statStep)}>
+            {section.items.map((item, index) => (
+              <Reveal
+                as="article"
+                key={`${item.value}-${item.label}`}
+                delay={index * 80}
+                className={cx(styles.statCard, steps && styles.statStep)}
+              >
                 <div className={styles.statValue}>{item.value}</div>
                 <h3 className={styles.statLabel}>{item.label}</h3>
                 {item.description ? <p className={styles.statDescription}>{item.description}</p> : null}
-              </article>
+              </Reveal>
             ))}
           </div>
         </SectionShell>
@@ -335,7 +343,7 @@ function renderSection(section: PageSection, index: number, posts: BlogListItem[
           innerClassName={cx(section.background === "muted" && styles.surfaceMuted)}
         >
           <div className={section.layout === "split" ? styles.contentSplit : styles.contentCentered}>
-            <div>
+            <Reveal direction="left">
               {section.title ? (
                 <h2 id={headingId} className={styles.contentTitle}>
                   {section.title}
@@ -357,10 +365,14 @@ function renderSection(section: PageSection, index: number, posts: BlogListItem[
               ) : null}
 
               {section.layout !== "split" ? renderActions(section.actions) : null}
-            </div>
+            </Reveal>
 
             {section.layout === "split" && section.aside ? (
-              <aside className={cx(styles.contentAside, section.aside.image && styles.contentAsideImagePanel)}>
+              <Reveal
+                as="aside"
+                direction="right"
+                className={cx(styles.contentAside, section.aside.image && styles.contentAsideImagePanel)}
+              >
                 {section.aside.image ? (
                   <div className={styles.contentAsideImageFrame}>
                     <Image
@@ -375,7 +387,7 @@ function renderSection(section: PageSection, index: number, posts: BlogListItem[
                 {section.aside.body ? <p className={styles.contentAsideBody}>{section.aside.body}</p> : null}
                 {!section.aside.image ? renderActions(section.aside.actions ?? section.actions) : null}
                 {section.aside.note ? <p className={styles.contentAsideNote}>{section.aside.note}</p> : null}
-              </aside>
+              </Reveal>
             ) : null}
           </div>
         </SectionShell>
@@ -398,14 +410,14 @@ function renderSection(section: PageSection, index: number, posts: BlogListItem[
           )}
         >
           <div className={styles.ctaSurface}>
-            <div className={styles.ctaInner}>
+            <Reveal className={styles.ctaInner}>
               <h2 id={headingId} className={styles.ctaTitle}>
                 {section.title}
               </h2>
               {section.body ? <p className={styles.ctaBody}>{section.body}</p> : null}
               {renderActions(section.actions, inverse ? "inverse" : "default")}
               {section.note ? <p className={styles.ctaNote}>{section.note}</p> : null}
-            </div>
+            </Reveal>
           </div>
         </section>
       );
@@ -430,13 +442,13 @@ function renderSection(section: PageSection, index: number, posts: BlogListItem[
     case "testimonial":
       return (
         <SectionShell key={sectionId} id={sectionId} innerClassName={styles.surfaceTight}>
-          <div className={styles.testimonialCard}>
+          <Reveal className={styles.testimonialCard}>
             <blockquote className={styles.testimonialQuote}>&ldquo;{section.quote}&rdquo;</blockquote>
             <div className={styles.testimonialMeta}>
               <strong>{section.author}</strong>
               {section.role ? <div>{section.role}</div> : null}
             </div>
-          </div>
+          </Reveal>
         </SectionShell>
       );
 
@@ -445,11 +457,11 @@ function renderSection(section: PageSection, index: number, posts: BlogListItem[
         <SectionShell key={sectionId} id={sectionId} labelledBy={headingId}>
           <SectionHeader title={section.title} intro={section.intro} headingId={headingId} />
           <div className={styles.faqList}>
-            {section.items.map((item) => (
-              <article key={item.question} className={styles.faqItem}>
+            {section.items.map((item, index) => (
+              <Reveal as="article" key={item.question} delay={index * 60} className={styles.faqItem}>
                 <h3 className={styles.faqQuestion}>{item.question}</h3>
                 <p className={styles.faqAnswer}>{item.answer}</p>
-              </article>
+              </Reveal>
             ))}
           </div>
         </SectionShell>

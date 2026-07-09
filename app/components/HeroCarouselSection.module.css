@@ -1,3 +1,8 @@
+.fullBleed {
+  margin-top: calc(-1 * var(--cs-marketing-nav-height));
+  padding-top: var(--cs-marketing-nav-height);
+}
+
 .slide {
   position: absolute;
   top: 0;
@@ -79,11 +84,53 @@
   transform: scale(1.15);
 }
 
+.timerWrap {
+  position: relative;
+  width: 40px;
+  height: 40px;
+}
+
+.timerSvg {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg);
+  pointer-events: none;
+}
+
+.timerTrack {
+  fill: none;
+  stroke: var(--cs-color-border-strong);
+  stroke-width: 2;
+  opacity: 0.35;
+}
+
+.timerProgress {
+  fill: none;
+  stroke: var(--cs-color-brand);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 106.8;
+  stroke-dashoffset: 106.8;
+  animation: timerFill 5s linear forwards;
+}
+
+.timerPaused {
+  animation-play-state: paused;
+}
+
+@keyframes timerFill {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
 .playPauseButton {
+  position: absolute;
+  inset: 4px;
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 2px solid var(--cs-color-border-strong);
+  border: none;
   background: var(--cs-color-surface-raised);
   color: var(--cs-color-ink);
   cursor: pointer;
@@ -94,7 +141,6 @@
 }
 
 .playPauseButton:hover {
-  border-color: var(--cs-color-brand);
   color: var(--cs-color-brand);
 }
 
@@ -124,8 +170,20 @@
     height: 10px;
   }
 
+  .timerWrap {
+    width: 36px;
+    height: 36px;
+  }
+
   .playPauseButton {
     width: 28px;
     height: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .timerProgress {
+    animation: none;
+    stroke-dashoffset: 106.8;
   }
 }

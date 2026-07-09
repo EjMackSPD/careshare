@@ -54,7 +54,7 @@ export default function HeroCarouselSection({
       <section
         id={sectionId}
         aria-labelledby={headingId}
-        className={className}
+        className={`${className} ${styles.fullBleed}`}
         style={style}
         role="region"
         aria-roledescription="carousel"
@@ -90,14 +90,26 @@ export default function HeroCarouselSection({
           ))}
         </div>
 
-        <button
-          type="button"
-          className={styles.playPauseButton}
-          onClick={() => setIsPlaying((playing) => !playing)}
-          aria-label={isPlaying ? 'Pause slideshow' : 'Play slideshow'}
-        >
-          {isPlaying ? <Pause size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />}
-        </button>
+        <div className={styles.timerWrap}>
+          <svg className={styles.timerSvg} viewBox="0 0 40 40" aria-hidden="true">
+            <circle className={styles.timerTrack} cx="20" cy="20" r="17" />
+            <circle
+              key={currentIndex}
+              className={`${styles.timerProgress} ${isPlaying ? '' : styles.timerPaused}`}
+              cx="20"
+              cy="20"
+              r="17"
+            />
+          </svg>
+          <button
+            type="button"
+            className={styles.playPauseButton}
+            onClick={() => setIsPlaying((playing) => !playing)}
+            aria-label={isPlaying ? 'Pause slideshow' : 'Play slideshow'}
+          >
+            {isPlaying ? <Pause size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />}
+          </button>
+        </div>
       </div>
     </>
   )
