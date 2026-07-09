@@ -16,6 +16,8 @@ export const Users: CollectionConfig = {
   auth: {
     tokenExpiration: 60 * 60 * 24 * 7,
     verify: false,
+    maxLoginAttempts: 5,
+    lockTime: 10 * 60 * 1000, // 10 minutes
     forgotPassword: {
       generateEmailHTML: (args) => {
         const token = args?.token;

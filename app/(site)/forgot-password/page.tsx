@@ -18,14 +18,24 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      await fetch("/payload-api/users/forgot-password", {
+      const response = await fetch("/payload-api/users/forgot-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
 
-      // Always show the same success state, regardless of whether the email
-      // is registered, so we don't leak which addresses have accounts.
+      if (response.status === 429) {
+        const data = await response.json().catch(() => null);
+        setError(
+          data?.errors?.[0]?.message ||
+            "Too many attempts. Please wait a bit before trying again."
+        );
+        setLoading(false);
+        return;
+      }
+
+      // Otherwise always show the same success state, regardless of whether
+      // the email is registered, so we don't leak which addresses have accounts.
       setSubmitted(true);
     } catch {
       setError("Something went wrong. Please try again.");

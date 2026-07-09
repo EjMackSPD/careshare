@@ -31,9 +31,15 @@ export async function payloadLogin(email: string, password: string) {
   });
 
   if (!response.ok) {
+    const data = await response.json().catch(() => null);
+    const message = data?.errors?.[0]?.message;
+
     return {
       ok: false,
-      error: "Invalid email or password",
+      error:
+        message && (response.status === 429 || response.status === 401)
+          ? message
+          : "Invalid email or password",
     };
   }
 

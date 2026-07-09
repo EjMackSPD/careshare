@@ -441,6 +441,15 @@ model GiftOrder {
   @@index([status])
 }
 
+// Records one throttled-endpoint attempt per row; count rows within a window to rate limit
+model RateLimitHit {
+  id        String   @id @default(cuid())
+  key       String
+  createdAt DateTime @default(now())
+
+  @@index([key, createdAt])
+}
+
 // Liability accounts discovered via Method Financial Connect
 model FamilyLiabilityAccount {
   id              String   @id @default(cuid())

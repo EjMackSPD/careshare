@@ -25,7 +25,7 @@ export default function Login() {
       const result = await payloadLogin(email, password);
 
       if (!result.ok) {
-        setError("Invalid email or password");
+        setError(result.error || "Invalid email or password");
         setLoading(false);
         return;
       }
