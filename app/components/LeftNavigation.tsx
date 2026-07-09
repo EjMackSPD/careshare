@@ -194,7 +194,9 @@ export default function LeftNavigation() {
         <nav className={styles.nav}>
           {/* Family Selector */}
           {families.length > 0 && (
-            <div className={styles.familySelector}>
+            <div className={styles.workspacePanel}>
+              <span className={styles.workspaceEyebrow}>Your workspace</span>
+              <div className={styles.familySelector}>
               <button
                 className={styles.familySelectorButton}
                 onClick={() => setShowFamilyDropdown(!showFamilyDropdown)}
@@ -254,6 +256,7 @@ export default function LeftNavigation() {
                   ))}
                 </div>
               )}
+              </div>
             </div>
           )}
 

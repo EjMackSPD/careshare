@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Footer from "@/app/components/Footer";
 import {
   CalendarDays,
   ClipboardCheck,
@@ -1099,7 +1098,6 @@ export default function CarePlanPage() {
           )}
         </main>
       </div>
-      <Footer />
     </div>
   );
 }

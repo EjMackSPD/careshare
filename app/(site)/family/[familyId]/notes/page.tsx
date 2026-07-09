@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import Footer from '@/app/components/Footer'
 import { Plus, Calendar, User, Search, ChevronLeft, ChevronRight } from 'lucide-react'
 import styles from './page.module.css'
 
@@ -272,7 +271,6 @@ export default function NotesPage() {
         )}
         </main>
       </div>
-      <Footer />
     </div>
   )
 }

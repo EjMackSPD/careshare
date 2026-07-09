@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-import Footer from '@/app/components/Footer'
 import {
   ArrowUpRight,
   BookOpen,
@@ -346,8 +345,6 @@ export default function ResourcesPage() {
           </section>
         </main>
       </div>
-
-      <Footer />
     </div>
   )
 }

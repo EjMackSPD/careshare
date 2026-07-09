@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Footer from '@/app/components/Footer'
 import { Search, HeartPulse, UtensilsCrossed, Car, Users, HandHeart, Scale, Stethoscope, Package, ShieldCheck, Phone, Mail, Globe, MapPin } from 'lucide-react'
 import type { Provider } from '@/lib/cms'
 import styles from './ProviderDirectory.module.css'
@@ -142,7 +141,6 @@ export default function ProviderDirectory({ providers }: { providers: Provider[]
           </section>
         </main>
       </div>
-      <Footer />
     </div>
   )
 }

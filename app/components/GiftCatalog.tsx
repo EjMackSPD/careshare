@@ -1,7 +1,6 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import Footer from '@/app/components/Footer'
 import { Search, Gift, Send, AlertCircle } from 'lucide-react'
 import styles from './GiftCatalog.module.css'
 
@@ -282,7 +281,6 @@ export default function GiftCatalog({
           )}
         </main>
       </div>
-      <Footer />
     </div>
   )
 }

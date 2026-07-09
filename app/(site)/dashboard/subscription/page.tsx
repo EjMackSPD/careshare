@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Footer from '@/app/components/Footer'
 import { Check, Users, Calendar, Wallet, UtensilsCrossed, Gift, Shield, Upload, Image as ImageIcon, Mic, Video, Book, Share2 } from 'lucide-react'
 import styles from './page.module.css'
 
@@ -486,7 +485,6 @@ export default function SubscriptionPage() {
           )}
         </main>
       </div>
-      <Footer />
     </div>
   )
 }

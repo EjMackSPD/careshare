@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Footer from '@/app/components/Footer'
 import { Search, ShoppingCart, Clock, DollarSign, ExternalLink } from 'lucide-react'
 import styles from './page.module.css'
 
@@ -256,7 +255,6 @@ export default function FoodDeliveryPage() {
           </div>
         </main>
       </div>
-      <Footer />
     </div>
   )
 }

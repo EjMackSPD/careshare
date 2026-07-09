@@ -1,5 +1,6 @@
 import Navigation from "./Navigation";
 import LeftNavigation from "./LeftNavigation";
+import Footer from "./Footer";
 import styles from "./AppShell.module.css";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
@@ -10,6 +11,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <LeftNavigation />
         <div className={styles.content}>{children}</div>
       </div>
+      <Footer />
     </div>
   );
 }

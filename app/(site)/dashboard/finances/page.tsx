@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Footer from "@/app/components/Footer";
 import {
   BarChart,
   Bar,
@@ -3739,7 +3738,6 @@ export default function FinancesPage() {
           )}
         </main>
       </div>
-      <Footer />
     </div>
   );
 }

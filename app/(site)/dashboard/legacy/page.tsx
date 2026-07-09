@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Footer from '@/app/components/Footer'
 import { Plus, Book, Heart, Briefcase, Lightbulb, Calendar, BookOpen, PenTool, Image, Video, Mic, FileText } from 'lucide-react'
 import styles from './page.module.css'
 
@@ -390,7 +389,6 @@ export default function LiveForeverPage() {
         </div>
       </div>
       )}
-      <Footer />
     </div>
   )
 }

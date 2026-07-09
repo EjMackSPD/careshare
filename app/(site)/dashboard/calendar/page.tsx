@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Footer from "@/app/components/Footer";
 import {
   CalendarDays,
   ChevronLeft,
@@ -848,8 +847,6 @@ export default function CalendarPage() {
           </div>
         </div>
       )}
-
-      <Footer />
     </div>
   );
 }

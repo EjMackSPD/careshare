@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react"
 import Link from "next/link"
-import Footer from "@/app/components/Footer"
 import {
   ArrowUp,
   BrainCircuit,
@@ -694,8 +693,6 @@ export default function CareConciergePage() {
           )}
         </main>
       </div>
-
-      <Footer />
     </div>
   )
 }

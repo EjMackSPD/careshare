@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import Footer from "@/app/components/Footer";
 import { Bell, Mail, Phone, MessageSquare } from "lucide-react";
 import styles from "./page.module.css";
 
@@ -649,7 +648,6 @@ export default function FamilySettings() {
           </form>
         </main>
       </div>
-      <Footer />
     </div>
   );
 }

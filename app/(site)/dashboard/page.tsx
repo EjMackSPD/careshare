@@ -3,7 +3,6 @@ import { getCurrentUser } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
 import { hydrateStoredDraft } from "@/lib/onboarding";
 import Link from "next/link";
-import Footer from "../../components/Footer";
 import PendingInvitationsBanner from "../../components/PendingInvitationsBanner";
 import CareRecipientWidget from "../../components/widgets/CareRecipientWidget";
 import TasksWidget from "../../components/widgets/TasksWidget";
@@ -439,8 +438,6 @@ export default async function Dashboard() {
           )}
         </main>
       </div>
-
-      <Footer />
     </div>
   );
 }

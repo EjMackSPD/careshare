@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
-import Footer from '@/app/components/Footer'
 import styles from './page.module.css'
 
 const caregiverRoles = new Set(['OWNER', 'PRIMARY_CAREGIVER', 'FAMILY_ADMIN'])
@@ -97,7 +96,6 @@ export default async function FamiliesPage() {
         )}
         </main>
       </div>
-      <Footer />
     </div>
   )
 }

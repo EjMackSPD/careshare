@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import Footer from '@/app/components/Footer'
 import styles from './page.module.css'
 
 type Member = {
@@ -361,7 +360,6 @@ export default function FamilyCosts() {
         )}
       </main>
       </div>
-      <Footer />
     </div>
   )
 }

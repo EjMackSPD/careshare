@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Footer from '@/app/components/Footer'
 import { AlertCircle, Landmark, Link2 } from 'lucide-react'
 import styles from './LiabilityAccounts.module.css'
 
@@ -189,7 +188,6 @@ export default function LiabilityAccounts({
           )}
         </main>
       </div>
-      <Footer />
     </div>
   )
 }

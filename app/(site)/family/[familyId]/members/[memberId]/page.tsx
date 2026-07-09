@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import Footer from '@/app/components/Footer'
 import { Mail, Phone, Calendar, User, Info } from 'lucide-react'
 import styles from './page.module.css'
 
@@ -225,7 +224,6 @@ export default function MemberProfilePage() {
           </div>
         </main>
       </div>
-      <Footer />
     </div>
   )
 }

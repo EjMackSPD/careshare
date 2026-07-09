@@ -3,21 +3,25 @@
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSession } from "@/app/components/AuthProvider";
 import { useRouter, useSearchParams } from "next/navigation";
-import Footer from "@/app/components/Footer";
+import CareConciergeWidget from "@/app/components/CareConciergeWidget";
 import {
   AlertCircle,
+  AlertTriangle,
   CalendarClock,
   CheckCircle2,
   Edit3,
   FileText,
   FolderOpen,
   Image as ImageIcon,
+  ListTodo,
   Loader2,
   Paperclip,
   Plus,
   Search,
   Trash2,
   Upload,
+  UserPlus,
+  UserX,
   Users,
   X,
 } from "lucide-react";
@@ -25,7 +29,7 @@ import styles from "./page.module.css";
 
 type TaskStatus = "TODO" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
 type TaskPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
-type TaskView = "open" | "unassigned" | "completed";
+type TaskView = "open" | "unassigned" | "overdue" | "completed";
 type SortBy = "date" | "alpha";
 
 type TaskAssignment = {
@@ -230,6 +234,7 @@ function TasksPageContent() {
     if (
       tabParam === "open" ||
       tabParam === "unassigned" ||
+      tabParam === "overdue" ||
       tabParam === "completed"
     ) {
       setActiveView(tabParam);
@@ -296,6 +301,7 @@ function TasksPageContent() {
       .filter((task) => {
         if (activeView === "completed") return isCompleted(task);
         if (activeView === "unassigned") return isOpen(task) && isUnassigned(task);
+        if (activeView === "overdue") return isOverdue(task);
         return isOpen(task);
       })
       .filter((task) => {
@@ -537,6 +543,70 @@ function TasksPageContent() {
     }
   }
 
+  async function assignToMe(task: Task) {
+    if (!currentUserId || task.assignments.some((a) => a.userId === currentUserId)) {
+      return;
+    }
+
+    try {
+      const assignedMembers = [
+        ...task.assignments.map((assignment) => assignment.userId),
+        currentUserId,
+      ];
+
+      const res = await fetch(`/api/tasks/${task.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: task.title,
+          description: task.description,
+          priority: task.priority,
+          status: task.status,
+          assignedMembers,
+          dueDate: task.dueDate,
+          attachmentUrl: task.attachmentUrl || null,
+          fileName: task.fileName || null,
+          fileType: task.fileType || null,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to assign task");
+
+      await fetchTasks(selectedFamily);
+      showToast(`Assigned "${task.title}" to you`, "success");
+    } catch (error) {
+      console.error("Error assigning task:", error);
+      showToast("Failed to assign task", "error");
+    }
+  }
+
+  async function quickAddSuggestedTask(task: { title: string; reason: string; priority: string }) {
+    if (!selectedFamily) return;
+
+    try {
+      const res = await fetch(`/api/families/${selectedFamily}/tasks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: task.title,
+          description: task.reason,
+          priority: task.priority,
+          status: "TODO",
+          assignedMembers: [],
+          dueDate: null,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Failed to add task");
+
+      await fetchTasks(selectedFamily);
+      showToast(`Added "${task.title}" to the queue`, "success");
+    } catch (error) {
+      console.error("Error adding suggested task:", error);
+      showToast("Failed to add task", "error");
+    }
+  }
+
   async function deleteTask(taskId: string) {
     if (!confirm("Are you sure you want to delete this task?")) return;
 
@@ -627,43 +697,72 @@ function TasksPageContent() {
             ) : (
               <>
                 <div className={styles.summaryRow}>
-                  <div className={styles.summaryCard}>
-                    <span className={styles.summaryLabel}>Family</span>
-                    <strong>{getFamilyDisplayName(currentFamily)}</strong>
-                  </div>
                   <button
                     type="button"
                     className={`${styles.summaryCard} ${
                       activeView === "open" ? styles.summaryActive : ""
                     }`}
                     onClick={() => setActiveView("open")}
+                    aria-pressed={activeView === "open"}
                   >
-                    <span className={styles.summaryLabel}>Open</span>
-                    <strong>{summary.openCount}</strong>
+                    <span className={`${styles.summaryIcon} ${styles.summaryIconOpen}`}>
+                      <ListTodo size={18} />
+                    </span>
+                    <span className={styles.summaryText}>
+                      <span className={styles.summaryLabel}>Open</span>
+                      <strong>{summary.openCount}</strong>
+                    </span>
                   </button>
+
                   <button
                     type="button"
                     className={`${styles.summaryCard} ${
                       activeView === "unassigned" ? styles.summaryActive : ""
                     }`}
                     onClick={() => setActiveView("unassigned")}
+                    aria-pressed={activeView === "unassigned"}
                   >
-                    <span className={styles.summaryLabel}>Unassigned</span>
-                    <strong>{summary.unassignedCount}</strong>
+                    <span className={`${styles.summaryIcon} ${styles.summaryIconUnassigned}`}>
+                      <UserX size={18} />
+                    </span>
+                    <span className={styles.summaryText}>
+                      <span className={styles.summaryLabel}>Unassigned</span>
+                      <strong>{summary.unassignedCount}</strong>
+                    </span>
                   </button>
-                  <div className={`${styles.summaryCard} ${styles.summaryAlert}`}>
-                    <span className={styles.summaryLabel}>Overdue</span>
-                    <strong>{summary.overdueCount}</strong>
-                  </div>
+
+                  <button
+                    type="button"
+                    className={`${styles.summaryCard} ${styles.summaryAlert} ${
+                      activeView === "overdue" ? styles.summaryActive : ""
+                    }`}
+                    onClick={() => setActiveView("overdue")}
+                    aria-pressed={activeView === "overdue"}
+                  >
+                    <span className={`${styles.summaryIcon} ${styles.summaryIconOverdue}`}>
+                      <AlertTriangle size={18} />
+                    </span>
+                    <span className={styles.summaryText}>
+                      <span className={styles.summaryLabel}>Overdue</span>
+                      <strong>{summary.overdueCount}</strong>
+                    </span>
+                  </button>
+
                   <button
                     type="button"
                     className={`${styles.summaryCard} ${
                       activeView === "completed" ? styles.summaryActive : ""
                     }`}
                     onClick={() => setActiveView("completed")}
+                    aria-pressed={activeView === "completed"}
                   >
-                    <span className={styles.summaryLabel}>Completed</span>
-                    <strong>{summary.completedCount}</strong>
+                    <span className={`${styles.summaryIcon} ${styles.summaryIconCompleted}`}>
+                      <CheckCircle2 size={18} />
+                    </span>
+                    <span className={styles.summaryText}>
+                      <span className={styles.summaryLabel}>Completed</span>
+                      <strong>{summary.completedCount}</strong>
+                    </span>
                   </button>
                 </div>
 
@@ -682,24 +781,26 @@ function TasksPageContent() {
 
                       <div className={styles.filterControls}>
                         <div className={styles.viewTabs}>
-                          {(["open", "unassigned", "completed"] as TaskView[]).map(
-                            (view) => (
-                              <button
-                                key={view}
-                                type="button"
-                                className={
-                                  activeView === view ? styles.activeTab : styles.tab
-                                }
-                                onClick={() => setActiveView(view)}
-                              >
-                                {view === "open"
-                                  ? "Open"
-                                  : view === "unassigned"
-                                  ? "Unassigned"
-                                  : "Completed"}
-                              </button>
-                            )
-                          )}
+                          {(
+                            ["open", "unassigned", "overdue", "completed"] as TaskView[]
+                          ).map((view) => (
+                            <button
+                              key={view}
+                              type="button"
+                              className={
+                                activeView === view ? styles.activeTab : styles.tab
+                              }
+                              onClick={() => setActiveView(view)}
+                            >
+                              {view === "open"
+                                ? "Open"
+                                : view === "unassigned"
+                                ? "Unassigned"
+                                : view === "overdue"
+                                ? "Overdue"
+                                : "Completed"}
+                            </button>
+                          ))}
                         </div>
 
                         <select
@@ -722,6 +823,8 @@ function TasksPageContent() {
                             ? "Open queue"
                             : activeView === "unassigned"
                             ? "Unassigned queue"
+                            : activeView === "overdue"
+                            ? "Overdue queue"
                             : "Completed work"}
                         </h2>
                         <p>
@@ -849,11 +952,19 @@ function TasksPageContent() {
 
                                   <div className={styles.ownerCell}>
                                     <span>{getAssigneeNames(task)}</span>
-                                    {isUnassigned(task) && (
-                                      <span className={styles.ownerHint}>
-                                        Needs assignment
-                                      </span>
-                                    )}
+                                    {currentUserId &&
+                                    !task.assignments.some(
+                                      (assignment) => assignment.userId === currentUserId
+                                    ) ? (
+                                      <button
+                                        type="button"
+                                        className={styles.assignMeBtn}
+                                        onClick={() => assignToMe(task)}
+                                      >
+                                        <UserPlus size={13} />
+                                        Assign to me
+                                      </button>
+                                    ) : null}
                                   </div>
 
                                   <div className={styles.dueCell}>
@@ -950,31 +1061,39 @@ function TasksPageContent() {
                     }`}
                   >
                     <div className={styles.composerHeader}>
-                      <div>
-                        <p className={styles.composerEyebrow}>Inspector</p>
-                        <h2>{composerTitle}</h2>
-                        <p>{composerDescription}</p>
-                      </div>
+                      {composerOpen ? (
+                        <div>
+                          <p className={styles.composerEyebrow}>Inspector</p>
+                          <h2>{composerTitle}</h2>
+                          <p>{composerDescription}</p>
+                        </div>
+                      ) : (
+                        <div>
+                          <p className={styles.composerEyebrow}>AI-powered</p>
+                          <h2>Care Concierge</h2>
+                          <p>Insights and quick tasks grounded in this family&apos;s data.</p>
+                        </div>
+                      )}
 
-                      <button
-                        type="button"
-                        className={styles.closeComposer}
-                        onClick={resetComposer}
-                      >
-                        <X size={18} />
-                      </button>
+                      {composerOpen && (
+                        <button
+                          type="button"
+                          className={styles.closeComposer}
+                          onClick={resetComposer}
+                        >
+                          <X size={18} />
+                        </button>
+                      )}
                     </div>
 
                     {!composerOpen ? (
                       <div className={styles.composerPlaceholder}>
-                        <div className={styles.emptyIcon}>
-                          <CheckCircle2 size={28} />
-                        </div>
-                        <h3>Ready for the next move</h3>
-                        <p>
-                          Open a task to edit it, or create a new one without
-                          losing sight of the current queue.
-                        </p>
+                        {selectedFamily && (
+                          <CareConciergeWidget
+                            familyId={selectedFamily}
+                            onAddSuggestedTask={quickAddSuggestedTask}
+                          />
+                        )}
                         <button
                           type="button"
                           className={styles.primaryButton}
@@ -1196,8 +1315,6 @@ function TasksPageContent() {
         </main>
       </div>
 
-      <Footer />
-
       {toast && (
         <div className={`${styles.toast} ${styles[toast.type]}`}>
           {toast.message}
@@ -1220,7 +1337,6 @@ export default function TasksPage() {
               </div>
             </main>
           </div>
-          <Footer />
         </div>
       }
     >

@@ -78,16 +78,20 @@
 }
 
 .navLinks .loginLink {
-  background: var(--cs-color-brand-deep);
+  margin-left: 0.35rem;
+  background: var(--cs-button-primary-bg);
   color: #ffffff;
-  padding: 0.55rem 1rem;
-  box-shadow: 0 10px 22px rgba(18, 56, 77, 0.16);
+  font-weight: 700;
+  padding: 0.65rem 1.4rem;
+  box-shadow: var(--cs-shadow-brand);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .navLinks .loginLink:hover {
-  background: var(--cs-color-brand);
+  background: var(--cs-button-primary-bg-hover);
   color: #ffffff;
-  box-shadow: 0 14px 28px rgba(40, 127, 174, 0.22);
+  box-shadow: var(--cs-shadow-lift);
+  transform: translateY(-2px);
 }
 
 .demoBtn {
@@ -161,14 +165,15 @@
   margin: 0.5rem 1.5rem 1rem;
   padding: 0.85rem 1rem;
   border-radius: var(--cs-radius-md);
-  background: var(--cs-color-brand-deep);
+  background: var(--cs-button-primary-bg);
   color: #ffffff;
+  font-weight: 700;
   text-align: center;
-  box-shadow: 0 12px 26px rgba(18, 56, 77, 0.16);
+  box-shadow: var(--cs-shadow-brand);
 }
 
 .mobileMenu .loginLink:hover {
-  background: var(--cs-color-brand);
+  background: var(--cs-button-primary-bg-hover);
   color: #ffffff;
 }
 

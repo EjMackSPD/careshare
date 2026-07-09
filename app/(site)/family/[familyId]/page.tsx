@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Footer from '@/app/components/Footer'
 import styles from './page.module.css'
 
 const caregiverRoles = new Set(['OWNER', 'PRIMARY_CAREGIVER', 'FAMILY_ADMIN'])
@@ -320,7 +319,6 @@ export default function FamilyDetail() {
         </div>
       </main>
       </div>
-      <Footer />
     </div>
   )
 }
