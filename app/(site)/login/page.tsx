@@ -38,40 +38,6 @@ export default function Login() {
     }
   };
 
-  const handleDemoMode = async () => {
-    setLoading(true);
-    setError("");
-
-    try {
-      // First, ensure demo user and data exist
-      const setupResponse = await fetch("/api/auth/demo", {
-        method: "POST",
-      });
-
-      if (!setupResponse.ok) {
-        setError("Failed to set up demo mode");
-        setLoading(false);
-        return;
-      }
-
-      // Now sign in with demo account
-      const result = await payloadLogin("demo@careshare.app", "demo123");
-
-      if (!result.ok) {
-        setError("Demo mode login failed. Please try again.");
-        setLoading(false);
-        return;
-      }
-
-      // Demo users always skip onboarding (already have data)
-      router.push("/dashboard");
-      router.refresh();
-    } catch (error) {
-      setError("Something went wrong with demo mode");
-      setLoading(false);
-    }
-  };
-
   return (
     <>
       <MarketingNav />
@@ -123,11 +89,8 @@ export default function Login() {
                   <Sparkles size={24} />
                 </div>
                 <div>
-                  <h3>Try Demo Mode</h3>
-                  <p>
-                    Explore with pre-loaded examples and see what&apos;s
-                    possible
-                  </p>
+                  <h3>AI Care Concierge</h3>
+                  <p>Get grounded answers about your family&apos;s care situation</p>
                 </div>
               </div>
             </div>
@@ -167,6 +130,9 @@ export default function Login() {
                   required
                   placeholder="••••••••"
                 />
+                <Link href="/forgot-password" className={styles.forgotPasswordLink}>
+                  Forgot password?
+                </Link>
               </div>
 
               <button
@@ -178,20 +144,6 @@ export default function Login() {
               </button>
             </form>
 
-            <div className={styles.divider}>
-              <span>New to CareShare?</span>
-            </div>
-
-            <div className={styles.demoOptions}>
-              <button
-                type="button"
-                onClick={handleDemoMode}
-                disabled={loading}
-                className={styles.demoBtn}
-              >
-                Quick Demo
-              </button>
-            </div>
             <div className={styles.formFooter}>
               <p>
                 Don&apos;t have an account? <Link href="/onboarding">Sign up</Link>

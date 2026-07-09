@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import Footer from "@/app/components/Footer";
-import { useSession } from "@/app/components/AuthProvider";
 import {
   BarChart,
   Bar,
@@ -73,15 +72,7 @@ const CATEGORY_COLORS: { [key: string]: string } = {
 };
 
 export default function FinancesPage() {
-  const { data: session } = useSession();
-  const isDemoAccount = session?.user?.email === "demo@careshare.app";
-  const today = React.useMemo(
-    () =>
-      isDemoAccount
-        ? new Date("2025-10-07T12:00:00")
-        : new Date(),
-    [isDemoAccount]
-  );
+  const today = React.useMemo(() => new Date(), []);
   const [activeTab, setActiveTab] = useState("Overview");
   const tabs = ["Overview", "Expenses", "Bills", "Family Contributions"];
 
@@ -2075,11 +2066,9 @@ export default function FinancesPage() {
         <main className={styles.main}>
           <div className={styles.pageHeader}>
             <div>
-              <h1>{isDemoAccount ? "Sample care finances" : "Finances"}</h1>
+              <h1>Finances</h1>
               <p className={styles.subtitle}>
-                {isDemoAccount
-                  ? "Explore how a family can track shared care costs, contributions, and upcoming bills."
-                  : "Manage expenses, bills, and budgeting for care"}
+                Manage expenses, bills, and budgeting for care
               </p>
             </div>
             <div className={styles.headerButtons}>
@@ -2087,7 +2076,7 @@ export default function FinancesPage() {
                 className={styles.addBillBtn}
                 onClick={() => setShowAddBill(true)}
               >
-                {isDemoAccount ? "Try a sample bill" : "Add Bill"}
+                Add Bill
               </button>
             </div>
           </div>

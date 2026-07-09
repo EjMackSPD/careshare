@@ -196,65 +196,16 @@
   cursor: not-allowed;
 }
 
-.divider {
-  margin: 1.5rem 0;
-  text-align: center;
-  position: relative;
-}
-
-.divider::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: #e2e8f0;
-}
-
-.divider span {
-  position: relative;
-  background: white;
-  padding: 0 1rem;
-  color: #94a3b8;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.demoBtn {
-  width: 100%;
-  background: white;
-  color: #6366f1;
-  border: 1.5px solid #e2e8f0;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  font-size: 1rem;
+.forgotPasswordLink {
+  align-self: flex-end;
+  font-size: 0.85rem;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+  color: #6366f1;
+  text-decoration: none;
 }
 
-.demoBtn:hover:not(:disabled) {
-  border-color: #6366f1;
-  background: #f8f9ff;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
-}
-
-.demoBtn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.demoText {
-  text-align: center;
-  color: #64748b;
-  font-size: 0.875rem;
-  margin-top: 0.75rem;
+.forgotPasswordLink:hover {
+  text-decoration: underline;
 }
 
 .formFooter {

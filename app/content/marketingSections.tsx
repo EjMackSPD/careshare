@@ -82,12 +82,12 @@ export const homeSections: PageSection[] = [
     id: "home-demo",
     type: "content",
     title: "See CareShare in Action",
-    intro: "Experience the platform with a fully interactive demo account. No signup required.",
+    intro: "One dashboard for everything a family needs to coordinate care together.",
     bullets: [
-      "Pre-loaded with realistic caregiving scenarios",
-      "Explore all major workflows and features",
-      "See how families coordinate care together",
-      "Test tasks, calendars, and finances with real sample data",
+      "Shared tasks, calendar, and messaging in one workspace",
+      "Track and split care-related expenses transparently",
+      "Invite family members and set the right access for each",
+      "An AI Care Concierge grounded in your family's own records",
     ],
     layout: "split",
     background: "muted",
@@ -129,7 +129,7 @@ export const featureSections: PageSection[] = [
       "Stop juggling emails, texts, and spreadsheets. CareShare brings everyone together with tools that actually make caregiving easier.",
     actions: [
       { href: "/onboarding", label: "Start Free Trial", variant: "primary", icon: Sparkles },
-      { href: "/login", label: "Try Demo", variant: "secondary", icon: Video },
+      { href: "/login", label: "Log In", variant: "secondary", icon: ArrowRight },
     ],
     media: {
       kind: "image",

@@ -3,7 +3,6 @@ import { getCurrentUser } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
 import { hydrateStoredDraft } from "@/lib/onboarding";
 import Link from "next/link";
-import DemoInitButton from "../../components/DemoInitButton";
 import Footer from "../../components/Footer";
 import PendingInvitationsBanner from "../../components/PendingInvitationsBanner";
 import CareRecipientWidget from "../../components/widgets/CareRecipientWidget";
@@ -383,20 +382,16 @@ export default async function Dashboard() {
                   ? "Start your first care workspace or invite a trusted supporter when you are ready."
                   : "Create your first family group to start coordinating care."}
               </p>
-              {user.email === "demo@careshare.app" ? (
-                <DemoInitButton />
-              ) : (
-                <div className={styles.emptyActions}>
-                  <Link href="/family/create" className={styles.primaryBtn}>
-                    {isIndividualAudience ? "Create Personal Workspace" : "Create Family Group"}
+              <div className={styles.emptyActions}>
+                <Link href="/family/create" className={styles.primaryBtn}>
+                  {isIndividualAudience ? "Create Personal Workspace" : "Create Family Group"}
+                </Link>
+                {isIndividualAudience && (
+                  <Link href="/onboarding" className={styles.secondaryEmptyLink}>
+                    Review onboarding details
                   </Link>
-                  {isIndividualAudience && (
-                    <Link href="/onboarding" className={styles.secondaryEmptyLink}>
-                      Review onboarding details
-                    </Link>
-                  )}
-                </div>
-              )}
+                )}
+              </div>
             </div>
           ) : (
             <>

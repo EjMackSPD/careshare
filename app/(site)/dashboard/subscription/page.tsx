@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Footer from '@/app/components/Footer'
-import { Check, Info, Users, Calendar, Wallet, UtensilsCrossed, Gift, Shield, Upload, Image as ImageIcon, Mic, Video, Book, Share2 } from 'lucide-react'
+import { Check, Users, Calendar, Wallet, UtensilsCrossed, Gift, Shield, Upload, Image as ImageIcon, Mic, Video, Book, Share2 } from 'lucide-react'
 import styles from './page.module.css'
 
 type BillingPeriod = 'monthly' | 'yearly'
@@ -135,12 +135,6 @@ export default function SubscriptionPage() {
         <main className={styles.main}>
           <div className={styles.pageHeader}>
             <h1>Choose Your Plan</h1>
-          </div>
-
-          {/* Demo Mode Banner */}
-          <div className={styles.demoBanner}>
-            <Info size={20} />
-            <span>You're in demo mode. No actual billing will occur.</span>
           </div>
 
           {/* Billing Toggle */}

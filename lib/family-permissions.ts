@@ -16,6 +16,10 @@ export type FamilyCapability =
   | "sensitive.write"
   | "documents.read"
   | "documents.write"
+  | "gifts.read"
+  | "gifts.write"
+  | "liabilities.read"
+  | "liabilities.write"
 
 const roleCapabilities: Record<FamilyRole, FamilyCapability[]> = {
   OWNER: [
@@ -34,6 +38,10 @@ const roleCapabilities: Record<FamilyRole, FamilyCapability[]> = {
     "sensitive.write",
     "documents.read",
     "documents.write",
+    "gifts.read",
+    "gifts.write",
+    "liabilities.read",
+    "liabilities.write",
   ],
   PRIMARY_CAREGIVER: [
     "workspace.manage",
@@ -51,6 +59,10 @@ const roleCapabilities: Record<FamilyRole, FamilyCapability[]> = {
     "sensitive.write",
     "documents.read",
     "documents.write",
+    "gifts.read",
+    "gifts.write",
+    "liabilities.read",
+    "liabilities.write",
   ],
   FAMILY_ADMIN: [
     "members.manage",
@@ -65,6 +77,9 @@ const roleCapabilities: Record<FamilyRole, FamilyCapability[]> = {
     "sensitive.read",
     "documents.read",
     "documents.write",
+    "gifts.read",
+    "gifts.write",
+    "liabilities.read",
   ],
   CONTRIBUTOR: [
     "care.read",
@@ -74,6 +89,7 @@ const roleCapabilities: Record<FamilyRole, FamilyCapability[]> = {
     "chat.read",
     "chat.write",
     "documents.read",
+    "gifts.read",
   ],
   VIEWER: [
     "care.read",
@@ -81,6 +97,7 @@ const roleCapabilities: Record<FamilyRole, FamilyCapability[]> = {
     "contributions.read",
     "chat.read",
     "documents.read",
+    "gifts.read",
   ],
   CARE_RECIPIENT: [
     "care.read",

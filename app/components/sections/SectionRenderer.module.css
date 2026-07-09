@@ -71,11 +71,6 @@
   pointer-events: none;
 }
 
-.heroCarousel {
-  position: absolute;
-  inset: 0;
-}
-
 .heroOverlay {
   position: absolute;
   inset: 0;

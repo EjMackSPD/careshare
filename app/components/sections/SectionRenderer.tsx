@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Calendar, CheckCircle2, Clock, Tag, User } from "lucide-react";
-import ImageCarousel from "@/app/components/ImageCarousel";
+import HeroCarouselSection from "@/app/components/HeroCarouselSection";
 import styles from "./SectionRenderer.module.css";
 import ContactSubmissionForm from "./ContactSubmissionForm";
 import { resolveIcon } from "./icon-map";
@@ -181,32 +181,44 @@ function renderSection(section: PageSection, index: number, posts: BlogListItem[
             } as React.CSSProperties)
           : undefined;
 
+      const heroContent = (
+        <div className={styles.heroContent}>
+          {section.eyebrow ? <div className={styles.heroEyebrow}>{section.eyebrow}</div> : null}
+          <h1 id={headingId} className={styles.heroTitle}>
+            {section.title}
+            {section.highlight ? <span className={styles.heroHighlight}>{section.highlight}</span> : null}
+          </h1>
+          {section.body ? <p className={styles.heroBody}>{section.body}</p> : null}
+          {renderActions(section.actions, isBrand ? "inverse" : "default")}
+        </div>
+      );
+
+      const heroClassName = cx(styles.section, styles.hero, isBrand ? styles.heroBrand : styles.heroLight);
+
+      if (section.media?.kind === "carousel") {
+        return (
+          <HeroCarouselSection
+            key={sectionId}
+            sectionId={sectionId}
+            headingId={headingId}
+            className={heroClassName}
+            style={heroStyle}
+            overlayClassName={styles.heroOverlay}
+            images={section.media.images ?? []}
+            content={heroContent}
+          />
+        );
+      }
+
       return (
         <section
           key={sectionId}
           id={sectionId}
           aria-labelledby={headingId}
-          className={cx(styles.section, styles.hero, isBrand ? styles.heroBrand : styles.heroLight)}
+          className={heroClassName}
           style={heroStyle}
         >
-          {section.media?.kind === "carousel" ? (
-            <>
-              <div className={styles.heroCarousel} aria-hidden="true">
-                <ImageCarousel images={section.media.images} />
-              </div>
-              <div className={styles.heroOverlay} aria-hidden="true" />
-            </>
-          ) : null}
-
-          <div className={styles.heroContent}>
-            {section.eyebrow ? <div className={styles.heroEyebrow}>{section.eyebrow}</div> : null}
-            <h1 id={headingId} className={styles.heroTitle}>
-              {section.title}
-              {section.highlight ? <span className={styles.heroHighlight}>{section.highlight}</span> : null}
-            </h1>
-            {section.body ? <p className={styles.heroBody}>{section.body}</p> : null}
-            {renderActions(section.actions, isBrand ? "inverse" : "default")}
-          </div>
+          {heroContent}
         </section>
       );
     }

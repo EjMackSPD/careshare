@@ -122,6 +122,7 @@ model Family {
   resources     Resource[]
   giftOrders    GiftOrder[]
   foodOrders    FoodOrder[]
+  liabilityAccounts FamilyLiabilityAccount[]
   messages      Message[]
   lifeStories   LifeStory[]
   medications   Medication[]
@@ -414,23 +415,50 @@ model Resource {
 
 // Gift marketplace orders
 model GiftOrder {
-  id          String   @id @default(cuid())
-  familyId    String
-  itemName    String
-  description String?
-  price       Float
-  status      String   @default("pending") // pending, ordered, delivered
-  orderedBy   String?
-  orderDate   DateTime?
-  deliveryDate DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                 String    @id @default(cuid())
+  familyId           String
+  itemName           String
+  description        String?
+  price              Float
+  currencyCode       String    @default("USD")
+  status             String    @default("pending") // pending, ordered, delivered, failed
+  recipientName      String?
+  recipientEmail     String?
+  tremendousOrderId  String?
+  tremendousRewardId String?
+  redemptionUrl      String?
+  failureReason      String?
+  orderedBy          String?
+  orderDate          DateTime?
+  deliveryDate       DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   family      Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
   orderedByUser User? @relation("OrderedGifts", fields: [orderedBy], references: [id])
 
   @@index([familyId])
   @@index([status])
+}
+
+// Liability accounts discovered via Method Financial Connect
+model FamilyLiabilityAccount {
+  id              String   @id @default(cuid())
+  familyId        String
+  methodEntityId  String
+  methodAccountId String   @unique
+  liabilityType   String?
+  name            String?
+  mask            String?
+  status          String?
+  balanceCurrent  Float?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  lastSyncedAt    DateTime @default(now())
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@index([familyId])
 }
 
 // Food delivery orders

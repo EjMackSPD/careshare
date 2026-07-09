@@ -1,0 +1,218 @@
+.container {
+  min-height: 100vh;
+  background: var(--cs-color-surface);
+  padding-top: 100px;
+}
+
+.layout {
+  display: flex;
+  min-height: calc(100vh - 81px);
+}
+
+.main {
+  flex: 1;
+  max-width: 1000px;
+  padding: 3rem 2rem;
+  width: 100%;
+}
+
+.pageHeader {
+  margin-bottom: 2rem;
+}
+
+.pageHeader h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--cs-color-ink);
+  margin: 0 0 0.5rem 0;
+}
+
+.subtitle {
+  color: var(--cs-color-muted);
+  font-size: 1rem;
+  margin: 0;
+}
+
+.notConfigured {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background: var(--cs-color-brand-soft);
+  border: 1px solid var(--cs-color-border);
+  border-radius: var(--cs-radius-lg);
+  padding: 1rem 1.25rem;
+  color: var(--cs-color-brand-dark);
+  margin-bottom: 1.5rem;
+}
+
+.notConfigured p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.linkBtn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.25rem;
+  background: var(--cs-button-primary-bg);
+  color: white;
+  border: none;
+  border-radius: var(--cs-radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+}
+
+.linkForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: var(--cs-color-surface-raised);
+  border: 1px solid var(--cs-color-border);
+  border-radius: var(--cs-radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  max-width: 26rem;
+}
+
+.formRow {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.linkForm input {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--cs-color-border);
+  border-radius: var(--cs-radius-sm);
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+.formActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.cancelBtn,
+.confirmBtn {
+  flex: 1;
+  padding: 0.6rem;
+  border-radius: var(--cs-radius-sm);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.cancelBtn {
+  background: var(--cs-color-surface);
+  border: 1px solid var(--cs-color-border);
+  color: var(--cs-color-muted-strong);
+}
+
+.confirmBtn {
+  background: var(--cs-button-primary-bg);
+  border: none;
+  color: white;
+}
+
+.confirmBtn:disabled,
+.cancelBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.successText {
+  color: var(--cs-color-care-dark);
+  background: var(--cs-color-care-soft);
+  padding: 0.75rem 1rem;
+  border-radius: var(--cs-radius-md);
+  margin: 0 0 1.5rem 0;
+}
+
+.errorText {
+  color: var(--cs-color-rose-dark);
+  background: var(--cs-color-brand-soft);
+  padding: 0.75rem 1rem;
+  border-radius: var(--cs-radius-md);
+  margin: 0 0 1.5rem 0;
+}
+
+.listSection h2 {
+  font-size: 1.3rem;
+  color: var(--cs-color-ink);
+  margin: 0 0 1rem 0;
+}
+
+.emptyText {
+  color: var(--cs-color-muted);
+}
+
+.accountList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.accountItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--cs-color-surface-raised);
+  border: 1px solid var(--cs-color-border);
+  border-radius: var(--cs-radius-md);
+  padding: 1rem;
+}
+
+.accountIcon {
+  color: var(--cs-color-brand);
+  flex-shrink: 0;
+}
+
+.accountItem strong {
+  display: block;
+  color: var(--cs-color-ink);
+}
+
+.accountMeta {
+  display: block;
+  color: var(--cs-color-muted);
+  font-size: 0.85rem;
+  margin-top: 0.15rem;
+  text-transform: capitalize;
+}
+
+.balance {
+  margin-left: auto;
+  font-weight: 700;
+  color: var(--cs-color-ink);
+}
+
+.statusBadge {
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--cs-radius-sm);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: var(--cs-color-surface);
+  color: var(--cs-color-muted-strong);
+  white-space: nowrap;
+}
+
+.status_active {
+  background: var(--cs-color-care-soft);
+  color: var(--cs-color-care-dark);
+}
+
+@media (max-width: 768px) {
+  .formRow {
+    flex-direction: column;
+  }
+
+  .accountItem {
+    flex-wrap: wrap;
+  }
+}

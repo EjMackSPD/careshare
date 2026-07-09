@@ -64,12 +64,12 @@ export const seedPages = [
         blockType: "content",
         sectionId: "home-demo",
         title: "See CareShare in Action",
-        intro: "Experience the platform with a fully interactive demo account. No signup required.",
+        intro: "One dashboard for everything a family needs to coordinate care together.",
         bullets: [
-          { text: "Pre-loaded with realistic caregiving scenarios" },
-          { text: "Explore all major workflows and features" },
-          { text: "See how families coordinate care together" },
-          { text: "Test tasks, calendars, and finances with real sample data" },
+          { text: "Shared tasks, calendar, and messaging in one workspace" },
+          { text: "Track and split care-related expenses transparently" },
+          { text: "Invite family members and set the right access for each" },
+          { text: "An AI Care Concierge grounded in your family's own records" },
         ],
         layout: "split",
         background: "muted",
@@ -109,7 +109,7 @@ export const seedPages = [
           "Stop juggling emails, texts, and spreadsheets. CareShare brings everyone together with tools that actually make caregiving easier.",
         actions: [
           { href: "/onboarding", label: "Start Free Trial", variant: "primary", iconKey: "sparkles" },
-          { href: "/login", label: "Try Demo", variant: "secondary", iconKey: "video" },
+          { href: "/login", label: "Log In", variant: "secondary", iconKey: "video" },
         ],
         media: {
           kind: "image",
@@ -195,7 +195,7 @@ export const seedPages = [
         body: "Join families who are caring better, together.",
         actions: [
           { href: "/onboarding", label: "Get Started Free", variant: "primary", iconKey: "sparkles" },
-          { href: "/login", label: "Try Demo Account", variant: "secondary" },
+          { href: "/login", label: "Log In", variant: "secondary" },
         ],
         note: "No credit card required. Cancel anytime.",
       },

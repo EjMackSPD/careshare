@@ -9,12 +9,23 @@ import {
   readOwnOrSupportStaff,
 } from "../access.ts";
 import { syncUserToPrismaAfterChange } from "../hooks/syncUserToPrisma.ts";
+import { renderPasswordResetEmailHTML, passwordResetEmailSubject } from "../../lib/payload-email.ts";
 
 export const Users: CollectionConfig = {
   slug: "users",
   auth: {
     tokenExpiration: 60 * 60 * 24 * 7,
     verify: false,
+    forgotPassword: {
+      generateEmailHTML: (args) => {
+        const token = args?.token;
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+        return renderPasswordResetEmailHTML({
+          resetUrl: `${siteUrl}/reset-password?token=${token}`,
+        });
+      },
+      generateEmailSubject: () => passwordResetEmailSubject(),
+    },
   },
   admin: {
     useAsTitle: "email",

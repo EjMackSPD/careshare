@@ -3,6 +3,7 @@ import { fileURLToPath } from "url";
 import { buildConfig } from "payload";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { vercelBlobStorage } from "@payloadcms/storage-vercel-blob";
+import { resendAdapter } from "@payloadcms/email-resend";
 import sharp from "sharp";
 import { Users } from "./payload/collections/Users.ts";
 import { Media } from "./payload/collections/Media.ts";
@@ -18,6 +19,16 @@ const siteURL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 const trustedOrigins = Array.from(new Set([siteURL, "http://localhost:3000"]));
 const payloadBlobToken =
   process.env.PAYLOAD_BLOB_READ_WRITE_TOKEN || process.env.BLOB_READ_WRITE_TOKEN;
+
+function parseEmailFrom(value: string | undefined) {
+  const match = value?.match(/^(.*?)\s*<(.+)>$/);
+  return {
+    name: match?.[1]?.trim() || "CareShare",
+    address: match?.[2]?.trim() || value || "no-reply@yourcareshare.com",
+  };
+}
+
+const emailFrom = parseEmailFrom(process.env.EMAIL_FROM);
 
 export default buildConfig({
   admin: {
@@ -100,6 +111,13 @@ export default buildConfig({
     allowIDOnCreate: true,
     blocksAsJSON: true,
   }),
+  email: process.env.RESEND_API_KEY
+    ? resendAdapter({
+        apiKey: process.env.RESEND_API_KEY,
+        defaultFromAddress: emailFrom.address,
+        defaultFromName: emailFrom.name,
+      })
+    : undefined,
   plugins: [
     vercelBlobStorage({
       access: "private" as "public",
