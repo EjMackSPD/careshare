@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, requireFamilyCapability } from '@/lib/auth-utils'
 import { prisma } from '@/lib/prisma'
 
 export async function PATCH(
@@ -19,23 +19,20 @@ export async function PATCH(
     const { eventId } = await params
     const body = await request.json()
 
-    // Verify user has access to this event
     const event = await prisma.event.findUnique({
       where: { id: eventId },
-      include: {
-        family: {
-          include: {
-            members: {
-              where: {
-                userId: (user as any).id,
-              },
-            },
-          },
-        },
-      },
     })
 
-    if (!event || event.family.members.length === 0) {
+    if (!event) {
+      return NextResponse.json(
+        { error: 'Event not found or access denied' },
+        { status: 403 }
+      )
+    }
+
+    try {
+      await requireFamilyCapability(event.familyId, 'care.write')
+    } catch {
       return NextResponse.json(
         { error: 'Event not found or access denied' },
         { status: 403 }
@@ -76,23 +73,20 @@ export async function DELETE(
 
     const { eventId } = await params
 
-    // Verify user has access to this event
     const event = await prisma.event.findUnique({
       where: { id: eventId },
-      include: {
-        family: {
-          include: {
-            members: {
-              where: {
-                userId: (user as any).id,
-              },
-            },
-          },
-        },
-      },
     })
 
-    if (!event || event.family.members.length === 0) {
+    if (!event) {
+      return NextResponse.json(
+        { error: 'Event not found or access denied' },
+        { status: 403 }
+      )
+    }
+
+    try {
+      await requireFamilyCapability(event.familyId, 'care.write')
+    } catch {
       return NextResponse.json(
         { error: 'Event not found or access denied' },
         { status: 403 }

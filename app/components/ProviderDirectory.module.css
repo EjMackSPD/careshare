@@ -1,0 +1,220 @@
+.container {
+  min-height: 100vh;
+  background: var(--cs-color-surface);
+  padding-top: 100px;
+}
+
+.layout {
+  display: flex;
+  min-height: calc(100vh - 81px);
+}
+
+.main {
+  flex: 1;
+  max-width: 1400px;
+  padding: 3rem 2rem;
+  width: 100%;
+}
+
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.pageHeader h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--cs-color-ink);
+  margin: 0 0 0.5rem 0;
+}
+
+.subtitle {
+  color: var(--cs-color-muted);
+  font-size: 1rem;
+  margin: 0;
+}
+
+.categoryTabs {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.categoryTab {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  background: var(--cs-color-surface-raised);
+  border: 1px solid var(--cs-color-border);
+  border-radius: var(--cs-radius-md);
+  color: var(--cs-color-muted-strong);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.categoryTab:hover {
+  border-color: var(--cs-color-brand);
+  color: var(--cs-color-brand);
+  background: var(--cs-color-brand-soft);
+}
+
+.categoryTab.activeCategory {
+  background: var(--cs-button-primary-bg);
+  color: white;
+  border-color: var(--cs-color-brand);
+}
+
+.searchBar {
+  position: relative;
+  margin-bottom: 2.5rem;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--cs-color-muted);
+}
+
+.searchBar input {
+  width: 100%;
+  padding: 0.85rem 1rem 0.85rem 3rem;
+  border: 1px solid var(--cs-color-border);
+  border-radius: var(--cs-radius-lg);
+  font-size: 1rem;
+  background: var(--cs-color-surface-raised);
+  transition: all 0.2s;
+}
+
+.searchBar input:focus {
+  outline: none;
+  border-color: var(--cs-color-brand);
+  box-shadow: 0 0 0 3px var(--cs-color-brand-soft);
+}
+
+.providersSection {
+  margin-bottom: 3rem;
+}
+
+.providersGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.providerCard {
+  background: var(--cs-color-surface-raised);
+  padding: 1.75rem;
+  border-radius: var(--cs-radius-lg);
+  border: 1px solid var(--cs-color-border);
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+
+.providerCard:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--cs-shadow-lift);
+  border-color: var(--cs-color-brand);
+}
+
+.providerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.providerCard h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--cs-color-ink);
+  margin: 0;
+}
+
+.categoryBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  background: var(--cs-color-surface);
+  border-radius: var(--cs-radius-sm);
+  font-size: 0.8rem;
+  color: var(--cs-color-muted-strong);
+  white-space: nowrap;
+}
+
+.vettedBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  align-self: flex-start;
+  padding: 0.25rem 0.65rem;
+  margin-bottom: 0.75rem;
+  background: var(--cs-color-care-soft);
+  color: var(--cs-color-care-dark);
+  border-radius: var(--cs-radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.description {
+  color: var(--cs-color-text);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0 0 1.25rem 0;
+  flex: 1;
+}
+
+.contactList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--cs-color-border);
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--cs-color-muted-strong);
+  font-size: 0.85rem;
+  text-decoration: none;
+}
+
+a.contactItem:hover {
+  color: var(--cs-color-brand);
+}
+
+.emptyState {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--cs-color-muted);
+  font-style: italic;
+}
+
+@media (max-width: 1400px) {
+  .providersGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .categoryTabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 0.5rem;
+  }
+
+  .providersGrid {
+    grid-template-columns: 1fr;
+  }
+}

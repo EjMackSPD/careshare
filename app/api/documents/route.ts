@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/auth-utils";
+import { requireAuth, requireFamilyCapability } from "@/lib/auth-utils";
 
 // GET /api/documents - Get all documents for a family
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireAuth();
+    await requireAuth();
 
     const { searchParams } = new URL(request.url);
     const familyId = searchParams.get("familyId");
@@ -17,15 +17,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Verify user has access to this family
-    const familyMember = await prisma.familyMember.findFirst({
-      where: {
-        familyId,
-        userId: (user as any).id,
-      },
-    });
-
-    if (!familyMember) {
+    try {
+      await requireFamilyCapability(familyId, "documents.read");
+    } catch {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
@@ -78,15 +72,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify user has access to this family
-    const familyMember = await prisma.familyMember.findFirst({
-      where: {
-        familyId,
-        userId: (user as any).id,
-      },
-    });
-
-    if (!familyMember) {
+    try {
+      await requireFamilyCapability(familyId, "documents.write");
+    } catch {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 

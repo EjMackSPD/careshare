@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { requireAuth } from "@/lib/auth-utils"
+import { requireAuth, requireFamilyCapability } from "@/lib/auth-utils"
 import { TaskPriority, TaskStatus } from "@prisma/client"
 
 // PATCH - Update a task
@@ -9,7 +9,7 @@ export async function PATCH(
   { params }: { params: Promise<{ taskId: string }> }
 ) {
   try {
-    const user = await requireAuth()
+    await requireAuth()
     const { taskId } = await params
     const body = await request.json()
 
@@ -26,17 +26,9 @@ export async function PATCH(
       )
     }
 
-    // Verify user is a member of this family
-    const familyMember = await prisma.familyMember.findUnique({
-      where: {
-        familyId_userId: {
-          familyId: task.familyId,
-          userId: user.id
-        }
-      }
-    })
-
-    if (!familyMember) {
+    try {
+      await requireFamilyCapability(task.familyId, "care.write")
+    } catch {
       return NextResponse.json(
         { error: "Not authorized to update this task" },
         { status: 403 }
@@ -123,7 +115,7 @@ export async function DELETE(
   { params }: { params: Promise<{ taskId: string }> }
 ) {
   try {
-    const user = await requireAuth()
+    await requireAuth()
     const { taskId } = await params
 
     // Get the task to verify family membership
@@ -139,17 +131,9 @@ export async function DELETE(
       )
     }
 
-    // Verify user is a member of this family
-    const familyMember = await prisma.familyMember.findUnique({
-      where: {
-        familyId_userId: {
-          familyId: task.familyId,
-          userId: user.id
-        }
-      }
-    })
-
-    if (!familyMember) {
+    try {
+      await requireFamilyCapability(task.familyId, "care.write")
+    } catch {
       return NextResponse.json(
         { error: "Not authorized to delete this task" },
         { status: 403 }

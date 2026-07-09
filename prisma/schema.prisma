@@ -710,12 +710,14 @@ model AIMessage {
   role           AIMessageRole
   content        String        @db.Text
   citedContext   Json?
+  flagged        Boolean       @default(false)
   createdAt      DateTime      @default(now())
 
   conversation   AIConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   @@index([conversationId])
   @@index([createdAt])
+  @@index([flagged])
 }
 
 model BlogPost {

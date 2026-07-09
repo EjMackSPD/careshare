@@ -15,6 +15,7 @@ import {
   UsersRound,
   Gift,
   UtensilsCrossed,
+  Stethoscope,
   Infinity,
   CreditCard,
   Menu,
@@ -38,7 +39,7 @@ const mainMenuItems = [
   { href: "/dashboard/finances", label: "Finances", icon: Wallet },
   { href: "/dashboard/care-plan", label: "Care Plan", icon: Heart },
   { href: "/dashboard/resources", label: "Resources", icon: BookOpen },
-  { href: "/dashboard/care-ai", label: "CareAI", icon: Sparkles },
+  { href: "/dashboard/care-concierge", label: "Care Concierge", icon: Sparkles },
 ];
 
 const familyMenuItems = [
@@ -52,6 +53,7 @@ const familyMenuItems = [
 ];
 
 const marketplaceMenuItems = [
+  { href: "/dashboard/providers", label: "Find a Provider", icon: Stethoscope },
   { href: "/dashboard/gifts", label: "Gift Marketplace", icon: Gift },
   { href: "/dashboard/food", label: "Food Delivery", icon: UtensilsCrossed },
   { href: "/dashboard/subscription", label: "Subscription", icon: CreditCard },
@@ -97,8 +99,8 @@ export default function LeftNavigation() {
           const data = await res.json();
           setFamilies(data);
           // Set first family as default if none selected
-          if (data.length > 0 && !selectedFamilyId) {
-            setSelectedFamilyId(data[0].id);
+          if (data.length > 0) {
+            setSelectedFamilyId((current) => current ?? data[0].id);
           }
         }
       } catch (error) {
@@ -108,7 +110,7 @@ export default function LeftNavigation() {
     if (session) {
       fetchFamilies();
     }
-  }, [session, selectedFamilyId]);
+  }, [session]);
 
   // Determine which sections should be expanded based on current page
   const isFamilyPage =
@@ -117,6 +119,7 @@ export default function LeftNavigation() {
     pathname?.startsWith("/dashboard/legacy");
 
   const isMarketplacePage =
+    pathname?.startsWith("/dashboard/providers") ||
     pathname?.startsWith("/dashboard/gifts") ||
     pathname?.startsWith("/dashboard/food") ||
     pathname?.startsWith("/dashboard/subscription");

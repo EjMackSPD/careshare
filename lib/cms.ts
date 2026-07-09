@@ -366,6 +366,52 @@ export async function getPublishedPosts(limit = 12): Promise<BlogListItem[]> {
   return result.docs.map(mapPostForList);
 }
 
+export type Provider = {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  phone: string | null;
+  email: string | null;
+  website: string | null;
+  serviceArea: string | null;
+  logoUrl: string | null;
+  vetted: boolean;
+};
+
+function mapProvider(doc: PayloadDoc): Provider {
+  return {
+    id: String(doc.id),
+    name: doc.name,
+    category: doc.category,
+    description: doc.description,
+    phone: doc.phone || null,
+    email: doc.email || null,
+    website: doc.website || null,
+    serviceArea: doc.serviceArea || null,
+    logoUrl: mediaURL(doc.logo),
+    vetted: Boolean(doc.vetted),
+  };
+}
+
+export async function getPublishedProviders(): Promise<Provider[]> {
+  const payload = await getPayloadClient();
+  const result = await payload.find({
+    collection: "providers",
+    depth: 1,
+    limit: 100,
+    overrideAccess: false,
+    sort: "name",
+    where: {
+      _status: {
+        equals: "published",
+      },
+    },
+  });
+
+  return result.docs.map(mapProvider);
+}
+
 export async function getPublishedPostBySlug(slug: string) {
   const payload = await getPayloadClient();
   const result = await payload.find({

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { requireAuth } from "@/lib/auth-utils"
+import { requireAuth, requireFamilyCapability } from "@/lib/auth-utils"
 import { MedicationFrequency } from "@prisma/client"
 
 // PATCH - Update a medication
@@ -9,7 +9,7 @@ export async function PATCH(
   { params }: { params: Promise<{ medicationId: string }> }
 ) {
   try {
-    const user = await requireAuth()
+    await requireAuth()
     const { medicationId } = await params
     const body = await request.json()
 
@@ -25,17 +25,9 @@ export async function PATCH(
       )
     }
 
-    // Verify user is a member of this family
-    const familyMember = await prisma.familyMember.findUnique({
-      where: {
-        familyId_userId: {
-          familyId: medication.familyId,
-          userId: user.id
-        }
-      }
-    })
-
-    if (!familyMember) {
+    try {
+      await requireFamilyCapability(medication.familyId, "sensitive.write")
+    } catch {
       return NextResponse.json(
         { error: "Not authorized to update this medication" },
         { status: 403 }
@@ -77,7 +69,7 @@ export async function DELETE(
   { params }: { params: Promise<{ medicationId: string }> }
 ) {
   try {
-    const user = await requireAuth()
+    await requireAuth()
     const { medicationId } = await params
 
     // Get medication to verify family membership
@@ -92,17 +84,9 @@ export async function DELETE(
       )
     }
 
-    // Verify user is a member of this family
-    const familyMember = await prisma.familyMember.findUnique({
-      where: {
-        familyId_userId: {
-          familyId: medication.familyId,
-          userId: user.id
-        }
-      }
-    })
-
-    if (!familyMember) {
+    try {
+      await requireFamilyCapability(medication.familyId, "sensitive.write")
+    } catch {
       return NextResponse.json(
         { error: "Not authorized to delete this medication" },
         { status: 403 }

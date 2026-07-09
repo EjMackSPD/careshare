@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/auth-utils";
+import { requireAuth, requireFamilyCapability } from "@/lib/auth-utils";
 
 type RouteContext = {
   params: Promise<{
@@ -11,7 +11,7 @@ type RouteContext = {
 // PATCH /api/documents/[documentId] - Update a document
 export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
-    const user = await requireAuth();
+    await requireAuth();
 
     const { documentId } = await context.params;
     const body = await request.json();
@@ -19,7 +19,6 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     // Get document and verify access
     const existingDocument = await prisma.document.findUnique({
       where: { id: documentId },
-      include: { family: true },
     });
 
     if (!existingDocument) {
@@ -29,15 +28,9 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       );
     }
 
-    // Verify user has access to this family
-    const familyMember = await prisma.familyMember.findFirst({
-      where: {
-        familyId: existingDocument.familyId,
-        userId: (user as any).id,
-      },
-    });
-
-    if (!familyMember) {
+    try {
+      await requireFamilyCapability(existingDocument.familyId, "documents.write");
+    } catch {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
@@ -76,14 +69,13 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 // DELETE /api/documents/[documentId] - Delete a document
 export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
-    const user = await requireAuth();
+    await requireAuth();
 
     const { documentId } = await context.params;
 
     // Get document and verify access
     const existingDocument = await prisma.document.findUnique({
       where: { id: documentId },
-      include: { family: true },
     });
 
     if (!existingDocument) {
@@ -93,15 +85,9 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
       );
     }
 
-    // Verify user has access to this family
-    const familyMember = await prisma.familyMember.findFirst({
-      where: {
-        familyId: existingDocument.familyId,
-        userId: (user as any).id,
-      },
-    });
-
-    if (!familyMember) {
+    try {
+      await requireFamilyCapability(existingDocument.familyId, "documents.write");
+    } catch {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 

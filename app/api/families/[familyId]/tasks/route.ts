@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { requireAuth } from "@/lib/auth-utils"
+import { requireAuth, requireFamilyCapability } from "@/lib/auth-utils"
 import { TaskPriority, TaskStatus } from "@prisma/client"
 
 // GET - Fetch all tasks for a family
@@ -9,20 +9,12 @@ export async function GET(
   { params }: { params: Promise<{ familyId: string }> }
 ) {
   try {
-    const user = await requireAuth()
+    await requireAuth()
     const { familyId } = await params
 
-    // Verify user is a member of this family
-    const familyMember = await prisma.familyMember.findUnique({
-      where: {
-        familyId_userId: {
-          familyId,
-          userId: user.id
-        }
-      }
-    })
-
-    if (!familyMember) {
+    try {
+      await requireFamilyCapability(familyId, "care.read")
+    } catch {
       return NextResponse.json(
         { error: "Not authorized to view tasks for this family" },
         { status: 403 }
@@ -64,7 +56,7 @@ export async function POST(
   { params }: { params: Promise<{ familyId: string }> }
 ) {
   try {
-    const user = await requireAuth()
+    await requireAuth()
     const { familyId } = await params
     const body = await request.json()
 
@@ -75,17 +67,9 @@ export async function POST(
       )
     }
 
-    // Verify user is a member of this family
-    const familyMember = await prisma.familyMember.findUnique({
-      where: {
-        familyId_userId: {
-          familyId,
-          userId: user.id
-        }
-      }
-    })
-
-    if (!familyMember) {
+    try {
+      await requireFamilyCapability(familyId, "care.write")
+    } catch {
       return NextResponse.json(
         { error: "Not authorized to add tasks to this family" },
         { status: 403 }

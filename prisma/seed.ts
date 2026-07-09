@@ -39,7 +39,7 @@ async function main() {
     create: {
       id: "demo-family-id",
       name: "Smith Family Care Group",
-      elderName: "Grandma Mary Smith",
+      elderName: "Grandma Susan Smith",
       elderPhone: "(555) 123-4567",
       elderAddress: "123 Oak Street, Springfield, IL 62701",
       elderBirthday: new Date("1945-06-15"),
@@ -63,8 +63,8 @@ async function main() {
     update: {},
     create: {
       familyId: demoFamily.id,
-      name: "Grandma Mary Smith",
-      preferredName: "Mary",
+      name: "Grandma Susan Smith",
+      preferredName: "Susan",
       relationshipToCaregiver: "Mother",
       phone: "(555) 123-4567",
       address: "123 Oak Street, Springfield, IL 62701",
@@ -87,7 +87,7 @@ async function main() {
       location: "Springfield Medical Center",
     },
     {
-      title: "Grandma Mary's Birthday",
+      title: "Grandma Susan's Birthday",
       description: "Birthday celebration at her home",
       type: EventType.BIRTHDAY,
       eventDate: new Date("2025-06-15"),

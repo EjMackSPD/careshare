@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, requireFamilyCapability } from '@/lib/auth-utils'
 import { prisma } from '@/lib/prisma'
 
 export async function PATCH(
@@ -19,23 +19,20 @@ export async function PATCH(
     const { costId } = await params
     const body = await request.json()
 
-    // Verify user has access to this cost
     const cost = await prisma.cost.findUnique({
       where: { id: costId },
-      include: {
-        family: {
-          include: {
-            members: {
-              where: {
-                userId: (user as any).id,
-              },
-            },
-          },
-        },
-      },
     })
 
-    if (!cost || cost.family.members.length === 0) {
+    if (!cost) {
+      return NextResponse.json(
+        { error: 'Cost not found or access denied' },
+        { status: 403 }
+      )
+    }
+
+    try {
+      await requireFamilyCapability(cost.familyId, 'bills.write')
+    } catch {
       return NextResponse.json(
         { error: 'Cost not found or access denied' },
         { status: 403 }
@@ -85,23 +82,20 @@ export async function DELETE(
 
     const { costId } = await params
 
-    // Verify user has access to this cost
     const cost = await prisma.cost.findUnique({
       where: { id: costId },
-      include: {
-        family: {
-          include: {
-            members: {
-              where: {
-                userId: (user as any).id,
-              },
-            },
-          },
-        },
-      },
     })
 
-    if (!cost || cost.family.members.length === 0) {
+    if (!cost) {
+      return NextResponse.json(
+        { error: 'Cost not found or access denied' },
+        { status: 403 }
+      )
+    }
+
+    try {
+      await requireFamilyCapability(cost.familyId, 'bills.write')
+    } catch {
       return NextResponse.json(
         { error: 'Cost not found or access denied' },
         { status: 403 }

@@ -31,7 +31,7 @@ export async function SupportOverview({ user }: ServerProps) {
     );
   }
 
-  const [familyCount, userCount, membershipCount, recentFamilies] = await Promise.all([
+  const [familyCount, userCount, membershipCount, recentFamilies, flaggedMessages] = await Promise.all([
     prisma.family.count(),
     prisma.user.count(),
     prisma.familyMember.count(),
@@ -52,6 +52,18 @@ export async function SupportOverview({ user }: ServerProps) {
         },
       },
       orderBy: { updatedAt: "desc" },
+      take: 8,
+    }),
+    prisma.aIMessage.findMany({
+      where: { flagged: true },
+      include: {
+        conversation: {
+          include: {
+            family: { select: { name: true } },
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
       take: 8,
     }),
   ]);
@@ -112,6 +124,43 @@ export async function SupportOverview({ user }: ServerProps) {
                   <td>{formatDate(family.updatedAt)}</td>
                 </tr>
               ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="careshare-support-card">
+        <div className="careshare-support-overview__section-header">
+          <h2>Recently Flagged Care Concierge Answers</h2>
+        </div>
+
+        <div className="careshare-support-overview__table-wrap">
+          <table className="careshare-support-table">
+            <thead>
+              <tr>
+                <th>Family</th>
+                <th>Answer</th>
+                <th>Flagged</th>
+              </tr>
+            </thead>
+            <tbody>
+              {flaggedMessages.length === 0 ? (
+                <tr>
+                  <td colSpan={3} className="careshare-support-table__muted">
+                    No flagged answers yet.
+                  </td>
+                </tr>
+              ) : (
+                flaggedMessages.map((message) => (
+                  <tr key={message.id}>
+                    <td>
+                      <strong>{message.conversation.family.name}</strong>
+                    </td>
+                    <td>{message.content.slice(0, 140)}</td>
+                    <td>{formatDate(message.createdAt)}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

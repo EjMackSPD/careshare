@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client"
 import { prisma } from "@/lib/prisma"
 import { getAssistantModel, getOpenAIClient } from "@/lib/openai"
+import { getPublishedProviders } from "@/lib/cms"
 import type {
   AssistantCitation,
   AssistantContextSummary,
@@ -132,7 +133,7 @@ function buildOfflineFallback(input: {
     noteSources.length
       ? `Notes and observations: ${noteSources.length} recent notes are available.`
       : null,
-    "Try the same question again once network access to OpenAI is available and CareAI can generate a more tailored recommendation.",
+    "Try the same question again once network access to OpenAI is available and the Care Concierge can generate a more tailored recommendation.",
   ].filter(Boolean)
 
   const recommendations: AssistantRecommendation[] = [
@@ -472,6 +473,29 @@ export async function buildAssistantContext(familyId: string) {
     )
   })
 
+  const providers = await getPublishedProviders()
+
+  providers.slice(0, 15).forEach((provider) => {
+    createSource(
+      sources,
+      "Local provider",
+      provider.name,
+      provider.category.replace(/_/g, " ").toLowerCase(),
+      [
+        `Name: ${provider.name}`,
+        `Category: ${provider.category}`,
+        `Description: ${provider.description}`,
+        provider.serviceArea ? `Service area: ${provider.serviceArea}` : null,
+        provider.phone ? `Phone: ${provider.phone}` : null,
+        provider.email ? `Email: ${provider.email}` : null,
+        provider.website ? `Website: ${provider.website}` : null,
+        provider.vetted ? "Vetted by CareShare staff." : null,
+      ]
+        .filter(Boolean)
+        .join("\n")
+    )
+  })
+
   createSource(
     sources,
     "General guidance",
@@ -509,6 +533,7 @@ export async function buildAssistantContext(familyId: string) {
           family.medications.length ? `${family.medications.length} medications` : null,
           family.resources.length ? `${family.resources.length} resources` : null,
           family.messages.length ? `${family.messages.length} chat messages` : null,
+          providers.length ? `${providers.length} local providers` : null,
         ].filter(Boolean) as string[],
       },
     },
@@ -526,6 +551,7 @@ export function formatConversationMessage(
     role: "USER" | "ASSISTANT" | "SYSTEM"
     content: string
     citedContext: Prisma.JsonValue | null
+    flagged: boolean
     createdAt: Date
   }
 ) {
@@ -539,6 +565,7 @@ export function formatConversationMessage(
       followUps?: string[]
       contextSummary?: AssistantContextSummary
     } | null) ?? null,
+    flagged: message.flagged,
     createdAt: message.createdAt.toISOString(),
   }
 }
@@ -553,7 +580,7 @@ export async function generateAssistantReply(input: {
     const model = getAssistantModel()
 
     const instructions = [
-      "You are CareAI, a family care coordination assistant inside CareShare.",
+      "You are the CareShare Care Concierge, a family care coordination assistant inside CareShare.",
       "Use family records as the source of truth whenever they are available.",
       "If the data needed is missing, say that clearly and do not invent details.",
       "General caregiving knowledge is allowed only for recommendations or inferences, and it must be framed as guidance rather than fact.",
@@ -679,7 +706,7 @@ export async function generateAssistantReply(input: {
       followUps,
     }
   } catch (error) {
-    console.error("CareAI falling back to local summary:", error)
+    console.error("Care Concierge falling back to local summary:", error)
     return buildOfflineFallback(input)
   }
 }

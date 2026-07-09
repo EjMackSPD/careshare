@@ -70,6 +70,7 @@ export interface Config {
     users: User;
     pages: Page;
     posts: Post;
+    providers: Provider;
     media: Media;
     'contact-submissions': ContactSubmission;
     'payload-kv': PayloadKv;
@@ -82,6 +83,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    providers: ProvidersSelect<false> | ProvidersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     'contact-submissions': ContactSubmissionsSelect<false> | ContactSubmissionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -938,6 +940,32 @@ export interface Post {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "providers".
+ */
+export interface Provider {
+  id: number;
+  name: string;
+  category:
+    | 'HOME_HEALTH_AIDE'
+    | 'MEAL_DELIVERY'
+    | 'TRANSPORTATION'
+    | 'ADULT_DAY_CARE'
+    | 'RESPITE_CARE'
+    | 'LEGAL_FINANCIAL'
+    | 'MEDICAL_EQUIPMENT';
+  description: string;
+  phone?: string | null;
+  email?: string | null;
+  website?: string | null;
+  serviceArea?: string | null;
+  logo?: (number | null) | Media;
+  vetted?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "contact-submissions".
  */
 export interface ContactSubmission {
@@ -1433,6 +1461,24 @@ export interface PostsSelect<T extends boolean = true> {
         image?: T;
         noIndex?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "providers_select".
+ */
+export interface ProvidersSelect<T extends boolean = true> {
+  name?: T;
+  category?: T;
+  description?: T;
+  phone?: T;
+  email?: T;
+  website?: T;
+  serviceArea?: T;
+  logo?: T;
+  vetted?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

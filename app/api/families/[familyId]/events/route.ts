@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth-utils'
+import { getCurrentUser, requireFamilyCapability } from '@/lib/auth-utils'
 import { prisma } from '@/lib/prisma'
 
 export async function GET(
@@ -18,15 +18,9 @@ export async function GET(
 
     const { familyId } = await params
 
-    // Check if user is member of this family
-    const isMember = await prisma.familyMember.findFirst({
-      where: {
-        familyId,
-        userId: (user as any).id,
-      },
-    })
-
-    if (!isMember) {
+    try {
+      await requireFamilyCapability(familyId, 'care.read')
+    } catch {
       return NextResponse.json(
         { error: 'Not a member of this family' },
         { status: 403 }
@@ -77,15 +71,9 @@ export async function POST(
       )
     }
 
-    // Check if user is member of this family
-    const isMember = await prisma.familyMember.findFirst({
-      where: {
-        familyId,
-        userId: (user as any).id,
-      },
-    })
-
-    if (!isMember) {
+    try {
+      await requireFamilyCapability(familyId, 'care.write')
+    } catch {
       return NextResponse.json(
         { error: 'Not a member of this family' },
         { status: 403 }

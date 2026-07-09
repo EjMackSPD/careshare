@@ -55,7 +55,7 @@ export async function GET(
       ),
     })
   } catch (error) {
-    console.error("Failed to fetch CareAI conversation:", error)
+    console.error("Failed to fetch Care Concierge conversation:", error)
     return NextResponse.json(
       { error: "Failed to fetch conversation" },
       { status: 500 }

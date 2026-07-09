@@ -267,6 +267,13 @@
   line-height: 1.45;
 }
 
+.headerBadges {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
 .guardrail {
   display: inline-flex;
   align-items: center;
@@ -278,6 +285,24 @@
   font-size: 0.82rem;
   font-weight: 600;
   white-space: nowrap;
+}
+
+.escalationLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(36, 100, 141, 0.1);
+  color: #24648d;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.escalationLink:hover {
+  background: rgba(36, 100, 141, 0.18);
 }
 
 .messageStream {
@@ -354,6 +379,32 @@
 .infoTag {
   background: rgba(36, 100, 141, 0.1);
   color: #24648d;
+}
+
+.flagRow {
+  margin-top: 0.7rem;
+}
+
+.flagButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: none;
+  background: transparent;
+  color: #8a97a3;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.2rem 0;
+}
+
+.flagButton:hover {
+  color: #b33b3b;
+}
+
+.flagButton:disabled {
+  cursor: default;
+  color: #6a9a72;
 }
 
 .articulationCard {
@@ -659,6 +710,10 @@
 
   .chatHeader {
     flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .headerBadges {
     align-items: flex-start;
   }
 

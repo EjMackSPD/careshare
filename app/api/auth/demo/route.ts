@@ -193,7 +193,7 @@ export async function POST() {
       const demoFamily = await prisma.family.create({
         data: {
           name: "Smith Family Care Group",
-          elderName: "Mary Smith",
+          elderName: "Susan Smith",
           elderPhone: "(555) 123-4567",
           elderAddress: "123 Oak Street, Springfield, IL 62701",
           elderBirthday: new Date("1945-06-15"),
@@ -245,8 +245,8 @@ export async function POST() {
       await prisma.careRecipient.create({
         data: {
           familyId: demoFamily.id,
-          name: "Mary Smith",
-          preferredName: "Mary",
+          name: "Susan Smith",
+          preferredName: "Susan",
           relationshipToCaregiver: "Mother",
           phone: "(555) 123-4567",
           address: "123 Oak Street, Springfield, IL 62701",
@@ -268,7 +268,7 @@ export async function POST() {
           familyId: demoFamily.id,
         },
         {
-          title: "Grandma Mary's Birthday",
+          title: "Grandma Susan's Birthday",
           description: "Birthday celebration at her home",
           type: EventType.BIRTHDAY,
           eventDate: new Date("2025-06-15"),

@@ -102,8 +102,10 @@ export function useAuth() {
 export function useSession() {
   const { user, status, refresh } = useAuth();
 
+  const data = useMemo(() => (user ? { user } : null), [user]);
+
   return {
-    data: user ? { user } : null,
+    data,
     status,
     update: refresh,
   };

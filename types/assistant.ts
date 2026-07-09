@@ -42,6 +42,7 @@ export type AssistantMessage = {
     followUps?: string[]
     contextSummary?: AssistantContextSummary
   } | null
+  flagged: boolean
   createdAt: string
 }
 

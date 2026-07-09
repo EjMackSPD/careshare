@@ -7,6 +7,7 @@ import {
   requireFamilyMembership,
 } from '@/lib/auth-utils'
 import { normalizeFamilyRole } from '@/lib/family-permissions'
+import { sendFamilyInvitationEmail } from '@/lib/email'
 
 export async function GET(
   request: NextRequest,
@@ -126,10 +127,21 @@ export async function POST(
             email: true,
           },
         },
+        family: {
+          select: {
+            name: true,
+          },
+        },
       },
     })
 
-    // TODO: Send email notification to invitee
+    await sendFamilyInvitationEmail({
+      to: invitation.email,
+      familyName: invitation.family.name,
+      inviterName: invitation.inviter.name,
+      role: invitation.role,
+      message: invitation.message,
+    })
 
     await logFamilyAuditEvent({
       familyId,

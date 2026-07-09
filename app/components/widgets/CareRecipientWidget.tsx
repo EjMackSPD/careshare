@@ -6,12 +6,16 @@ import { Plus } from 'lucide-react'
 import styles from './Widget.module.css'
 
 type CareRecipientWidgetProps = {
-  elderName?: string | null
-  elderAge?: number
-  wellness?: string
-  medications?: number
-  nextAppointment?: string
+  careRecipientName?: string | null
+  careRecipientAge?: number | null
+  activeMedicationCount?: number
+  nextAppointmentTitle?: string | null
+  nextAppointmentDate?: string | null
   familyId?: string
+}
+
+function formatAppointmentDate(value: string) {
+  return new Intl.DateTimeFormat("en", { month: "short", day: "numeric" }).format(new Date(value))
 }
 
 type Note = {
@@ -24,12 +28,12 @@ type Note = {
   }
 }
 
-export default function CareRecipientWidget({ 
-  elderName = 'Martha Johnson', 
-  elderAge = 78,
-  wellness = 'Good',
-  medications = 3,
-  nextAppointment = '2 days',
+export default function CareRecipientWidget({
+  careRecipientName,
+  careRecipientAge,
+  activeMedicationCount = 0,
+  nextAppointmentTitle,
+  nextAppointmentDate,
   familyId
 }: CareRecipientWidgetProps) {
   const [notes, setNotes] = useState<Note[]>([])
@@ -97,57 +101,82 @@ export default function CareRecipientWidget({
 
   return (
     <div className={styles.widget}>
-      <div className={styles.widgetHeader}>
-        <h3>Care Notes</h3>
-        <button 
-          className={styles.addButton}
-          onClick={() => setShowAddNote(!showAddNote)}
-          title="Add note"
-        >
-          <Plus size={16} />
-          Add Note
-        </button>
-      </div>
-      
       <div className={styles.widgetContent}>
-        
-        {showAddNote && (
-          <form onSubmit={handleAddNote} className={styles.addNoteForm}>
-            <textarea
-              value={newNote}
-              onChange={(e) => setNewNote(e.target.value)}
-              placeholder="Add a quick note about care, health, or observations..."
-              rows={3}
-              className={styles.noteInput}
-            />
-            <div className={styles.noteActions}>
-              <button type="button" onClick={() => setShowAddNote(false)} className={styles.noteCancelBtn}>
-                Cancel
-              </button>
-              <button type="submit" className={styles.noteSaveBtn}>Save</button>
-            </div>
-          </form>
-        )}
-        
-        {notes.length === 0 ? (
-          <p className={styles.emptyText}>No recent notes.</p>
-        ) : (
-          <div className={styles.notesList}>
-            {notes.map(note => (
-              <div key={note.id} className={styles.noteItem}>
-                <p className={styles.noteContent}>{note.content.substring(0, 80)}{note.content.length > 80 ? '...' : ''}</p>
-                <span className={styles.noteAuthor}>
-                  - {note.user.name || note.user.email}
-                </span>
-              </div>
-            ))}
+        <div className={styles.careRecipientInfo}>
+          <div className={styles.avatar}>
+            {(careRecipientName || "?").charAt(0).toUpperCase()}
           </div>
-        )}
-        {familyId && (
-          <Link href={`/family/${familyId}/notes`} className={styles.viewAllLink}>
-            View all notes →
-          </Link>
-        )}
+          <div>
+            <h3>{careRecipientName || "No care recipient on file"}</h3>
+            <p>{careRecipientAge ? `Age ${careRecipientAge}` : "Age not set"}</p>
+          </div>
+        </div>
+
+        <div className={styles.infoGrid}>
+          <div className={styles.infoItem}>
+            <strong>Active medications</strong>
+            <span>{activeMedicationCount}</span>
+          </div>
+          <div className={styles.infoItem}>
+            <strong>Next appointment</strong>
+            <span>
+              {nextAppointmentTitle && nextAppointmentDate
+                ? `${nextAppointmentTitle} · ${formatAppointmentDate(nextAppointmentDate)}`
+                : "None scheduled"}
+            </span>
+          </div>
+        </div>
+
+        <div className={styles.section}>
+          <div className={styles.noteHeader}>
+            <strong>Care Notes</strong>
+            <button
+              className={styles.addNoteBtn}
+              onClick={() => setShowAddNote(!showAddNote)}
+              title="Add note"
+            >
+              <Plus size={16} />
+            </button>
+          </div>
+
+          {showAddNote && (
+            <form onSubmit={handleAddNote} className={styles.addNoteForm}>
+              <textarea
+                value={newNote}
+                onChange={(e) => setNewNote(e.target.value)}
+                placeholder="Add a quick note about care, health, or observations..."
+                rows={3}
+                className={styles.noteInput}
+              />
+              <div className={styles.noteActions}>
+                <button type="button" onClick={() => setShowAddNote(false)} className={styles.noteCancelBtn}>
+                  Cancel
+                </button>
+                <button type="submit" className={styles.noteSaveBtn}>Save</button>
+              </div>
+            </form>
+          )}
+
+          {notes.length === 0 ? (
+            <p className={styles.emptyText}>No recent notes.</p>
+          ) : (
+            <div className={styles.notesList}>
+              {notes.map(note => (
+                <div key={note.id} className={styles.noteItem}>
+                  <p className={styles.noteContent}>{note.content.substring(0, 80)}{note.content.length > 80 ? '...' : ''}</p>
+                  <span className={styles.noteAuthor}>
+                    - {note.user.name || note.user.email}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+          {familyId && (
+            <Link href={`/family/${familyId}/notes`} className={styles.viewAllLink}>
+              View all notes →
+            </Link>
+          )}
+        </div>
       </div>
     </div>
   )

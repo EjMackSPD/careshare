@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import { requireAuth } from "@/lib/auth-utils"
+import { requireAuth, requireFamilyCapability } from "@/lib/auth-utils"
 import { MedicationFrequency } from "@prisma/client"
 
 // GET - Fetch all medications for a family
@@ -9,20 +9,12 @@ export async function GET(
   { params }: { params: Promise<{ familyId: string }> }
 ) {
   try {
-    const user = await requireAuth()
+    await requireAuth()
     const { familyId } = await params
 
-    // Verify user is a member of this family
-    const familyMember = await prisma.familyMember.findUnique({
-      where: {
-        familyId_userId: {
-          familyId,
-          userId: user.id
-        }
-      }
-    })
-
-    if (!familyMember) {
+    try {
+      await requireFamilyCapability(familyId, "sensitive.read")
+    } catch {
       return NextResponse.json(
         { error: "Not authorized to view medications for this family" },
         { status: 403 }
@@ -55,17 +47,9 @@ export async function POST(
     const { familyId } = await params
     const body = await request.json()
 
-    // Verify user is a member of this family
-    const familyMember = await prisma.familyMember.findUnique({
-      where: {
-        familyId_userId: {
-          familyId,
-          userId: user.id
-        }
-      }
-    })
-
-    if (!familyMember) {
+    try {
+      await requireFamilyCapability(familyId, "sensitive.write")
+    } catch {
       return NextResponse.json(
         { error: "Not authorized to add medications to this family" },
         { status: 403 }

@@ -8,6 +8,7 @@ import { Users } from "./payload/collections/Users.ts";
 import { Media } from "./payload/collections/Media.ts";
 import { Pages } from "./payload/collections/Pages.ts";
 import { Posts } from "./payload/collections/Posts.ts";
+import { Providers } from "./payload/collections/Providers.ts";
 import { ContactSubmissions } from "./payload/collections/ContactSubmissions.ts";
 
 const filename = fileURLToPath(import.meta.url);
@@ -66,6 +67,13 @@ export default buildConfig({
             title: "Support Overview",
           },
         },
+        activation: {
+          path: "/activation",
+          Component: "/payload/admin/ActivationOverview.tsx#ActivationOverview",
+          meta: {
+            title: "Activation Metrics",
+          },
+        },
       },
     },
     theme: "light",
@@ -80,7 +88,7 @@ export default buildConfig({
       scriptPath: path.resolve(dirname, "scripts/migrate-users-to-payload.mjs"),
     },
   ],
-  collections: [Users, Pages, Posts, Media, ContactSubmissions],
+  collections: [Users, Pages, Posts, Providers, Media, ContactSubmissions],
   cookiePrefix: "payload",
   cors: trustedOrigins,
   csrf: trustedOrigins,

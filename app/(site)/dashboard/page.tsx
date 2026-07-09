@@ -5,6 +5,7 @@ import { hydrateStoredDraft } from "@/lib/onboarding";
 import Link from "next/link";
 import DemoInitButton from "../../components/DemoInitButton";
 import Footer from "../../components/Footer";
+import PendingInvitationsBanner from "../../components/PendingInvitationsBanner";
 import CareRecipientWidget from "../../components/widgets/CareRecipientWidget";
 import TasksWidget from "../../components/widgets/TasksWidget";
 import FinancialWidget from "../../components/widgets/FinancialWidget";
@@ -61,6 +62,11 @@ export default async function Dashboard() {
               assignments: true,
             },
           },
+          careRecipient: true,
+          medications: {
+            where: { active: true },
+            select: { id: true },
+          },
         },
       },
     },
@@ -72,6 +78,27 @@ export default async function Dashboard() {
       onboardingData: true,
     },
   });
+
+  const pendingInvitations = user.email
+    ? await prisma.familyInvitation.findMany({
+        where: {
+          email: { equals: user.email, mode: "insensitive" },
+          status: "PENDING",
+        },
+        include: {
+          family: { select: { name: true, elderName: true } },
+          inviter: { select: { name: true, email: true } },
+        },
+        orderBy: { createdAt: "desc" },
+      })
+    : [];
+
+  if (
+    familyMembers.length > 0 &&
+    familyMembers.every((familyMember) => familyMember.role === "CARE_RECIPIENT")
+  ) {
+    redirect("/care");
+  }
 
   const families = familyMembers.map((familyMember) => familyMember.family);
   const onboardingDraft = hydrateStoredDraft(dbUser?.onboardingData ?? null);
@@ -100,10 +127,32 @@ export default async function Dashboard() {
   const careRecipientName = primaryFamily?.elderName || "Care recipient";
   const isIndividualAudience = onboardingDraft.audienceType === "INDIVIDUAL";
 
+  const careRecipient = primaryFamily?.careRecipient;
+  const careRecipientDisplayName =
+    careRecipient?.preferredName || careRecipient?.name || primaryFamily?.elderName || null;
+  const careRecipientAge = careRecipient?.birthDate
+    ? new Date().getFullYear() - new Date(careRecipient.birthDate).getFullYear()
+    : primaryFamily?.elderBirthday
+      ? new Date().getFullYear() - new Date(primaryFamily.elderBirthday).getFullYear()
+      : null;
+  const activeMedicationCount = primaryFamily?.medications.length ?? 0;
+  const nextAppointment = primaryFamily?.events[0] ?? null;
+
   return (
     <div className={styles.container}>
       <div className={styles.layout}>
         <main className={styles.main}>
+          <PendingInvitationsBanner
+            invitations={pendingInvitations.map((invitation) => ({
+              id: invitation.id,
+              role: invitation.role,
+              message: invitation.message,
+              familyName: invitation.family.name,
+              elderName: invitation.family.elderName,
+              inviterName: invitation.inviter.name,
+            }))}
+          />
+
           <section className={styles.hero}>
             <div className={styles.heroContent}>
               <div className={styles.heroCopy}>
@@ -362,13 +411,11 @@ export default async function Dashboard() {
                 <div className={styles.widgetGrid}>
                   <div className={styles.widgetLarge}>
                     <CareRecipientWidget
-                      elderName={primaryFamily?.elderName}
-                      elderAge={
-                        primaryFamily?.elderBirthday
-                          ? new Date().getFullYear() -
-                            new Date(primaryFamily.elderBirthday).getFullYear()
-                          : undefined
-                      }
+                      careRecipientName={careRecipientDisplayName}
+                      careRecipientAge={careRecipientAge}
+                      activeMedicationCount={activeMedicationCount}
+                      nextAppointmentTitle={nextAppointment?.title ?? null}
+                      nextAppointmentDate={nextAppointment?.eventDate.toISOString() ?? null}
                       familyId={primaryFamily?.id}
                     />
                   </div>
