@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type KeyboardEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -13,6 +13,7 @@ import {
   Sparkles,
   Users,
   UserRound,
+  X,
 } from 'lucide-react'
 import styles from './page.module.css'
 import MarketingNav from '@/app/components/MarketingNav'
@@ -23,7 +24,7 @@ import {
   type OnboardingDraft,
   type OnboardingInvite,
 } from '@/types/onboarding'
-import { payloadLogout, useSession } from '@/app/components/AuthProvider'
+import { payloadLogin, useSession } from '@/app/components/AuthProvider'
 
 type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6
 
@@ -35,17 +36,30 @@ type OnboardingPanelContent = {
   note: string
 }
 
+type SignupFields = {
+  firstName: string
+  lastName: string
+  email: string
+  password: string
+  confirmPassword: string
+}
+
+type ApiErrorBody = {
+  error?: string
+  message?: string
+}
+
 const DEFAULT_PANEL_CONTENT: OnboardingPanelContent = {
   eyebrow: 'Guided setup',
   title: 'Build the right care workspace from the start',
   body:
-    'CareShare adapts setup around your role, the people involved, and the decisions that need to stay organized.',
+    'Create your account once, choose the right path, and leave with a care workspace ready to use.',
   bullets: [
-    'Choose the path that matches how you support care today',
-    'Capture the details your family or care team needs first',
-    'Leave with a workspace ready for tasks, bills, events, and updates',
+    'Stay in setup after signup with no extra login step',
+    'Answer only the details needed for your care path',
+    'Land directly in your next CareShare workspace or handoff',
   ],
-  note: 'You can refine everything later from your dashboard.',
+  note: 'Everything can be refined later from your dashboard.',
 }
 
 const TOP_NEEDS = [
@@ -122,7 +136,7 @@ const STEP_LABELS: Record<OnboardingAudienceType, string[]> = {
   CAREGIVER_POA: ['Account', 'Audience', 'Authority', 'Profile', 'Workspace', 'Finish'],
   FAMILY: ['Account', 'Audience', 'Path', 'Profile', 'Setup', 'Finish'],
   CARE_CENTER: ['Account', 'Audience', 'Organization', 'Contact', 'Goals', 'Finish'],
-  INDIVIDUAL: ['Account', 'Audience', 'Planning', 'About You', 'Support', 'Finish'],
+  INDIVIDUAL: ['Account', 'Audience', 'About You', 'Support', 'Finish'],
 }
 
 function emptyInvite(): OnboardingInvite {
@@ -156,13 +170,62 @@ function getAudienceContent(audienceType: OnboardingAudienceType) {
   return AUDIENCE_OPTIONS.find((option) => option.value === audienceType) ?? AUDIENCE_OPTIONS[0]
 }
 
+function getNextStep(currentStep: OnboardingStep, audienceType: OnboardingAudienceType) {
+  if (audienceType === 'INDIVIDUAL' && currentStep === 2) {
+    return 4
+  }
+
+  return Math.min(6, currentStep + 1) as OnboardingStep
+}
+
+function getPreviousStep(currentStep: OnboardingStep, audienceType: OnboardingAudienceType) {
+  if (audienceType === 'INDIVIDUAL' && currentStep === 4) {
+    return 2
+  }
+
+  return Math.max(1, currentStep - 1) as OnboardingStep
+}
+
+function normalizeStepForAudience(step: OnboardingStep, audienceType: OnboardingAudienceType) {
+  return audienceType === 'INDIVIDUAL' && step === 3 ? 4 : step
+}
+
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error && error.message ? error.message : fallback
+}
+
+async function readApiError(response: Response, fallback: string) {
+  try {
+    const data = (await response.json()) as ApiErrorBody
+    return data.error || data.message || fallback
+  } catch {
+    return fallback
+  }
+}
+
+async function assertOk(response: Response, fallback: string) {
+  if (response.ok) {
+    return
+  }
+
+  throw new Error(await readApiError(response, fallback))
+}
+
 export default function OnboardingPage() {
   const router = useRouter()
-  const { data: session, status } = useSession()
+  const { data: session, status, update: refreshSession } = useSession()
   const [step, setStep] = useState<OnboardingStep>(1)
   const [loading, setLoading] = useState(false)
   const [pageLoading, setPageLoading] = useState(true)
   const [error, setError] = useState('')
+  const [conditionInput, setConditionInput] = useState('')
+  const [signupFields, setSignupFields] = useState<SignupFields>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  })
   const [formData, setFormData] = useState<OnboardingDraft>(DEFAULT_ONBOARDING_DRAFT)
   const [panelContent, setPanelContent] = useState<OnboardingPanelContent>(DEFAULT_PANEL_CONTENT)
 
@@ -171,8 +234,38 @@ export default function OnboardingPage() {
     () => getAudienceContent(formData.audienceType),
     [formData.audienceType]
   )
-  const stepLabels = STEP_LABELS[formData.audienceType]
-  const progressStep = useMemo(() => (isAuthenticated ? step : 1), [isAuthenticated, step])
+  const visibleSteps = useMemo(() => {
+    const internalSteps =
+      formData.audienceType === 'INDIVIDUAL'
+        ? ([1, 2, 4, 5, 6] as OnboardingStep[])
+        : ([1, 2, 3, 4, 5, 6] as OnboardingStep[])
+
+    return internalSteps.map((internalStep, index) => ({
+      internalStep,
+      label: STEP_LABELS[formData.audienceType][index],
+    }))
+  }, [formData.audienceType])
+  const progressStep = useMemo(() => {
+    if (!isAuthenticated) {
+      return 1
+    }
+
+    return Math.max(
+      1,
+      visibleSteps.findIndex((visibleStep) => visibleStep.internalStep === step) + 1
+    )
+  }, [isAuthenticated, step, visibleSteps])
+  const accountFullName = useMemo(() => {
+    const signupName = `${signupFields.firstName.trim()} ${signupFields.lastName.trim()}`.trim()
+    return signupName || session?.user?.name?.trim() || ''
+  }, [session?.user?.name, signupFields.firstName, signupFields.lastName])
+  const accountPreferredName = useMemo(() => {
+    return signupFields.firstName.trim() || accountFullName.split(' ')[0] || ''
+  }, [accountFullName, signupFields.firstName])
+  const conditionTags = useMemo(
+    () => parseConditions(formData.careRecipient.conditions),
+    [formData.careRecipient.conditions]
+  )
 
   useEffect(() => {
     let cancelled = false
@@ -216,7 +309,7 @@ export default function OnboardingPage() {
     }
 
     if (!isAuthenticated) {
-      setPageLoading(false)
+      queueMicrotask(() => setPageLoading(false))
       return
     }
 
@@ -255,11 +348,8 @@ export default function OnboardingPage() {
             saved.notificationPreferences ?? DEFAULT_ONBOARDING_DRAFT.notificationPreferences,
           topNeeds: saved.topNeeds ?? [],
         })
-        setStep(
-          data.hasCompletedOnboarding
-            ? 1
-            : (Math.min(Math.max(data.onboardingStep ?? 2, 2), 6) as OnboardingStep)
-        )
+        const savedStep = Math.min(Math.max(data.onboardingStep ?? 2, 2), 6) as OnboardingStep
+        setStep(data.hasCompletedOnboarding ? 1 : normalizeStepForAudience(savedStep, saved.audienceType))
       } catch (loadError) {
         setError('Unable to load your onboarding progress')
       } finally {
@@ -281,6 +371,14 @@ export default function OnboardingPage() {
       ...prev,
       audienceType,
       workspaceMode: getWorkspaceMode(audienceType),
+      careRecipient:
+        audienceType === 'INDIVIDUAL' && accountFullName
+          ? {
+              ...prev.careRecipient,
+              name: prev.careRecipient.name || accountFullName,
+              preferredName: prev.careRecipient.preferredName || accountPreferredName,
+            }
+          : prev.careRecipient,
       careContext: {
         ...prev.careContext,
         selfManaged: audienceType === 'INDIVIDUAL',
@@ -372,6 +470,59 @@ export default function OnboardingPage() {
     }))
   }
 
+  const updateConditionTags = (conditions: string[]) => {
+    updateCareRecipient('conditions', conditions.join(', '))
+  }
+
+  const addConditionTags = (input: string) => {
+    const nextConditions = input
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean)
+
+    if (nextConditions.length === 0) {
+      return
+    }
+
+    const existing = new Set(conditionTags.map((item) => item.toLowerCase()))
+    const uniqueConditions = nextConditions.filter((condition) => {
+      const key = condition.toLowerCase()
+
+      if (existing.has(key)) {
+        return false
+      }
+
+      existing.add(key)
+      return true
+    })
+
+    if (uniqueConditions.length > 0) {
+      updateConditionTags([...conditionTags, ...uniqueConditions])
+    }
+
+    setConditionInput('')
+  }
+
+  const removeConditionTag = (condition: string) => {
+    updateConditionTags(conditionTags.filter((item) => item !== condition))
+  }
+
+  const handleConditionKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== 'Enter' && event.key !== ',') {
+      return
+    }
+
+    event.preventDefault()
+    addConditionTags(conditionInput)
+  }
+
+  const updateSignupField = (field: keyof SignupFields, value: string) => {
+    setSignupFields((prev) => ({
+      ...prev,
+      [field]: value,
+    }))
+  }
+
   const buildPayload = (currentStep: OnboardingStep) => ({
     ...formData,
     currentStep,
@@ -387,36 +538,72 @@ export default function OnboardingPage() {
       return
     }
 
-    await fetch('/api/onboarding', {
+    const response = await fetch('/api/onboarding', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(buildPayload(targetStep)),
     })
+
+    await assertOk(response, 'Unable to save your onboarding progress')
   }
 
   const validateStep = (currentStep: OnboardingStep) => {
     setError('')
 
     if (currentStep === 1 && !isAuthenticated) {
-      const name = (document.querySelector('input[name="signup-name"]') as HTMLInputElement | null)?.value
-      const email = (document.querySelector('input[name="signup-email"]') as HTMLInputElement | null)?.value
-      const password = (document.querySelector('input[name="signup-password"]') as HTMLInputElement | null)?.value
-      const confirmPassword = (
-        document.querySelector('input[name="signup-confirm-password"]') as HTMLInputElement | null
-      )?.value
+      const firstName = signupFields.firstName.trim()
+      const lastName = signupFields.lastName.trim()
+      const email = signupFields.email.trim()
+      const password = signupFields.password
+      const confirmPassword = signupFields.confirmPassword
 
-      if (!name || !email || !password) {
-        setError('Please fill in all required fields')
+      if (!firstName && !lastName && !email) {
+        setError('Add your name and email to continue.')
+        return false
+      }
+
+      if (!firstName && !lastName) {
+        setError('Add your first and last name to continue.')
+        return false
+      }
+
+      if (!firstName) {
+        setError('Add your first name to continue.')
+        return false
+      }
+
+      if (!lastName) {
+        setError('Add your last name to continue.')
+        return false
+      }
+
+      if (!email) {
+        setError('Add your email address to continue.')
+        return false
+      }
+
+      if (!password && !confirmPassword) {
+        setError('Create a password to continue.')
+        return false
+      }
+
+      if (!password) {
+        setError('Enter your password to continue.')
+        return false
+      }
+
+      if (!confirmPassword) {
+        setError('Confirm your password to continue.')
         return false
       }
 
       if (password.length < 6) {
-        setError('Password must be at least 6 characters')
+        setError('Use at least 6 characters for your password.')
         return false
       }
 
       if (password !== confirmPassword) {
-        setError('Passwords do not match')
+        setError('Make sure both password fields match.')
         return false
       }
     }
@@ -484,10 +671,9 @@ export default function OnboardingPage() {
   }
 
   const handleAccountStep = async () => {
-    const name = (document.querySelector('input[name="signup-name"]') as HTMLInputElement | null)?.value ?? ''
-    const email = (document.querySelector('input[name="signup-email"]') as HTMLInputElement | null)?.value ?? ''
-    const password =
-      (document.querySelector('input[name="signup-password"]') as HTMLInputElement | null)?.value ?? ''
+    const name = `${signupFields.firstName.trim()} ${signupFields.lastName.trim()}`.trim()
+    const email = signupFields.email.trim().toLowerCase()
+    const password = signupFields.password
 
     const signupRes = await fetch('/api/auth/signup', {
       method: 'POST',
@@ -499,12 +685,19 @@ export default function OnboardingPage() {
       }),
     })
 
-    if (!signupRes.ok) {
-      const data = await signupRes.json()
-      throw new Error(data.error || 'Failed to create account')
+    await assertOk(signupRes, 'Failed to create account')
+
+    const loginResult = await payloadLogin(email, password)
+
+    if (!loginResult.ok) {
+      throw new Error(
+        'Your account was created, but we could not sign you in automatically. Please sign in to continue setup.'
+      )
     }
 
-    router.push('/login')
+    await refreshSession()
+    setStep(2)
+    router.refresh()
   }
 
   const handleNext = async () => {
@@ -520,25 +713,25 @@ export default function OnboardingPage() {
         return
       }
 
-      const nextStep = Math.min(6, step + 1) as OnboardingStep
+      const nextStep = getNextStep(step, formData.audienceType)
       await saveDraft(nextStep)
       setStep(nextStep)
-    } catch (nextError: any) {
-      setError(nextError.message || 'Something went wrong')
+    } catch (nextError) {
+      setError(getErrorMessage(nextError, 'Something went wrong while continuing setup'))
     } finally {
       setLoading(false)
     }
   }
 
   const handleBack = async () => {
-    const previousStep = Math.max(1, step - 1) as OnboardingStep
+    const previousStep = getPreviousStep(step, formData.audienceType)
     setLoading(true)
 
     try {
       await saveDraft(previousStep)
       setStep(previousStep)
     } catch (backError) {
-      setError('Unable to save your progress')
+      setError(getErrorMessage(backError, 'Unable to save your progress'))
     } finally {
       setLoading(false)
     }
@@ -558,17 +751,13 @@ export default function OnboardingPage() {
         body: JSON.stringify(buildPayload(6)),
       })
 
-      const data = await response.json()
+      await assertOk(response, 'Failed to complete onboarding')
+      const data = (await response.json()) as { redirectTo?: string }
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to complete onboarding')
-      }
-
-      await payloadLogout()
-      router.push(data.redirectTo && data.redirectTo !== '/dashboard' ? data.redirectTo : '/login')
+      router.push(data.redirectTo || '/dashboard')
       router.refresh()
-    } catch (completeError: any) {
-      setError(completeError.message || 'Something went wrong')
+    } catch (completeError) {
+      setError(getErrorMessage(completeError, 'Something went wrong while finishing setup'))
     } finally {
       setLoading(false)
     }
@@ -579,8 +768,9 @@ export default function OnboardingPage() {
       <span className={styles.stepEyebrow}>Account</span>
       <h2>{isAuthenticated ? 'You are signed in' : 'Create your CareShare account'}</h2>
       <p className={styles.stepDescription}>
-        Start with an account, then we&apos;ll tailor setup for the kind of care support
-        you&apos;re building.
+        {isAuthenticated
+          ? 'We have your account ready. Continue to choose the care path that fits today.'
+          : "Create your account once. We'll keep you signed in and continue setup right here."}
       </p>
 
       {isAuthenticated ? (
@@ -597,9 +787,31 @@ export default function OnboardingPage() {
       ) : (
         <>
           <div className={styles.formShell}>
-            <div className={styles.formGroup}>
-              <label htmlFor="signup-name">Your name *</label>
-              <input id="signup-name" name="signup-name" type="text" placeholder="Jordan Smith" />
+            <div className={styles.formRow}>
+              <div className={styles.formGroup}>
+                <label htmlFor="signup-first-name">First name *</label>
+                <input
+                  id="signup-first-name"
+                  name="signup-first-name"
+                  type="text"
+                  value={signupFields.firstName}
+                  onChange={(event) => updateSignupField('firstName', event.target.value)}
+                  autoComplete="given-name"
+                  placeholder="Jordan"
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="signup-last-name">Last name *</label>
+                <input
+                  id="signup-last-name"
+                  name="signup-last-name"
+                  type="text"
+                  value={signupFields.lastName}
+                  onChange={(event) => updateSignupField('lastName', event.target.value)}
+                  autoComplete="family-name"
+                  placeholder="Smith"
+                />
+              </div>
             </div>
             <div className={styles.formGroup}>
               <label htmlFor="signup-email">Email address *</label>
@@ -607,6 +819,9 @@ export default function OnboardingPage() {
                 id="signup-email"
                 name="signup-email"
                 type="email"
+                value={signupFields.email}
+                onChange={(event) => updateSignupField('email', event.target.value)}
+                autoComplete="email"
                 placeholder="jordan@example.com"
               />
             </div>
@@ -617,6 +832,9 @@ export default function OnboardingPage() {
                   id="signup-password"
                   name="signup-password"
                   type="password"
+                  value={signupFields.password}
+                  onChange={(event) => updateSignupField('password', event.target.value)}
+                  autoComplete="new-password"
                   placeholder="Minimum 6 characters"
                 />
               </div>
@@ -626,6 +844,9 @@ export default function OnboardingPage() {
                   id="signup-confirm-password"
                   name="signup-confirm-password"
                   type="password"
+                  value={signupFields.confirmPassword}
+                  onChange={(event) => updateSignupField('confirmPassword', event.target.value)}
+                  autoComplete="new-password"
                   placeholder="Re-enter password"
                 />
               </div>
@@ -641,8 +862,8 @@ export default function OnboardingPage() {
       <span className={styles.stepEyebrow}>Audience</span>
       <h2>Who are you setting CareShare up for?</h2>
       <p className={styles.stepDescription}>
-        Pick the path that matches your role right now. We&apos;ll shape the setup flow and
-        first actions around it.
+        Pick the path that matches your role. CareShare will only ask for the details
+        that make that path useful.
       </p>
 
       <div className={styles.audienceGrid}>
@@ -679,7 +900,7 @@ export default function OnboardingPage() {
           <span className={styles.stepEyebrow}>Authority</span>
           <h2>Tell us how you support this person</h2>
           <p className={styles.stepDescription}>
-            We&apos;ll use this to frame permissions, language, and your recommended next steps.
+            This helps CareShare frame permissions, language, and next steps.
           </p>
 
           <div className={styles.formGroup}>
@@ -723,7 +944,7 @@ export default function OnboardingPage() {
           <span className={styles.stepEyebrow}>Family Path</span>
           <h2>Are you creating a care circle or joining one?</h2>
           <p className={styles.stepDescription}>
-            Choose the path that matches where your family is today.
+            Tell us whether to build a new shared workspace or guide you toward an existing one.
           </p>
 
           <div className={styles.choiceStack}>
@@ -757,7 +978,7 @@ export default function OnboardingPage() {
           <span className={styles.stepEyebrow}>Organization</span>
           <h2>Introduce your care center</h2>
           <p className={styles.stepDescription}>
-            This creates a partnership intake, not a family workspace.
+            This creates a partnership intake and keeps the family workspace flow out of your way.
           </p>
 
           <div className={styles.formGroup}>
@@ -806,8 +1027,7 @@ export default function OnboardingPage() {
         <span className={styles.stepEyebrow}>Planning Style</span>
         <h2>Start with your own plan first</h2>
         <p className={styles.stepDescription}>
-          We&apos;ll set this up with self-first language so you can capture what matters now
-          and invite trusted supporters later.
+          Capture what matters now. You can invite trusted supporters later.
         </p>
 
         <div className={styles.choiceStack}>
@@ -874,8 +1094,8 @@ export default function OnboardingPage() {
         <h2>{isIndividual ? 'Build your personal care profile' : 'Add the person receiving care'}</h2>
         <p className={styles.stepDescription}>
           {isIndividual
-            ? 'These details stay in one place so your care plan, reminders, and supporters start from the right context.'
-            : 'We’ll create a structured profile instead of burying care details in notes later.'}
+            ? 'These details give your personal plan the right context from day one.'
+            : 'Create the core profile your family will coordinate around.'}
         </p>
 
         <div className={styles.formRow}>
@@ -941,12 +1161,47 @@ export default function OnboardingPage() {
 
         <div className={styles.formGroup}>
           <label>Known conditions</label>
-          <input
-            type="text"
-            value={formData.careRecipient.conditions}
-            onChange={(event) => updateCareRecipient('conditions', event.target.value)}
-            placeholder="Mobility issues, diabetes, memory support"
-          />
+          <div className={styles.tagInputShell}>
+            {conditionTags.length > 0 && (
+              <div className={styles.tagList} aria-label="Known conditions">
+                {conditionTags.map((condition) => (
+                  <span key={condition} className={styles.conditionChip}>
+                    {condition}
+                    <button
+                      type="button"
+                      className={styles.conditionRemove}
+                      onClick={() => removeConditionTag(condition)}
+                      aria-label={`Remove ${condition}`}
+                    >
+                      <X size={14} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className={styles.tagEntryRow}>
+              <input
+                type="text"
+                value={conditionInput}
+                onChange={(event) => setConditionInput(event.target.value)}
+                onKeyDown={handleConditionKeyDown}
+                onBlur={() => addConditionTags(conditionInput)}
+                placeholder={
+                  conditionTags.length > 0
+                    ? 'Add another condition'
+                    : 'Type a condition, then press Enter'
+                }
+              />
+              <button
+                type="button"
+                className={styles.inlineAddButton}
+                onClick={() => addConditionTags(conditionInput)}
+              >
+                Add
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -959,7 +1214,7 @@ export default function OnboardingPage() {
           <span className={styles.stepEyebrow}>Goals</span>
           <h2>What kind of partnership are you exploring?</h2>
           <p className={styles.stepDescription}>
-            This helps us tailor the follow-up and route your request to the right team.
+            This routes your request to the right follow-up path.
           </p>
 
           <div className={styles.choiceStack}>
@@ -1004,8 +1259,7 @@ export default function OnboardingPage() {
           <span className={styles.stepEyebrow}>Join Flow</span>
           <h2>We&apos;ll guide you into the existing care circle</h2>
           <p className={styles.stepDescription}>
-            For this first version, we&apos;ll save your profile and route you to join guidance if you
-            don&apos;t have an invite token yet.
+            Save your profile now. If you do not have an invite token yet, we will send you to join guidance.
           </p>
 
           <div className={styles.formGroup}>
@@ -1040,8 +1294,8 @@ export default function OnboardingPage() {
         </h2>
         <p className={styles.stepDescription}>
           {formData.audienceType === 'INDIVIDUAL'
-            ? 'This can stay personal for now. Invite people only if you want support right away.'
-            : 'Set the shared name, describe the care circle, and invite the first people who should be involved.'}
+            ? 'Keep it personal for now, or invite supporters right away.'
+            : 'Name the shared workspace and invite the first helpers.'}
         </p>
 
         <div className={styles.formGroup}>
@@ -1158,8 +1412,7 @@ export default function OnboardingPage() {
           <span className={styles.stepEyebrow}>Finish</span>
           <h2>Review your partnership intake</h2>
           <p className={styles.stepDescription}>
-            We&apos;ll route this to the right follow-up path and take you to a dedicated next-step
-            screen after submission.
+            Submit this intake and go straight to the next-step screen.
           </p>
 
           <div className={styles.summaryStack}>
@@ -1189,7 +1442,7 @@ export default function OnboardingPage() {
             : 'Choose your top needs'}
         </h2>
         <p className={styles.stepDescription}>
-          We&apos;ll use this to shape the first dashboard guidance after setup.
+          These priorities shape your first dashboard guidance.
         </p>
 
         <div className={styles.needGrid}>
@@ -1265,7 +1518,6 @@ export default function OnboardingPage() {
         <div className={styles.shell}>
           <section className={styles.heroPanel}>
             <div className={styles.heroCopy}>
-              <span className={styles.heroEyebrow}>{panelContent.eyebrow}</span>
               <h1>{panelContent.title}</h1>
               <p>{panelContent.body}</p>
             </div>
@@ -1293,9 +1545,15 @@ export default function OnboardingPage() {
 
           <section className={styles.formPanel}>
             <div className={styles.progressBar}>
-              <div className={styles.progressSteps}>
-                {[1, 2, 3, 4, 5, 6].map((stepNumber) => (
-                  <div key={stepNumber} className={styles.progressStepWrapper}>
+              <div
+                className={styles.progressSteps}
+                style={{ gridTemplateColumns: `repeat(${visibleSteps.length}, minmax(0, 1fr))` }}
+              >
+                {visibleSteps.map((visibleStep, index) => {
+                  const stepNumber = index + 1
+
+                  return (
+                    <div key={visibleStep.internalStep} className={styles.progressStepWrapper}>
                     <div
                       className={`${styles.progressStep} ${
                         stepNumber <= progressStep ? styles.progressStepActive : ''
@@ -1303,7 +1561,7 @@ export default function OnboardingPage() {
                     >
                       {stepNumber < progressStep ? <Check size={15} /> : stepNumber}
                     </div>
-                    {stepNumber < 6 && (
+                    {stepNumber < visibleSteps.length && (
                       <div
                         className={`${styles.progressLine} ${
                           stepNumber < progressStep ? styles.progressLineCompleted : ''
@@ -1311,19 +1569,23 @@ export default function OnboardingPage() {
                       />
                     )}
                   </div>
-                ))}
+                  )
+                })}
               </div>
 
-              <div className={styles.progressLabels}>
-                {stepLabels.map((label, index) => {
+              <div
+                className={styles.progressLabels}
+                style={{ gridTemplateColumns: `repeat(${visibleSteps.length}, minmax(0, 1fr))` }}
+              >
+                {visibleSteps.map((visibleStep, index) => {
                   const stepNumber = index + 1
                   const labelClassName = `${stepNumber === progressStep ? styles.activeLabel : ''} ${
                     stepNumber < progressStep ? styles.completedLabel : ''
                   }`
 
                   return (
-                    <span key={label} className={labelClassName}>
-                      {label}
+                    <span key={visibleStep.label} className={labelClassName}>
+                      {visibleStep.label}
                     </span>
                   )
                 })}
@@ -1357,7 +1619,7 @@ export default function OnboardingPage() {
                     className={styles.primaryAction}
                     disabled={loading || pageLoading}
                   >
-                    Continue
+                    {loading && step === 1 && !isAuthenticated ? 'Creating account...' : 'Continue'}
                     <ArrowRight size={18} />
                   </button>
                 ) : (

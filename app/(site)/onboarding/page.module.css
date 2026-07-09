@@ -269,7 +269,7 @@
 }
 
 .stepDescription {
-  margin: 0.9rem 0 1.5rem;
+  margin: 0.9rem 0 1.9rem;
   color: #475569;
   line-height: 1.7;
   max-width: 40rem;
@@ -282,18 +282,19 @@
 .needGrid,
 .audienceGrid {
   display: grid;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 .formGroup {
   display: grid;
-  gap: 0.45rem;
+  gap: 0.65rem;
 }
 
 .formRow {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+  column-gap: 1.5rem;
+  row-gap: 1.25rem;
 }
 
 .formGroup label {
@@ -309,7 +310,7 @@
   border: 1px solid #d7e0e8;
   border-radius: 1rem;
   background: rgba(248, 250, 252, 0.98);
-  padding: 0.9rem 1rem;
+  padding: 1rem 1.05rem;
   font-size: 1rem;
   color: #0f172a;
   transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
@@ -327,6 +328,98 @@
 .formGroup textarea {
   resize: vertical;
   font-family: inherit;
+  min-height: 9rem;
+}
+
+.tagInputShell {
+  display: grid;
+  gap: 0.8rem;
+  border: 1px solid #d7e0e8;
+  border-radius: 1rem;
+  background: rgba(248, 250, 252, 0.98);
+  padding: 0.8rem;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.tagInputShell:focus-within {
+  border-color: #0f766e;
+  box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
+  background: #fff;
+}
+
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.conditionChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  max-width: 100%;
+  border: 1px solid rgba(15, 118, 110, 0.18);
+  border-radius: 999px;
+  background: #ecfdf5;
+  color: #115e59;
+  padding: 0.48rem 0.55rem 0.48rem 0.8rem;
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
+.conditionRemove {
+  width: 1.55rem;
+  height: 1.55rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 999px;
+  background: rgba(15, 118, 110, 0.12);
+  color: #0f766e;
+  cursor: pointer;
+}
+
+.conditionRemove:hover {
+  background: rgba(15, 118, 110, 0.2);
+}
+
+.tagEntryRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.tagEntryRow input {
+  border: none;
+  background: transparent;
+  padding: 0.35rem 0.25rem;
+  box-shadow: none;
+}
+
+.tagEntryRow input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.inlineAddButton {
+  min-height: 2.6rem;
+  border: 1px solid #c8d7df;
+  border-radius: 999px;
+  background: #fff;
+  color: #0f172a;
+  padding: 0 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
+}
+
+.inlineAddButton:hover {
+  border-color: #0f766e;
+  background: #f0fdfa;
+  transform: translateY(-1px);
 }
 
 .audienceGrid {
@@ -573,12 +666,14 @@
 
 .error {
   margin-bottom: 1rem;
-  padding: 0.9rem 1rem;
-  border-radius: 1rem;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #991b1b;
-  font-weight: 600;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.85rem;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #9a3412;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  font-weight: 700;
 }
 
 .stepActions {
