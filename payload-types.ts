@@ -343,12 +343,21 @@ export interface FeatureGridBlock {
   title: string;
   intro?: string | null;
   layout?: ('cards' | 'compact') | null;
+  /**
+   * Controls desktop card columns. Overflow rows are centered automatically.
+   */
   cardsPerRow?: ('2' | '3' | '4') | null;
   background?: ('plain' | 'muted') | null;
   items: {
     title: string;
     body: string;
+    /**
+     * Optional card image from Payload Media. When set, it replaces the icon treatment.
+     */
     image?: (number | null) | Media;
+    /**
+     * Optional override. Defaults to the Media alt text.
+     */
     imageAlt?: string | null;
     iconKey?:
       | (
@@ -485,6 +494,14 @@ export interface ContentBlock {
   aside?: {
     title?: string | null;
     body?: string | null;
+    /**
+     * Optional image from Payload Media. When set, the aside renders as an image panel.
+     */
+    image?: (number | null) | Media;
+    /**
+     * Optional override. Defaults to the Media alt text.
+     */
+    imageAlt?: string | null;
     actions?:
       | {
           label: string;
@@ -1252,6 +1269,8 @@ export interface ContentBlockSelect<T extends boolean = true> {
     | {
         title?: T;
         body?: T;
+        image?: T;
+        imageAlt?: T;
         actions?:
           | T
           | {
