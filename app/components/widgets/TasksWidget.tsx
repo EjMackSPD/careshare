@@ -2,6 +2,15 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import {
+  CalendarClock,
+  Car,
+  FileText,
+  ListTodo,
+  Pill,
+  Phone,
+  ShoppingCart,
+} from "lucide-react";
 import styles from "./Widget.module.css";
 
 type Task = {
@@ -72,6 +81,17 @@ export default function TasksWidget() {
     }
   };
 
+  const getTaskIcon = (title: string) => {
+    const lower = title.toLowerCase();
+    if (/medication|refill|prescription|pharmacy/.test(lower)) return Pill;
+    if (/transport|drive|pickup|ride/.test(lower)) return Car;
+    if (/call|phone|contact/.test(lower)) return Phone;
+    if (/insurance|document|upload|form/.test(lower)) return FileText;
+    if (/grocery|shopping|delivery/.test(lower)) return ShoppingCart;
+    if (/appointment|visit|checkup|doctor/.test(lower)) return CalendarClock;
+    return ListTodo;
+  };
+
   return (
     <div className={styles.widget}>
       <div className={styles.widgetHeader}>
@@ -103,8 +123,16 @@ export default function TasksWidget() {
                     })
                   : "No due date";
 
+                const TaskIcon = getTaskIcon(task.title);
+
                 return (
                   <div key={task.id} className={styles.taskItem}>
+                    <div
+                      className={styles.taskIcon}
+                      style={{ color: getPriorityColor(task.priority) }}
+                    >
+                      <TaskIcon size={16} />
+                    </div>
                     <div className={styles.taskInfo}>
                       <h4 className={styles.taskTitle}>{task.title}</h4>
                       <p className={styles.taskMeta}>

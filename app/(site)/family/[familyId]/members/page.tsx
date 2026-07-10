@@ -13,6 +13,8 @@ import {
   Search,
   UserCheck,
   X,
+  Activity,
+  ArrowRight,
 } from 'lucide-react'
 import styles from './page.module.css'
 
@@ -656,6 +658,14 @@ export default function FamilyMembers() {
               added directly with “Add Existing”; anyone else can be invited by email.
             </p>
           </div>
+
+          {canManage && (
+            <Link href="/dashboard/family-interactions" className={styles.interactionsLink}>
+              <Activity size={16} />
+              <span>See how each member is engaging — logins, notes, messages, and tasks</span>
+              <ArrowRight size={15} />
+            </Link>
+          )}
         </main>
       </div>
     </div>

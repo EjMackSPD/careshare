@@ -31,6 +31,7 @@ import {
   FileText,
   Shield,
   UserCog,
+  Activity,
 } from "lucide-react";
 import styles from "./LeftNavigation.module.css";
 
@@ -51,6 +52,11 @@ const familyMenuItems = [
     href: "/dashboard/family-collaboration",
     label: "Family Chat",
     icon: Users,
+  },
+  {
+    href: "/dashboard/family-interactions",
+    label: "Family Interactions",
+    icon: Activity,
   },
   { href: "/dashboard/legacy", label: "Live Forever", icon: Infinity },
 ];
@@ -123,6 +129,7 @@ export default function LeftNavigation() {
   const isFamilyPage =
     pathname?.startsWith("/family") ||
     pathname?.startsWith("/dashboard/family-collaboration") ||
+    pathname?.startsWith("/dashboard/family-interactions") ||
     pathname?.startsWith("/dashboard/legacy");
 
   const isMarketplacePage =
@@ -157,6 +164,7 @@ export default function LeftNavigation() {
     const isFamilyPage =
       pathname?.startsWith("/family") ||
       pathname?.startsWith("/dashboard/family-collaboration") ||
+      pathname?.startsWith("/dashboard/family-interactions") ||
       pathname?.startsWith("/dashboard/legacy");
 
     const isMarketplacePage =

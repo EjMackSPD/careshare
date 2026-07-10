@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
 import { hydrateStoredDraft } from "@/lib/onboarding";
 import { resolveDashboardPersona } from "@/lib/dashboard-persona";
+import { getCarePlanCompleteness } from "@/lib/care-plan-completeness";
 import Link from "next/link";
 import PendingInvitationsBanner from "../../components/PendingInvitationsBanner";
 import CareRecipientWidget from "../../components/widgets/CareRecipientWidget";
@@ -10,6 +11,7 @@ import TasksWidget from "../../components/widgets/TasksWidget";
 import FinancialWidget from "../../components/widgets/FinancialWidget";
 import CalendarWidget from "../../components/widgets/CalendarWidget";
 import CareConciergeHighlightWidget from "../../components/widgets/CareConciergeHighlightWidget";
+import CarePlanStatusBar from "../../components/widgets/CarePlanStatusBar";
 import styles from "./page.module.css";
 
 export default async function Dashboard() {
@@ -139,6 +141,10 @@ export default async function Dashboard() {
   const activeMedicationCount = primaryFamily?.medications.length ?? 0;
   const nextAppointment = primaryFamily?.events[0] ?? null;
 
+  const carePlanCompleteness = primaryFamily
+    ? await getCarePlanCompleteness(primaryFamily.id)
+    : null;
+
   return (
     <div className={styles.container}>
       <div className={styles.layout}>
@@ -186,6 +192,10 @@ export default async function Dashboard() {
             </div>
           </section>
 
+          {carePlanCompleteness && (
+            <CarePlanStatusBar completeness={carePlanCompleteness} />
+          )}
+
           {families.length === 0 ? (
             <div className={styles.emptyState}>
               <h2>{isIndividualAudience ? "Your personal plan is ready for the next step" : "No families yet"}</h2>
@@ -214,7 +224,7 @@ export default async function Dashboard() {
               <section className={styles.widgetSection}>
                 <div className={styles.sectionHeading}>
                   <div>
-                    <h2>Live workspace</h2>
+                    <h2>Care Space</h2>
                     <p>Notes, tasks, finances, and calendar in one working view.</p>
                   </div>
                 </div>
@@ -224,6 +234,8 @@ export default async function Dashboard() {
                     <CareRecipientWidget
                       careRecipientName={careRecipientDisplayName}
                       careRecipientAge={careRecipientAge}
+                      careRecipientPhotoUrl={careRecipient?.photoUrl ?? null}
+                      careRecipientRelationship={careRecipient?.relationshipToCaregiver ?? null}
                       activeMedicationCount={activeMedicationCount}
                       nextAppointmentTitle={nextAppointment?.title ?? null}
                       nextAppointmentDate={nextAppointment?.eventDate.toISOString() ?? null}

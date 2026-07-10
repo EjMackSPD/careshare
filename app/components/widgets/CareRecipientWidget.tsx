@@ -2,12 +2,15 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Plus } from 'lucide-react'
+import Image from 'next/image'
+import { Pill, CalendarClock, Plus } from 'lucide-react'
 import styles from './Widget.module.css'
 
 type CareRecipientWidgetProps = {
   careRecipientName?: string | null
   careRecipientAge?: number | null
+  careRecipientPhotoUrl?: string | null
+  careRecipientRelationship?: string | null
   activeMedicationCount?: number
   nextAppointmentTitle?: string | null
   nextAppointmentDate?: string | null
@@ -31,6 +34,8 @@ type Note = {
 export default function CareRecipientWidget({
   careRecipientName,
   careRecipientAge,
+  careRecipientPhotoUrl,
+  careRecipientRelationship,
   activeMedicationCount = 0,
   nextAppointmentTitle,
   nextAppointmentDate,
@@ -101,29 +106,57 @@ export default function CareRecipientWidget({
 
   return (
     <div className={styles.widget}>
-      <div className={styles.widgetContent}>
+      <div className={styles.recipientBanner}>
         <div className={styles.careRecipientInfo}>
-          <div className={styles.avatar}>
-            {(careRecipientName || "?").charAt(0).toUpperCase()}
+          <div className={styles.avatarRing}>
+            {careRecipientPhotoUrl ? (
+              <Image
+                src={careRecipientPhotoUrl}
+                alt={careRecipientName || "Care recipient"}
+                width={64}
+                height={64}
+                className={styles.avatarPhoto}
+              />
+            ) : (
+              <div className={styles.avatar}>
+                {(careRecipientName || "?").charAt(0).toUpperCase()}
+              </div>
+            )}
           </div>
           <div>
             <h3>{careRecipientName || "No care recipient on file"}</h3>
-            <p>{careRecipientAge ? `Age ${careRecipientAge}` : "Age not set"}</p>
+            <p>
+              {[careRecipientRelationship, careRecipientAge ? `Age ${careRecipientAge}` : null]
+                .filter(Boolean)
+                .join(' · ') || "Details not set"}
+            </p>
           </div>
         </div>
+      </div>
 
+      <div className={styles.widgetContent}>
         <div className={styles.infoGrid}>
           <div className={styles.infoItem}>
-            <strong>Active medications</strong>
-            <span>{activeMedicationCount}</span>
+            <div className={styles.infoIcon}>
+              <Pill size={16} />
+            </div>
+            <div>
+              <strong>Active medications</strong>
+              <span>{activeMedicationCount}</span>
+            </div>
           </div>
           <div className={styles.infoItem}>
-            <strong>Next appointment</strong>
-            <span>
-              {nextAppointmentTitle && nextAppointmentDate
-                ? `${nextAppointmentTitle} · ${formatAppointmentDate(nextAppointmentDate)}`
-                : "None scheduled"}
-            </span>
+            <div className={styles.infoIcon}>
+              <CalendarClock size={16} />
+            </div>
+            <div>
+              <strong>Next appointment</strong>
+              <span>
+                {nextAppointmentTitle && nextAppointmentDate
+                  ? `${nextAppointmentTitle} · ${formatAppointmentDate(nextAppointmentDate)}`
+                  : "None scheduled"}
+              </span>
+            </div>
           </div>
         </div>
 

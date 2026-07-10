@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { Cake, CalendarClock, ShoppingCart, Stethoscope, Users } from 'lucide-react'
 import styles from './Widget.module.css'
 
 type Event = {
@@ -9,6 +10,21 @@ type Event = {
   title: string
   eventDate: string
   type: string
+}
+
+function getEventIcon(type: string) {
+  switch (type) {
+    case 'BIRTHDAY':
+      return Cake
+    case 'APPOINTMENT':
+      return Stethoscope
+    case 'FOOD_DELIVERY':
+      return ShoppingCart
+    case 'VISIT':
+      return Users
+    default:
+      return CalendarClock
+  }
 }
 
 export default function CalendarWidget() {
@@ -65,8 +81,13 @@ export default function CalendarWidget() {
           <p className={styles.emptyText}>No upcoming events.</p>
         ) : (
           <ul className={styles.eventsList}>
-            {upcomingEvents.map((event) => (
+            {upcomingEvents.map((event) => {
+              const EventIcon = getEventIcon(event.type)
+              return (
               <li key={event.id} className={styles.eventItem}>
+                <div className={styles.eventIcon}>
+                  <EventIcon size={15} />
+                </div>
                 <span className={styles.eventTitle}>{event.title}</span>
                 <span className={styles.eventDate}>
                   {new Date(event.eventDate).toLocaleDateString('en-US', {
@@ -75,7 +96,8 @@ export default function CalendarWidget() {
                   })}
                 </span>
               </li>
-            ))}
+              )
+            })}
           </ul>
         )}
 

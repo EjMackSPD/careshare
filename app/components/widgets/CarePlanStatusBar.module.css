@@ -1,0 +1,92 @@
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--cs-color-surface-raised);
+  border: 1px solid var(--cs-color-border);
+  border-radius: var(--cs-radius-lg);
+  box-shadow: var(--cs-shadow-soft);
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 1.1rem;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 0.65rem;
+  background: var(--cs-color-brand-soft);
+  color: var(--cs-color-brand-dark);
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+}
+
+.labelRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.labelRow strong {
+  color: var(--cs-color-text);
+  font-size: 0.95rem;
+}
+
+.count {
+  color: var(--cs-color-muted);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.progressTrack {
+  height: 7px;
+  background: var(--cs-color-border);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--cs-color-brand), var(--cs-color-brand-dark));
+  transition: width 0.3s;
+}
+
+.nextStepBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  padding: 0.55rem 1rem;
+  border-radius: var(--cs-button-radius);
+  background: var(--cs-button-primary-bg);
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.nextStepBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--cs-shadow-lift);
+}
+
+@media (max-width: 720px) {
+  .bar {
+    flex-wrap: wrap;
+  }
+
+  .nextStepBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}

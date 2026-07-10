@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { Wallet, TrendingDown, PiggyBank, Receipt } from 'lucide-react'
 import styles from './Widget.module.css'
 
 type UpcomingBill = {
@@ -24,6 +25,8 @@ export default function FinancialWidget({
   upcomingBills = [],
 }: FinancialWidgetProps) {
   const percentSpent = monthlyBudget > 0 ? Math.min((spent / monthlyBudget) * 100, 100) : 0
+  const progressTone =
+    percentSpent >= 90 ? styles.progressDanger : percentSpent >= 70 ? styles.progressWarn : styles.progressGood
 
   return (
     <div className={styles.widget}>
@@ -34,22 +37,34 @@ export default function FinancialWidget({
 
       <div className={styles.widgetContent}>
         <div className={styles.financialStats}>
-          <div className={styles.budgetRow}>
+          <div className={styles.statRow}>
+            <div className={styles.statIcon}>
+              <Wallet size={16} />
+            </div>
             <span>Monthly Budget</span>
             <strong>${monthlyBudget.toFixed(2)}</strong>
           </div>
-          <div className={styles.budgetRow}>
+          <div className={styles.statRow}>
+            <div className={styles.statIcon}>
+              <TrendingDown size={16} />
+            </div>
             <span>Spent This Month</span>
             <strong>${spent.toFixed(2)}</strong>
           </div>
-          <div className={styles.budgetRow}>
+          <div className={styles.statRow}>
+            <div className={styles.statIcon}>
+              <PiggyBank size={16} />
+            </div>
             <span>Remaining</span>
             <strong className={styles.remainingAmount}>${remaining.toFixed(2)}</strong>
           </div>
         </div>
 
         <div className={styles.progressBar}>
-          <div className={styles.progressFill} style={{width: `${percentSpent}%`}}></div>
+          <div
+            className={`${styles.progressFill} ${progressTone}`}
+            style={{ width: `${percentSpent}%` }}
+          />
         </div>
         <p className={styles.progressLabel}>{percentSpent.toFixed(0)}% spent</p>
 
@@ -61,6 +76,7 @@ export default function FinancialWidget({
             <ul className={styles.billsList}>
               {upcomingBills.slice(0, 3).map((bill) => (
                 <li key={bill.id} className={styles.billItem}>
+                  <Receipt size={14} className={styles.billIcon} />
                   <span className={styles.billDescription}>{bill.description}</span>
                   <span className={styles.billAmount}>${bill.amount.toFixed(2)}</span>
                 </li>

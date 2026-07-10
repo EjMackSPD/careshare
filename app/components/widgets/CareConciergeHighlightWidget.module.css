@@ -3,8 +3,8 @@
   border: 1px solid var(--cs-color-border);
   border-radius: var(--cs-radius-xl);
   box-shadow: var(--cs-shadow-soft);
-  padding: 1.25rem;
-  margin-bottom: 1.5rem;
+  padding: 1.1rem;
+  margin-bottom: 1.1rem;
 }
 
 .header {
