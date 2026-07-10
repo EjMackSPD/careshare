@@ -30,7 +30,16 @@ export default function Login() {
         return;
       }
 
-      router.push("/auth/post-login");
+      // Carry any callbackUrl (set by middleware on the protected deep link)
+      // through to post-login, which validates it before redirecting there.
+      const callbackUrl = new URLSearchParams(window.location.search).get(
+        "callbackUrl"
+      );
+      router.push(
+        callbackUrl
+          ? `/auth/post-login?callbackUrl=${encodeURIComponent(callbackUrl)}`
+          : "/auth/post-login"
+      );
       router.refresh();
     } catch (error) {
       setError("Something went wrong");

@@ -7,7 +7,13 @@ export function middleware(request: NextRequest) {
     request.cookies.get("__Secure-payload-token")?.value;
 
   if (!token) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    const loginUrl = new URL("/login", request.url);
+    // Preserve where the user was headed so login can send them back.
+    loginUrl.searchParams.set(
+      "callbackUrl",
+      request.nextUrl.pathname + request.nextUrl.search
+    );
+    return NextResponse.redirect(loginUrl);
   }
 
   return NextResponse.next();
