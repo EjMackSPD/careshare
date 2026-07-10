@@ -14,33 +14,39 @@ export async function GET() {
       )
     }
 
-    const familyMembers = await prisma.familyMember.findMany({
-      where: {
-        userId: (user as any).id,
-      },
-      include: {
-        family: {
-          include: {
-            members: {
-              include: {
-                user: {
-                  select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                  },
-                },
-              },
+    const familyInclude = {
+      members: {
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
             },
-            careRecipient: true,
           },
         },
       },
-    })
+      careRecipient: true,
+    }
 
-    const families = familyMembers.map(fm => fm.family)
+    const [familyMembers, adminFamilies] = await Promise.all([
+      prisma.familyMember.findMany({
+        where: { userId: (user as any).id },
+        include: { family: { include: familyInclude } },
+      }),
+      prisma.adminFamily.findMany({
+        where: { adminId: (user as any).id },
+        include: { family: { include: familyInclude } },
+      }),
+    ])
 
-    return NextResponse.json(families)
+    const familiesById = new Map<string, (typeof familyMembers)[number]['family']>()
+    for (const fm of familyMembers) familiesById.set(fm.family.id, fm.family)
+    for (const af of adminFamilies) {
+      if (!familiesById.has(af.family.id)) familiesById.set(af.family.id, af.family)
+    }
+
+    return NextResponse.json(Array.from(familiesById.values()))
   } catch (error) {
     console.error('Get families error:', error)
     return NextResponse.json(

@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/auth-utils'
 import { prisma } from '@/lib/prisma'
+import { FamilyRole } from '@prisma/client'
 import Link from 'next/link'
 import styles from './page.module.css'
 
@@ -13,29 +14,43 @@ export default async function FamiliesPage() {
     redirect('/login')
   }
 
-  const familyMembers = await prisma.familyMember.findMany({
-    where: {
-      userId: (user as any).id,
-    },
-    include: {
-      family: {
-        include: {
-          _count: {
-            select: {
-              members: true,
-              events: true,
-              costs: true,
-            },
-          },
-        },
+  const familyCountInclude = {
+    _count: {
+      select: {
+        members: true,
+        events: true,
+        costs: true,
       },
     },
-  })
+  }
 
-  const families = familyMembers.map(fm => ({
-    ...fm.family,
-    role: fm.role,
-  }))
+  const [familyMembers, adminFamilies] = await Promise.all([
+    prisma.familyMember.findMany({
+      where: { userId: (user as any).id },
+      include: { family: { include: familyCountInclude } },
+    }),
+    prisma.adminFamily.findMany({
+      where: { adminId: (user as any).id },
+      include: { family: { include: familyCountInclude } },
+    }),
+  ])
+
+  const memberFamilyIds = new Set(familyMembers.map((fm) => fm.family.id))
+
+  const families = [
+    ...familyMembers.map((fm) => ({
+      ...fm.family,
+      role: fm.role as FamilyRole | null,
+      isProviderManaged: false,
+    })),
+    ...adminFamilies
+      .filter((af) => !memberFamilyIds.has(af.family.id))
+      .map((af) => ({
+        ...af.family,
+        role: null as FamilyRole | null,
+        isProviderManaged: true,
+      })),
+  ]
 
   return (
     <div className={styles.container}>
@@ -66,8 +81,13 @@ export default async function FamiliesPage() {
               >
                 <div className={styles.familyCardHeader}>
                   <h2>{family.name}</h2>
-                  {caregiverRoles.has(family.role) && (
-                    <span className={styles.badge}>⭐ Care Team Lead</span>
+                  {family.isProviderManaged ? (
+                    <span className={styles.badge}>🏢 Care Provider Access</span>
+                  ) : (
+                    family.role &&
+                    caregiverRoles.has(family.role) && (
+                      <span className={styles.badge}>⭐ Care Team Lead</span>
+                    )
                   )}
                 </div>
                 {family.elderName && (

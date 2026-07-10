@@ -1,5 +1,5 @@
 import { prisma } from "./prisma";
-import { FamilyRole, Prisma, UserRole } from "@prisma/client";
+import { FamilyMember, FamilyRole, Prisma, UserRole } from "@prisma/client";
 import {
   FamilyCapability,
   hasFamilyCapability,
@@ -49,17 +49,42 @@ export async function requireFamilyMembership(
     },
   });
 
-  if (!membership) {
+  const effectiveMembership = membership ?? (await getProviderMembership(familyId, user.id));
+
+  if (!effectiveMembership) {
     throw new Error("Family access required");
   }
 
-  if (allowedRoles && !allowedRoles.includes(membership.role)) {
+  if (allowedRoles && !allowedRoles.includes(effectiveMembership.role)) {
     throw new Error("Insufficient family permissions");
   }
 
   return {
     user,
-    membership,
+    membership: effectiveMembership,
+  };
+}
+
+// A Care Provider/Admin (nursing home, agency, professional) is granted
+// FAMILY_ADMIN-equivalent access to families explicitly assigned to them via
+// AdminFamily — scoped to that exact family, not a blanket cross-family bypass
+// like isOperationalAdmin.
+async function getProviderMembership(
+  familyId: string,
+  userId: string
+): Promise<FamilyMember | null> {
+  const assignment = await prisma.adminFamily.findUnique({
+    where: { adminId_familyId: { adminId: userId, familyId } },
+  });
+
+  if (!assignment) return null;
+
+  return {
+    id: `admin-family:${assignment.id}`,
+    familyId,
+    userId,
+    role: "FAMILY_ADMIN",
+    joinedAt: assignment.addedAt,
   };
 }
 
