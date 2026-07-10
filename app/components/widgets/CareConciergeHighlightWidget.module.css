@@ -42,9 +42,22 @@
 }
 
 .emptyText {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   margin: 0;
   font-size: 0.9rem;
   color: var(--cs-color-muted);
+}
+
+.loadingSpinner {
+  animation: highlightSpin 0.9s linear infinite;
+}
+
+@keyframes highlightSpin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .content {

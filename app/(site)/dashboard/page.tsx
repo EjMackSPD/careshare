@@ -3,7 +3,6 @@ import { getCurrentUser } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
 import { hydrateStoredDraft } from "@/lib/onboarding";
 import { resolveDashboardPersona } from "@/lib/dashboard-persona";
-import { getOrRefreshHighlight } from "@/lib/care-ai-highlight";
 import Link from "next/link";
 import PendingInvitationsBanner from "../../components/PendingInvitationsBanner";
 import CareRecipientWidget from "../../components/widgets/CareRecipientWidget";
@@ -20,65 +19,65 @@ export default async function Dashboard() {
     redirect("/login");
   }
 
-  const familyMembers = await prisma.familyMember.findMany({
-    where: {
-      userId: (user as any).id,
-    },
-    include: {
-      family: {
+  const [familyMembers, dbUser, adminFamilyCount, pendingInvitations] =
+    await Promise.all([
+      prisma.familyMember.findMany({
+        where: {
+          userId: (user as any).id,
+        },
         include: {
-          costs: {
+          family: {
+            include: {
+              costs: {
+                where: {
+                  status: "PENDING",
+                },
+                take: 5,
+              },
+              events: {
+                where: {
+                  eventDate: {
+                    gte: new Date(),
+                  },
+                },
+                take: 5,
+                orderBy: {
+                  eventDate: "asc",
+                },
+              },
+              careRecipient: true,
+              medications: {
+                where: { active: true },
+                select: { id: true },
+              },
+              carePlan: true,
+            },
+          },
+        },
+      }),
+      prisma.user.findUnique({
+        where: { id: (user as any).id },
+        select: {
+          onboardingData: true,
+        },
+      }),
+      prisma.adminFamily.count({
+        where: { adminId: (user as any).id },
+      }),
+      user.email
+        ? prisma.familyInvitation.findMany({
             where: {
+              email: { equals: user.email, mode: "insensitive" },
               status: "PENDING",
             },
-            take: 5,
-          },
-          events: {
-            where: {
-              eventDate: {
-                gte: new Date(),
-              },
+            include: {
+              family: { select: { name: true, elderName: true } },
+              inviter: { select: { name: true, email: true } },
             },
-            take: 5,
-            orderBy: {
-              eventDate: "asc",
-            },
-          },
-          careRecipient: true,
-          medications: {
-            where: { active: true },
-            select: { id: true },
-          },
-          carePlan: true,
-        },
-      },
-    },
-  });
-
-  const dbUser = await prisma.user.findUnique({
-    where: { id: (user as any).id },
-    select: {
-      onboardingData: true,
-    },
-  });
-
-  const adminFamilyCount = await prisma.adminFamily.count({
-    where: { adminId: (user as any).id },
-  });
-
-  const pendingInvitations = user.email
-    ? await prisma.familyInvitation.findMany({
-        where: {
-          email: { equals: user.email, mode: "insensitive" },
-          status: "PENDING",
-        },
-        include: {
-          family: { select: { name: true, elderName: true } },
-          inviter: { select: { name: true, email: true } },
-        },
-        orderBy: { createdAt: "desc" },
-      })
-    : [];
+            orderBy: { createdAt: "desc" },
+          })
+        : Promise.resolve([]),
+    ]);
 
   const onboardingDraft = hydrateStoredDraft(dbUser?.onboardingData ?? null);
 
@@ -124,10 +123,6 @@ export default async function Dashboard() {
   const monthlyBudget = primaryCarePlan?.estimatedCostMax ?? 2400;
   const spentThisMonth = paidThisMonth?._sum.amount ?? 0;
   const remainingBudget = Math.max(monthlyBudget - spentThisMonth, 0);
-
-  const conciergeHighlight = primaryFamily
-    ? await getOrRefreshHighlight(primaryFamily.id)
-    : null;
 
   const activeFamilyName = primaryFamily?.name || "Your care workspace";
   const careRecipientName = primaryFamily?.elderName || "Care recipient";
@@ -212,12 +207,8 @@ export default async function Dashboard() {
             </div>
           ) : (
             <>
-              {conciergeHighlight && (
-                <CareConciergeHighlightWidget
-                  familyId={primaryFamily?.id}
-                  recommendations={conciergeHighlight.recommendations}
-                  suggestedTask={conciergeHighlight.suggestedTask}
-                />
+              {primaryFamily && (
+                <CareConciergeHighlightWidget familyId={primaryFamily.id} />
               )}
 
               <section className={styles.widgetSection}>

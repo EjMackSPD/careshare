@@ -1,15 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { AlertTriangle, Lightbulb, Plus, Sparkles } from 'lucide-react'
+import { AlertTriangle, Lightbulb, Loader2, Plus, Sparkles } from 'lucide-react'
 import type { AssistantRecommendation, AssistantSuggestedTask } from '@/types/assistant'
 import styles from './CareConciergeHighlightWidget.module.css'
 
 type CareConciergeHighlightWidgetProps = {
-  familyId?: string
-  recommendations: AssistantRecommendation[]
-  suggestedTask: AssistantSuggestedTask | null
+  familyId: string
 }
 
 function recommendationIcon(type: AssistantRecommendation['type']) {
@@ -20,11 +18,36 @@ function recommendationIcon(type: AssistantRecommendation['type']) {
 
 export default function CareConciergeHighlightWidget({
   familyId,
-  recommendations,
-  suggestedTask,
 }: CareConciergeHighlightWidgetProps) {
+  const [recommendations, setRecommendations] = useState<AssistantRecommendation[]>([])
+  const [suggestedTask, setSuggestedTask] = useState<AssistantSuggestedTask | null>(null)
+  const [loading, setLoading] = useState(true)
   const [added, setAdded] = useState(false)
   const [adding, setAdding] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function fetchHighlight() {
+      try {
+        const res = await fetch(`/api/families/${familyId}/highlight`)
+        if (!res.ok) return
+        const data = await res.json()
+        if (cancelled) return
+        setRecommendations(data.recommendations || [])
+        setSuggestedTask(data.suggestedTask || null)
+      } catch {
+        // Leave the widget in its empty state; the full concierge page still works.
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+
+    fetchHighlight()
+    return () => {
+      cancelled = true
+    }
+  }, [familyId])
 
   async function handleAdd() {
     if (!familyId || !suggestedTask || adding) return
@@ -62,7 +85,12 @@ export default function CareConciergeHighlightWidget({
         </Link>
       </div>
 
-      {!hasContent ? (
+      {loading ? (
+        <p className={styles.emptyText}>
+          <Loader2 size={14} className={styles.loadingSpinner} /> Reviewing recent care
+          activity…
+        </p>
+      ) : !hasContent ? (
         <p className={styles.emptyText}>
           No highlights yet — check back once there&apos;s more care activity to review.
         </p>
