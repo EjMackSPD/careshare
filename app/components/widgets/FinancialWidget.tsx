@@ -3,18 +3,27 @@
 import Link from 'next/link'
 import styles from './Widget.module.css'
 
+type UpcomingBill = {
+  id: string
+  description: string
+  amount: number
+  dueDate: string | null
+}
+
 type FinancialWidgetProps = {
   monthlyBudget?: number
   spent?: number
   remaining?: number
+  upcomingBills?: UpcomingBill[]
 }
 
-export default function FinancialWidget({ 
-  monthlyBudget = 2400, 
-  spent = 0, 
-  remaining = 2400 
+export default function FinancialWidget({
+  monthlyBudget = 2400,
+  spent = 0,
+  remaining = 2400,
+  upcomingBills = [],
 }: FinancialWidgetProps) {
-  const percentSpent = (spent / monthlyBudget) * 100
+  const percentSpent = monthlyBudget > 0 ? Math.min((spent / monthlyBudget) * 100, 100) : 0
 
   return (
     <div className={styles.widget}>
@@ -22,7 +31,7 @@ export default function FinancialWidget({
         <h3>Financial Overview</h3>
         <Link href="/dashboard/finances" className={styles.addButton}>Add Expense</Link>
       </div>
-      
+
       <div className={styles.widgetContent}>
         <div className={styles.financialStats}>
           <div className={styles.budgetRow}>
@@ -35,7 +44,7 @@ export default function FinancialWidget({
           </div>
           <div className={styles.budgetRow}>
             <span>Remaining</span>
-            <strong style={{color: '#2563eb'}}>${remaining.toFixed(2)}</strong>
+            <strong className={styles.remainingAmount}>${remaining.toFixed(2)}</strong>
           </div>
         </div>
 
@@ -46,7 +55,18 @@ export default function FinancialWidget({
 
         <div className={styles.upcomingBills}>
           <strong>Upcoming Bills</strong>
-          <p className={styles.emptyText}>No upcoming bills.</p>
+          {upcomingBills.length === 0 ? (
+            <p className={styles.emptyText}>No upcoming bills.</p>
+          ) : (
+            <ul className={styles.billsList}>
+              {upcomingBills.slice(0, 3).map((bill) => (
+                <li key={bill.id} className={styles.billItem}>
+                  <span className={styles.billDescription}>{bill.description}</span>
+                  <span className={styles.billAmount}>${bill.amount.toFixed(2)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
 
         <Link href="/dashboard/finances" className={styles.viewAllLink}>View all bills</Link>

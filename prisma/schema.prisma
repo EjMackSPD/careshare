@@ -133,6 +133,7 @@ model Family {
   contributions FamilyContribution[]
   careRecipient CareRecipient?
   aiConversations AIConversation[]
+  aiHighlight   AIHighlight?
   auditLogs     AuditLog[]
 
   @@index([createdBy])
@@ -755,6 +756,20 @@ model AIMessage {
   @@index([conversationId])
   @@index([createdAt])
   @@index([flagged])
+}
+
+// Cached Care Concierge dashboard highlight (recommendations + one suggested task),
+// refreshed on a TTL rather than regenerated on every dashboard page load.
+model AIHighlight {
+  id              String   @id @default(cuid())
+  familyId        String   @unique
+  recommendations Json
+  suggestedTask   Json?
+  generatedAt     DateTime @default(now())
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@index([familyId])
 }
 
 model BlogPost {

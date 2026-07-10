@@ -40,3 +40,9 @@
     width: 100%;
   }
 }
+
+@media (max-width: 767px) {
+  .content {
+    padding-bottom: 72px;
+  }
+}

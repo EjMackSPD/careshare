@@ -42,6 +42,24 @@ type ModelOutput = {
   followUps?: string[]
 }
 
+type HighlightModelOutput = {
+  recommendations?: Array<{
+    title?: string
+    detail?: string
+    type?: string
+  }>
+  suggestedTask?: {
+    title?: string
+    reason?: string
+    priority?: string
+  } | null
+}
+
+export type HighlightSummary = {
+  recommendations: AssistantRecommendation[]
+  suggestedTask: AssistantSuggestedTask | null
+}
+
 function clip(value: string | null | undefined, max = 220) {
   if (!value) return ""
   return value.length > max ? `${value.slice(0, max - 1)}…` : value
@@ -64,15 +82,15 @@ function createSource(
   })
 }
 
-function safeJsonParse(value: string): ModelOutput | null {
+function safeJsonParse<T>(value: string): T | null {
   try {
-    return JSON.parse(value) as ModelOutput
+    return JSON.parse(value) as T
   } catch (error) {
     const match = value.match(/\{[\s\S]*\}/)
     if (!match) return null
 
     try {
-      return JSON.parse(match[0]) as ModelOutput
+      return JSON.parse(match[0]) as T
     } catch {
       return null
     }
@@ -624,7 +642,7 @@ export async function generateAssistantReply(input: {
       ],
     })
 
-    const parsed = safeJsonParse(response.output_text)
+    const parsed = safeJsonParse<ModelOutput>(response.output_text)
 
     if (!parsed?.answer) {
       throw new Error("CareAI returned an invalid response")
@@ -708,5 +726,119 @@ export async function generateAssistantReply(input: {
   } catch (error) {
     console.error("Care Concierge falling back to local summary:", error)
     return buildOfflineFallback(input)
+  }
+}
+
+function buildOfflineHighlightSummary(
+  context: AssistantContextBundle
+): HighlightSummary {
+  const taskSources = findSourcesByCategory(context, "Task")
+  const carePlanSources = findSourcesByCategory(context, "Care plan")
+
+  const recommendations: AssistantRecommendation[] = [
+    {
+      title: "Review the most recent family records",
+      detail:
+        "OpenAI wasn't reachable, so this is a grounded snapshot rather than a generated recommendation. Check the latest tasks and care plan for anything that needs attention.",
+      type: "insight",
+    },
+  ]
+
+  if (carePlanSources.length > 0) {
+    recommendations.push({
+      title: "Compare today to the care plan",
+      detail:
+        "If recent activity feels out of sync with the current care plan, that's a good signal to review it together.",
+      type: "watchout",
+    })
+  }
+
+  const suggestedTask: AssistantSuggestedTask | null = taskSources.length
+    ? {
+        title: "Review and assign the most urgent open care task",
+        reason:
+          "Recent family task records suggest there are active coordination items that should have a clear owner.",
+        priority: "HIGH",
+      }
+    : null
+
+  return {
+    recommendations: recommendations.slice(0, 2),
+    suggestedTask,
+  }
+}
+
+export async function generateHighlightSummary(
+  context: AssistantContextBundle
+): Promise<HighlightSummary> {
+  try {
+    const client = getOpenAIClient()
+    const model = getAssistantModel()
+
+    const instructions = [
+      "You are the CareShare Care Concierge, generating a short proactive highlight for a family's dashboard.",
+      "Use family records as the source of truth. If the data is sparse, keep recommendations general and grounded rather than inventing specifics.",
+      "Never claim medical, legal, or financial certainty.",
+      "Return valid JSON only, with at most 2 recommendations and at most 1 suggested task.",
+      'Schema: {"recommendations":[{"title":"string","detail":"string","type":"recommendation|insight|watchout"}],"suggestedTask":{"title":"string","reason":"string","priority":"LOW|MEDIUM|HIGH|URGENT"}|null}',
+      "Only include a suggestedTask when a concrete, genuinely useful next action stands out from the family's open tasks or upcoming needs.",
+    ].join("\n")
+
+    const response = await client.responses.create({
+      model,
+      store: false,
+      input: [
+        {
+          role: "system",
+          content: [{ type: "input_text", text: instructions }],
+        },
+        {
+          role: "user",
+          content: [
+            {
+              type: "input_text",
+              text: `Family context:\n${context.promptContext}\n\nGenerate the dashboard highlight now.`,
+            },
+          ],
+        },
+      ],
+    })
+
+    const parsed = safeJsonParse<HighlightModelOutput>(response.output_text)
+
+    if (!parsed) {
+      throw new Error("CareAI returned an invalid highlight response")
+    }
+
+    const recommendations = (parsed.recommendations || [])
+      .filter((item) => item.title && item.detail)
+      .slice(0, 2)
+      .map((item) => ({
+        title: item.title!.trim(),
+        detail: item.detail!.trim(),
+        type:
+          item.type === "insight" || item.type === "watchout"
+            ? item.type
+            : "recommendation",
+      })) as AssistantRecommendation[]
+
+    const suggestedTask: AssistantSuggestedTask | null =
+      parsed.suggestedTask?.title && parsed.suggestedTask?.reason
+        ? {
+            title: parsed.suggestedTask.title.trim(),
+            reason: parsed.suggestedTask.reason.trim(),
+            priority:
+              parsed.suggestedTask.priority === "LOW" ||
+              parsed.suggestedTask.priority === "HIGH" ||
+              parsed.suggestedTask.priority === "URGENT"
+                ? parsed.suggestedTask.priority
+                : "MEDIUM",
+          }
+        : null
+
+    return { recommendations, suggestedTask }
+  } catch (error) {
+    console.error("Care Concierge highlight falling back to local summary:", error)
+    return buildOfflineHighlightSummary(context)
   }
 }

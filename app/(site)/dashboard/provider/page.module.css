@@ -1,0 +1,119 @@
+.container {
+  padding: 1.5rem 1rem 3rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: 1.5rem;
+}
+
+.eyebrow {
+  display: inline-block;
+  background: var(--cs-color-brand-soft);
+  color: var(--cs-color-brand-dark);
+  padding: 0.3rem 0.75rem;
+  border-radius: var(--cs-radius-md);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+
+.header h1 {
+  font-size: 1.5rem;
+  color: var(--cs-color-text);
+  margin: 0 0 0.35rem 0;
+}
+
+.subtitle {
+  color: var(--cs-color-muted);
+  margin: 0;
+}
+
+.emptyState {
+  background: var(--cs-color-surface-raised);
+  border-radius: var(--cs-radius-xl);
+  box-shadow: var(--cs-shadow-soft);
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  color: var(--cs-color-muted);
+}
+
+.familyGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.familyCard {
+  background: var(--cs-color-surface-raised);
+  border-radius: var(--cs-radius-xl);
+  padding: 1.25rem;
+  box-shadow: var(--cs-shadow-soft);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.15s, box-shadow 0.15s;
+  display: flex;
+  flex-direction: column;
+}
+
+.familyCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--cs-shadow-lift);
+}
+
+.familyCardHeader h2 {
+  font-size: 1.15rem;
+  margin: 0;
+  color: var(--cs-color-text);
+}
+
+.elderName {
+  color: var(--cs-color-muted);
+  margin: 0.35rem 0 1rem 0;
+  font-size: 0.9rem;
+}
+
+.stats {
+  display: flex;
+  gap: 1.25rem;
+  padding-top: 0.85rem;
+  margin-top: auto;
+  border-top: 1px solid var(--cs-color-border);
+  flex-wrap: wrap;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.statNumber {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--cs-color-brand);
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  color: var(--cs-color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding: 2rem 2rem 3rem;
+  }
+
+  .header h1 {
+    font-size: 2rem;
+  }
+
+  .familyGrid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}

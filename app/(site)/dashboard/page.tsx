@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth-utils";
 import { prisma } from "@/lib/prisma";
 import { hydrateStoredDraft } from "@/lib/onboarding";
+import { resolveDashboardPersona } from "@/lib/dashboard-persona";
+import { getOrRefreshHighlight } from "@/lib/care-ai-highlight";
 import Link from "next/link";
 import PendingInvitationsBanner from "../../components/PendingInvitationsBanner";
 import CareRecipientWidget from "../../components/widgets/CareRecipientWidget";
@@ -11,6 +13,7 @@ import CalendarWidget from "../../components/widgets/CalendarWidget";
 import CollaborationWidget from "../../components/widgets/CollaborationWidget";
 import ResourcesWidget from "../../components/widgets/ResourcesWidget";
 import CarePlanWidget from "../../components/widgets/CarePlanWidget";
+import CareConciergeHighlightWidget from "../../components/widgets/CareConciergeHighlightWidget";
 import {
   CheckSquare,
   Calendar as CalendarIcon,
@@ -65,6 +68,25 @@ export default async function Dashboard() {
             where: { active: true },
             select: { id: true },
           },
+          messages: {
+            take: 5,
+            orderBy: { createdAt: "desc" },
+            include: {
+              user: { select: { name: true, email: true } },
+            },
+          },
+          resources: {
+            take: 5,
+            orderBy: { createdAt: "desc" },
+          },
+          carePlan: true,
+          members: {
+            select: {
+              id: true,
+              role: true,
+              user: { select: { name: true, email: true } },
+            },
+          },
         },
       },
     },
@@ -75,6 +97,10 @@ export default async function Dashboard() {
     select: {
       onboardingData: true,
     },
+  });
+
+  const adminFamilyCount = await prisma.adminFamily.count({
+    where: { adminId: (user as any).id },
   });
 
   const pendingInvitations = user.email
@@ -91,16 +117,55 @@ export default async function Dashboard() {
       })
     : [];
 
-  if (
-    familyMembers.length > 0 &&
-    familyMembers.every((familyMember) => familyMember.role === "CARE_RECIPIENT")
-  ) {
+  const onboardingDraft = hydrateStoredDraft(dbUser?.onboardingData ?? null);
+
+  const persona = resolveDashboardPersona({
+    familyMemberRoles: familyMembers.map((familyMember) => familyMember.role),
+    adminFamilyCount,
+    audienceType: onboardingDraft.audienceType,
+  });
+
+  if (persona === "CARE_RECIPIENT") {
     redirect("/care");
   }
 
+  if (persona === "PROVIDER_ADMIN") {
+    redirect("/dashboard/provider");
+  }
+
+  const isCoordinator = persona === "COORDINATOR";
+
   const families = familyMembers.map((familyMember) => familyMember.family);
-  const onboardingDraft = hydrateStoredDraft(dbUser?.onboardingData ?? null);
   const primaryFamily = families[0];
+
+  const primaryCarePlan = primaryFamily
+    ? (primaryFamily.carePlan ??
+      (await prisma.carePlan.create({
+        data: { familyId: primaryFamily.id, careLevel: "MODERATE" },
+      })))
+    : null;
+
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const paidThisMonth = primaryFamily
+    ? await prisma.cost.aggregate({
+        where: {
+          familyId: primaryFamily.id,
+          status: "PAID",
+          paidDate: { gte: startOfMonth },
+        },
+        _sum: { amount: true },
+      })
+    : null;
+
+  const monthlyBudget = primaryCarePlan?.estimatedCostMax ?? 2400;
+  const spentThisMonth = paidThisMonth?._sum.amount ?? 0;
+  const remainingBudget = Math.max(monthlyBudget - spentThisMonth, 0);
+
+  const conciergeHighlight = primaryFamily
+    ? await getOrRefreshHighlight(primaryFamily.id)
+    : null;
+
   const allTasks = families.flatMap((family) => family.tasks);
   const totalTasks = allTasks.length;
   const completedTasks = allTasks.filter(
@@ -154,13 +219,17 @@ export default async function Dashboard() {
           <section className={styles.hero}>
             <div className={styles.heroContent}>
               <div className={styles.heroCopy}>
-                <div className={styles.eyebrow}>Care Dashboard</div>
+                <div className={styles.eyebrow}>
+                  {isCoordinator ? "Care Coordinator Dashboard" : "Family Dashboard"}
+                </div>
 
                 <div className={styles.header}>
                   <div>
                     <h1>Welcome back, {user.name || "there"}.</h1>
                     <p className={styles.headerSubtitle}>
-                      Track care activity, upcoming obligations, and family coordination from one working view.
+                      {isCoordinator
+                        ? "Track care activity, upcoming obligations, and family coordination from one working view."
+                        : `See what's happening in ${activeFamilyName}'s care, and find ways you can help today.`}
                     </p>
                   </div>
                 </div>
@@ -394,6 +463,14 @@ export default async function Dashboard() {
             </div>
           ) : (
             <>
+              {conciergeHighlight && (
+                <CareConciergeHighlightWidget
+                  familyId={primaryFamily?.id}
+                  recommendations={conciergeHighlight.recommendations}
+                  suggestedTask={conciergeHighlight.suggestedTask}
+                />
+              )}
+
               <section className={styles.widgetSection}>
                 <div className={styles.sectionHeading}>
                   <div>
@@ -417,19 +494,54 @@ export default async function Dashboard() {
                     <TasksWidget />
                   </div>
                   <div className={styles.widgetMedium}>
-                    <FinancialWidget />
+                    <FinancialWidget
+                      monthlyBudget={monthlyBudget}
+                      spent={spentThisMonth}
+                      remaining={remainingBudget}
+                      upcomingBills={(primaryFamily?.costs ?? []).map((cost) => ({
+                        id: cost.id,
+                        description: cost.description,
+                        amount: cost.amount,
+                        dueDate: cost.dueDate ? cost.dueDate.toISOString() : null,
+                      }))}
+                    />
                   </div>
                   <div className={styles.widgetMedium}>
                     <CalendarWidget />
                   </div>
                   <div className={styles.widgetMedium}>
-                    <CollaborationWidget />
+                    <CollaborationWidget
+                      familyId={primaryFamily?.id}
+                      members={(primaryFamily?.members ?? []).map((member) => ({
+                        id: member.id,
+                        name: member.user.name || member.user.email,
+                        role: member.role,
+                      }))}
+                      messages={(primaryFamily?.messages ?? []).map((message) => ({
+                        id: message.id,
+                        authorName: message.user.name || message.user.email,
+                        message: message.message,
+                        createdAt: message.createdAt.toISOString(),
+                      }))}
+                    />
                   </div>
                   <div className={styles.widgetLarge}>
-                    <ResourcesWidget />
+                    <ResourcesWidget
+                      resources={(primaryFamily?.resources ?? []).map((resource) => ({
+                        id: resource.id,
+                        title: resource.title,
+                        category: resource.category,
+                        url: resource.url ?? resource.fileUrl ?? null,
+                      }))}
+                    />
                   </div>
                   <div className={styles.widgetLarge}>
-                    <CarePlanWidget />
+                    <CarePlanWidget
+                      careLevel={primaryCarePlan?.careLevel ?? null}
+                      careLevelDescription={primaryCarePlan?.careLevelDescription ?? null}
+                      estimatedCostMin={primaryCarePlan?.estimatedCostMin ?? null}
+                      estimatedCostMax={primaryCarePlan?.estimatedCostMax ?? null}
+                    />
                   </div>
                 </div>
               </section>

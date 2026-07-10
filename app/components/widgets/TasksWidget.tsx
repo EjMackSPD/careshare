@@ -62,13 +62,13 @@ export default function TasksWidget() {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "HIGH":
-        return "#ef4444";
+        return "var(--cs-color-rose)";
       case "MEDIUM":
-        return "#f59e0b";
+        return "var(--cs-color-warm)";
       case "LOW":
-        return "#10b981";
+        return "var(--cs-color-care)";
       default:
-        return "#6c757d";
+        return "var(--cs-color-muted)";
     }
   };
 
@@ -83,11 +83,11 @@ export default function TasksWidget() {
 
       <div className={styles.widgetContent}>
         {loading ? (
-          <div style={{ padding: "2rem", textAlign: "center", color: "#6c757d" }}>
+          <div style={{ padding: "2rem", textAlign: "center", color: "var(--cs-color-muted)" }}>
             Loading tasks...
           </div>
         ) : upcomingTasks.length === 0 ? (
-          <div style={{ padding: "2rem", textAlign: "center", color: "#6c757d" }}>
+          <div style={{ padding: "2rem", textAlign: "center", color: "var(--cs-color-muted)" }}>
             No upcoming tasks
           </div>
         ) : (

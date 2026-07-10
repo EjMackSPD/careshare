@@ -1,0 +1,49 @@
+/* Mobile-first: unprefixed rules are the mobile layout. Hidden from tablet width up,
+   where LeftNavigation's persistent rail is the primary navigation. */
+.tabBar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  background: var(--cs-color-surface-raised);
+  border-top: 1px solid var(--cs-color-border);
+  box-shadow: var(--cs-shadow-soft);
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  padding: 0.5rem 0.25rem 0.6rem;
+  color: var(--cs-color-muted);
+  text-decoration: none;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  min-height: 56px;
+}
+
+.tab span {
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.tabActive {
+  color: var(--cs-color-brand);
+}
+
+@media (min-width: 768px) {
+  .tabBar {
+    display: none;
+  }
+}

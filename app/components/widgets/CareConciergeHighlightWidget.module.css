@@ -1,0 +1,162 @@
+.widget {
+  background: linear-gradient(135deg, var(--cs-color-brand-soft), var(--cs-color-surface-raised));
+  border: 1px solid var(--cs-color-border);
+  border-radius: var(--cs-radius-xl);
+  box-shadow: var(--cs-shadow-soft);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.9rem;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--cs-color-brand-dark);
+}
+
+.title h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--cs-color-text);
+}
+
+.viewLink {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--cs-color-brand);
+  text-decoration: none;
+}
+
+.viewLink:hover {
+  text-decoration: underline;
+}
+
+.emptyText {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--cs-color-muted);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.recommendationList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.recommendationItem {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  background: var(--cs-color-surface-raised);
+  border-radius: var(--cs-radius-md);
+  padding: 0.7rem 0.85rem;
+}
+
+.recommendationIcon {
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+  color: var(--cs-color-brand);
+}
+
+.recommendationItem strong {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--cs-color-text);
+  margin-bottom: 0.15rem;
+}
+
+.recommendationDetail {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--cs-color-muted);
+  line-height: 1.4;
+}
+
+.suggestedTask {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background: var(--cs-color-surface-raised);
+  border: 1px dashed var(--cs-color-border-strong);
+  border-radius: var(--cs-radius-md);
+  padding: 0.7rem 0.85rem;
+  flex-wrap: wrap;
+}
+
+.suggestedTaskText {
+  flex: 1;
+  min-width: 180px;
+}
+
+.suggestedTaskText strong {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--cs-color-text);
+  margin-bottom: 0.15rem;
+}
+
+.suggestedTaskReason {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--cs-color-muted);
+}
+
+.addTaskBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--cs-button-primary-bg);
+  color: white;
+  border: none;
+  border-radius: var(--cs-button-radius);
+  padding: 0.45rem 0.85rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  min-height: 36px;
+}
+
+.addTaskBtn:hover:not(:disabled) {
+  background: var(--cs-button-primary-bg-hover);
+}
+
+.addTaskBtn:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+@media (max-width: 639px) {
+  .widget {
+    padding: 1rem;
+  }
+
+  .suggestedTask {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .addTaskBtn {
+    justify-content: center;
+  }
+}
