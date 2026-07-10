@@ -1069,7 +1069,7 @@ function TasksPageContent() {
                         </div>
                       ) : (
                         <div>
-                          <p className={styles.composerEyebrow}>AI-powered</p>
+                          <p className={styles.composerEyebrow}>Concierge</p>
                           <h2>Care Concierge</h2>
                           <p>Insights and quick tasks grounded in this family&apos;s data.</p>
                         </div>

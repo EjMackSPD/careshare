@@ -7,6 +7,7 @@ import { Heart, Shield, Users, Sparkles } from "lucide-react";
 import MarketingNav from "../../components/MarketingNav";
 import Footer from "../../components/Footer";
 import { payloadLogin } from "../../components/AuthProvider";
+import EmailCodeForm from "../../components/EmailCodeForm";
 import styles from "./page.module.css";
 
 export default function Login() {
@@ -15,6 +16,34 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [magicSent, setMagicSent] = useState(false);
+  const [magicLoading, setMagicLoading] = useState(false);
+
+  const getCallbackUrl = () =>
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("callbackUrl")
+      : null;
+
+  const handleSendMagic = async () => {
+    if (!email || !email.includes("@")) {
+      setError("Enter your email above first.");
+      return;
+    }
+    setError("");
+    setMagicLoading(true);
+    try {
+      await fetch("/api/auth/request-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, callbackUrl: getCallbackUrl() }),
+      });
+      setMagicSent(true);
+    } catch {
+      setError("Could not send a sign-in code. Please try again.");
+    } finally {
+      setMagicLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -152,6 +181,27 @@ export default function Login() {
                 {loading ? "Signing in..." : "Sign in"}
               </button>
             </form>
+
+            {magicSent ? (
+              <div style={{ marginTop: "1.25rem" }}>
+                <EmailCodeForm
+                  email={email}
+                  callbackUrl={getCallbackUrl()}
+                  onVerified={(redirectTo) => {
+                    window.location.href = redirectTo;
+                  }}
+                />
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={handleSendMagic}
+                disabled={magicLoading}
+                className={styles.magicBtn}
+              >
+                {magicLoading ? "Sending…" : "Email me a sign-in link or code"}
+              </button>
+            )}
 
             <div className={styles.formFooter}>
               <p>

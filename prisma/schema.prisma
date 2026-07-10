@@ -134,6 +134,7 @@ model Family {
   careRecipient CareRecipient?
   aiConversations AIConversation[]
   aiHighlight   AIHighlight?
+  aiResponseCache AIResponseCache[]
   auditLogs     AuditLog[]
 
   @@index([createdBy])
@@ -765,11 +766,41 @@ model AIHighlight {
   familyId        String   @unique
   recommendations Json
   suggestedTask   Json?
+  dataVersion     String?
   generatedAt     DateTime @default(now())
 
   family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
 
   @@index([familyId])
+}
+
+// Cached Care Concierge chat replies, keyed by family + data version + question.
+model AIResponseCache {
+  id        String   @id @default(cuid())
+  familyId  String
+  cacheKey  String   @unique
+  response  Json
+  createdAt DateTime @default(now())
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@index([familyId])
+  @@index([createdAt])
+}
+
+// Single-use passwordless login / email-verification tokens (magic link + code).
+model LoginToken {
+  id         String    @id @default(cuid())
+  email      String
+  tokenHash  String    @unique
+  codeHash   String
+  attempts   Int       @default(0)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([email])
+  @@index([expiresAt])
 }
 
 model BlogPost {

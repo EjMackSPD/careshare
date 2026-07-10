@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { OnboardingStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { upsertPayloadUser } from "@/lib/payload-users";
-import { sendWelcomeEmail } from "@/lib/email";
+import { requestLoginEmail } from "@/lib/login-flow";
 
 export async function POST(request: Request) {
   try {
@@ -37,11 +37,14 @@ export async function POST(request: Request) {
       mustResetPassword: false,
     });
 
-    await sendWelcomeEmail({ to: email, name: name || null });
+    // New accounts start unverified; send the magic link + code so they can
+    // confirm their email. The welcome email follows on first verification.
+    await requestLoginEmail(email);
 
     return NextResponse.json(
       {
         message: "User created successfully",
+        requiresVerification: true,
         user: {
           id: String((user as { id: string | number }).id),
           name,

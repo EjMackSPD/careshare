@@ -60,6 +60,95 @@ export type HighlightSummary = {
   suggestedTask: AssistantSuggestedTask | null
 }
 
+// Structured Outputs schemas — guarantee valid JSON so the verbose schema prose
+// can be dropped from the prompt (saving input tokens) and parsing never fails.
+const RECOMMENDATION_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["title", "detail", "type"],
+  properties: {
+    title: { type: "string" },
+    detail: { type: "string" },
+    type: { type: "string", enum: ["recommendation", "insight", "watchout"] },
+  },
+} as const
+
+const CARE_REPLY_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: [
+    "answer",
+    "citations",
+    "recommendations",
+    "suggestedTasks",
+    "suggestedEvents",
+    "followUps",
+  ],
+  properties: {
+    answer: { type: "string" },
+    citations: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["sourceId"],
+        properties: { sourceId: { type: "string" } },
+      },
+    },
+    recommendations: { type: "array", items: RECOMMENDATION_SCHEMA },
+    suggestedTasks: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["title", "reason", "priority"],
+        properties: {
+          title: { type: "string" },
+          reason: { type: "string" },
+          priority: {
+            type: "string",
+            enum: ["LOW", "MEDIUM", "HIGH", "URGENT"],
+          },
+        },
+      },
+    },
+    suggestedEvents: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["title", "reason", "timeframe", "type"],
+        properties: {
+          title: { type: "string" },
+          reason: { type: "string" },
+          timeframe: { type: "string" },
+          type: { type: "string", enum: ["APPOINTMENT", "VISIT", "OTHER"] },
+        },
+      },
+    },
+    followUps: { type: "array", items: { type: "string" } },
+  },
+} as const
+
+const HIGHLIGHT_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["recommendations", "suggestedTask"],
+  properties: {
+    recommendations: { type: "array", items: RECOMMENDATION_SCHEMA },
+    suggestedTask: {
+      type: ["object", "null"],
+      additionalProperties: false,
+      required: ["title", "reason", "priority"],
+      properties: {
+        title: { type: "string" },
+        reason: { type: "string" },
+        priority: { type: "string", enum: ["LOW", "MEDIUM", "HIGH", "URGENT"] },
+      },
+    },
+  },
+} as const
+
 function clip(value: string | null | undefined, max = 220) {
   if (!value) return ""
   return value.length > max ? `${value.slice(0, max - 1)}…` : value
@@ -104,6 +193,11 @@ function findSourcesByCategory(
   return context.sources.filter((source) => source.category === category)
 }
 
+// Prefix of the answer returned when OpenAI is unreachable. Callers use this to
+// avoid caching a degraded fallback response.
+export const OFFLINE_ANSWER_PREFIX =
+  "I couldn't reach OpenAI from this environment"
+
 function buildOfflineFallback(input: {
   question: string
   context: AssistantContextBundle
@@ -137,7 +231,7 @@ function buildOfflineFallback(input: {
     }))
 
   const lines = [
-    `I couldn't reach OpenAI from this environment, so here's a grounded snapshot from ${input.context.summary.familyName} instead.`,
+    `${OFFLINE_ANSWER_PREFIX}, so here's a grounded snapshot from ${input.context.summary.familyName} instead.`,
     profileSource ? `Family context: ${profileSource.note}.` : null,
     taskSources.length
       ? `Tasks in view: ${taskSources.length} recent task records are available.`
@@ -214,7 +308,14 @@ function buildOfflineFallback(input: {
   }
 }
 
-export async function buildAssistantContext(familyId: string) {
+export async function buildAssistantContext(
+  familyId: string,
+  options: { scope?: "full" | "highlight" } = {}
+) {
+  // The dashboard highlight only reasons over tasks/care-plan/events, so it skips
+  // providers, chat messages, and resources entirely to cut input tokens.
+  const isHighlight = options.scope === "highlight"
+
   const family = await prisma.family.findUnique({
     where: { id: familyId },
     include: {
@@ -256,7 +357,7 @@ export async function buildAssistantContext(familyId: string) {
         orderBy: {
           createdAt: "desc",
         },
-        take: 8,
+        take: 5,
       },
       medications: {
         orderBy: {
@@ -268,7 +369,7 @@ export async function buildAssistantContext(familyId: string) {
         orderBy: {
           updatedAt: "desc",
         },
-        take: 8,
+        take: 5,
       },
       messages: {
         include: {
@@ -282,7 +383,7 @@ export async function buildAssistantContext(familyId: string) {
         orderBy: {
           createdAt: "desc",
         },
-        take: 8,
+        take: 5,
       },
     },
   })
@@ -309,7 +410,9 @@ export async function buildAssistantContext(familyId: string) {
       family.emergencyContact
         ? `Emergency contact: ${family.emergencyContact}`
         : null,
-      family.medicalNotes ? `Medical notes: ${family.medicalNotes}` : null,
+      family.medicalNotes
+        ? `Medical notes: ${clip(family.medicalNotes, 300)}`
+        : null,
     ]
       .filter(Boolean)
       .join("\n")
@@ -336,7 +439,7 @@ export async function buildAssistantContext(familyId: string) {
           ? `Address: ${family.careRecipient.address}`
           : null,
         family.careRecipient.medicalNotes
-          ? `Medical notes: ${family.careRecipient.medicalNotes}`
+          ? `Medical notes: ${clip(family.careRecipient.medicalNotes, 300)}`
           : null,
       ]
         .filter(Boolean)
@@ -362,7 +465,7 @@ export async function buildAssistantContext(familyId: string) {
           ? `Estimated cost max: $${family.carePlan.estimatedCostMax}`
           : null,
         family.carePlan.careNotes
-          ? `Care notes: ${family.carePlan.careNotes}`
+          ? `Care notes: ${clip(family.carePlan.careNotes, 200)}`
           : null,
       ]
         .filter(Boolean)
@@ -382,7 +485,7 @@ export async function buildAssistantContext(familyId: string) {
       `${task.status}${task.dueDate ? ` • due ${task.dueDate.toISOString().slice(0, 10)}` : ""}`,
       [
         `Title: ${task.title}`,
-        task.description ? `Description: ${task.description}` : null,
+        task.description ? `Description: ${clip(task.description, 200)}` : null,
         `Priority: ${task.priority}`,
         `Status: ${task.status}`,
         task.dueDate ? `Due date: ${task.dueDate.toISOString()}` : null,
@@ -404,14 +507,15 @@ export async function buildAssistantContext(familyId: string) {
         `Type: ${event.type}`,
         `Date: ${event.eventDate.toISOString()}`,
         event.location ? `Location: ${event.location}` : null,
-        event.description ? `Description: ${event.description}` : null,
+        event.description ? `Description: ${clip(event.description, 160)}` : null,
       ]
         .filter(Boolean)
         .join("\n")
     )
   })
 
-  family.notes.forEach((note) => {
+  const notesForScope = isHighlight ? family.notes.slice(0, 3) : family.notes
+  notesForScope.forEach((note) => {
     createSource(
       sources,
       "Note",
@@ -421,8 +525,8 @@ export async function buildAssistantContext(familyId: string) {
         note.title ? `Title: ${note.title}` : null,
         note.category ? `Category: ${note.category}` : null,
         `Author: ${note.user.name || note.user.email}`,
-        `Created: ${note.createdAt.toISOString()}`,
-        `Content: ${note.content}`,
+        `Created: ${note.createdAt.toISOString().slice(0, 10)}`,
+        `Content: ${clip(note.content, 300)}`,
       ]
         .filter(Boolean)
         .join("\n")
@@ -441,59 +545,65 @@ export async function buildAssistantContext(familyId: string) {
         `Frequency: ${medication.frequency}`,
         medication.timeOfDay ? `Time of day: ${medication.timeOfDay}` : null,
         medication.instructions
-          ? `Instructions: ${medication.instructions}`
+          ? `Instructions: ${clip(medication.instructions, 120)}`
           : null,
         medication.prescribedBy
           ? `Prescribed by: ${medication.prescribedBy}`
           : null,
-        `Start date: ${medication.startDate.toISOString()}`,
-        medication.endDate ? `End date: ${medication.endDate.toISOString()}` : null,
+        `Start date: ${medication.startDate.toISOString().slice(0, 10)}`,
+        medication.endDate
+          ? `End date: ${medication.endDate.toISOString().slice(0, 10)}`
+          : null,
         medication.refillDate
-          ? `Refill date: ${medication.refillDate.toISOString()}`
+          ? `Refill date: ${medication.refillDate.toISOString().slice(0, 10)}`
           : null,
         medication.pharmacy ? `Pharmacy: ${medication.pharmacy}` : null,
-        medication.notes ? `Notes: ${medication.notes}` : null,
+        medication.notes ? `Notes: ${clip(medication.notes, 120)}` : null,
       ]
         .filter(Boolean)
         .join("\n")
     )
   })
 
-  family.resources.forEach((resource) => {
-    createSource(
-      sources,
-      "Resource",
-      resource.title,
-      clip(resource.category),
-      [
-        `Title: ${resource.title}`,
-        `Category: ${resource.category}`,
-        resource.description ? `Description: ${resource.description}` : null,
-        resource.url ? `URL: ${resource.url}` : null,
-        resource.fileUrl ? `File: ${resource.fileUrl}` : null,
-      ]
-        .filter(Boolean)
-        .join("\n")
-    )
-  })
+  if (!isHighlight) {
+    family.resources.forEach((resource) => {
+      createSource(
+        sources,
+        "Resource",
+        resource.title,
+        clip(resource.category),
+        [
+          `Title: ${resource.title}`,
+          `Category: ${resource.category}`,
+          resource.description
+            ? `Description: ${clip(resource.description, 160)}`
+            : null,
+          resource.url ? `URL: ${resource.url}` : null,
+          resource.fileUrl ? `File: ${resource.fileUrl}` : null,
+        ]
+          .filter(Boolean)
+          .join("\n")
+      )
+    })
 
-  family.messages.forEach((message) => {
-    createSource(
-      sources,
-      "Family message",
-      `Message from ${message.user.name || message.user.email}`,
-      clip(message.message, 80),
-      [
-        `Author: ${message.user.name || message.user.email}`,
-        `Created: ${message.createdAt.toISOString()}`,
-        `Message: ${message.message}`,
-      ].join("\n")
-    )
-  })
+    family.messages.forEach((message) => {
+      createSource(
+        sources,
+        "Family message",
+        `Message from ${message.user.name || message.user.email}`,
+        clip(message.message, 80),
+        [
+          `Author: ${message.user.name || message.user.email}`,
+          `Created: ${message.createdAt.toISOString().slice(0, 10)}`,
+          `Message: ${clip(message.message, 200)}`,
+        ].join("\n")
+      )
+    })
+  }
 
-  const providers = await getPublishedProviders()
+  const providers = isHighlight ? [] : await getPublishedProviders()
 
-  providers.slice(0, 15).forEach((provider) => {
+  providers.slice(0, 6).forEach((provider) => {
     createSource(
       sources,
       "Local provider",
@@ -502,7 +612,7 @@ export async function buildAssistantContext(familyId: string) {
       [
         `Name: ${provider.name}`,
         `Category: ${provider.category}`,
-        `Description: ${provider.description}`,
+        `Description: ${clip(provider.description, 160)}`,
         provider.serviceArea ? `Service area: ${provider.serviceArea}` : null,
         provider.phone ? `Phone: ${provider.phone}` : null,
         provider.email ? `Email: ${provider.email}` : null,
@@ -604,9 +714,7 @@ export async function generateAssistantReply(input: {
       "General caregiving knowledge is allowed only for recommendations or inferences, and it must be framed as guidance rather than fact.",
       "Never claim medical, legal, or financial certainty.",
       "If the user asks you to create or edit records, do not pretend you did it. Offer a suggested task or suggested calendar event instead.",
-      "Return valid JSON only.",
-      'Schema: {"answer":"string","citations":[{"sourceId":"string"}],"recommendations":[{"title":"string","detail":"string","type":"recommendation|insight|watchout"}],"suggestedTasks":[{"title":"string","reason":"string","priority":"LOW|MEDIUM|HIGH|URGENT"}],"suggestedEvents":[{"title":"string","reason":"string","timeframe":"string","type":"APPOINTMENT|VISIT|OTHER"}],"followUps":["string"]}',
-      "Citations must use only the listed source IDs.",
+      "Citations must use only the provided source IDs.",
       "Use the General guidance source only when you are making a recommendation or inference beyond explicit family facts.",
       "Only include suggestedTasks or suggestedEvents when they would genuinely help. These are suggestions, not actions that have already been taken.",
     ].join("\n")
@@ -619,6 +727,17 @@ export async function generateAssistantReply(input: {
     const response = await client.responses.create({
       model,
       store: false,
+      reasoning: { effort: "low" },
+      max_output_tokens: 1500,
+      text: {
+        verbosity: "low",
+        format: {
+          type: "json_schema",
+          name: "care_reply",
+          strict: true,
+          schema: CARE_REPLY_SCHEMA,
+        },
+      },
       input: [
         {
           role: "system",
@@ -779,14 +898,24 @@ export async function generateHighlightSummary(
       "You are the CareShare Care Concierge, generating a short proactive highlight for a family's dashboard.",
       "Use family records as the source of truth. If the data is sparse, keep recommendations general and grounded rather than inventing specifics.",
       "Never claim medical, legal, or financial certainty.",
-      "Return valid JSON only, with at most 2 recommendations and at most 1 suggested task.",
-      'Schema: {"recommendations":[{"title":"string","detail":"string","type":"recommendation|insight|watchout"}],"suggestedTask":{"title":"string","reason":"string","priority":"LOW|MEDIUM|HIGH|URGENT"}|null}',
-      "Only include a suggestedTask when a concrete, genuinely useful next action stands out from the family's open tasks or upcoming needs.",
+      "Return at most 2 recommendations and at most 1 suggested task.",
+      "Only include a suggestedTask when a concrete, genuinely useful next action stands out from the family's open tasks or upcoming needs; otherwise set it to null.",
     ].join("\n")
 
     const response = await client.responses.create({
       model,
       store: false,
+      reasoning: { effort: "minimal" },
+      max_output_tokens: 700,
+      text: {
+        verbosity: "low",
+        format: {
+          type: "json_schema",
+          name: "care_highlight",
+          strict: true,
+          schema: HIGHLIGHT_SCHEMA,
+        },
+      },
       input: [
         {
           role: "system",

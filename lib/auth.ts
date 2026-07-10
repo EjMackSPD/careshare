@@ -16,6 +16,7 @@ export type CareShareUser = {
   onboardingStep: number;
   onboardingData?: unknown;
   mustResetPassword?: boolean | null;
+  emailVerified: boolean;
 };
 
 export type CareShareSession = {
@@ -87,6 +88,7 @@ async function normalizePayloadUser(user: PayloadUser): Promise<CareShareUser | 
       onboardingStatus: true,
       onboardingStep: true,
       onboardingData: true,
+      emailVerified: true,
     },
   });
 
@@ -101,6 +103,7 @@ async function normalizePayloadUser(user: PayloadUser): Promise<CareShareUser | 
     onboardingStep: prismaUser?.onboardingStep ?? user.onboardingStep ?? 1,
     onboardingData: prismaUser?.onboardingData ?? user.onboardingData,
     mustResetPassword: user.mustResetPassword,
+    emailVerified: prismaUser?.emailVerified != null,
   };
 }
 

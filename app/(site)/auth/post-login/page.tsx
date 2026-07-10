@@ -23,6 +23,11 @@ export default async function PostLoginPage({
     redirect("/reset-password-required")
   }
 
+  // New users must confirm their email before accessing the product.
+  if (!session.user.emailVerified) {
+    redirect("/verify-email")
+  }
+
   if (canAccessPayloadAdmin(session.user)) {
     redirect("/admin")
   }

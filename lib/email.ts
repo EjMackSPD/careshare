@@ -1,5 +1,6 @@
 import { Resend } from "resend"
 import { brand, escapeHtml, renderEmailLayout } from "./email-template"
+import { loginEmailSubject, renderLoginEmailHTML } from "./payload-email"
 
 let resendClient: Resend | null = null
 
@@ -15,6 +16,49 @@ function getResendClient(): Resend | null {
   }
 
   return resendClient
+}
+
+export async function sendLoginEmail(input: {
+  to: string
+  link: string
+  code: string
+  isNewUser: boolean
+}) {
+  const resend = getResendClient()
+
+  if (!resend) {
+    console.warn("RESEND_API_KEY not set; skipping login email to", input.to)
+    return
+  }
+
+  const from = process.env.EMAIL_FROM || "CareShare <onboarding@resend.dev>"
+
+  try {
+    const result = await resend.emails.send({
+      from,
+      to: input.to,
+      subject: loginEmailSubject(input.isNewUser),
+      html: renderLoginEmailHTML({
+        link: input.link,
+        code: input.code,
+        isNewUser: input.isNewUser,
+      }),
+      text: [
+        input.isNewUser
+          ? "Confirm your email to finish setting up your CareShare account."
+          : "Sign in to CareShare.",
+        `Link: ${input.link}`,
+        `Code: ${input.code}`,
+        "This link and code expire in 15 minutes and can be used once.",
+      ].join("\n\n"),
+    })
+
+    if (result.error) {
+      console.error("Resend rejected login email:", result.error)
+    }
+  } catch (error) {
+    console.error("Failed to send login email:", error)
+  }
 }
 
 export async function sendFamilyInvitationEmail(input: {

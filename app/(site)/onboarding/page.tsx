@@ -18,13 +18,14 @@ import {
 import styles from './page.module.css'
 import MarketingNav from '@/app/components/MarketingNav'
 import Footer from '@/app/components/Footer'
+import EmailCodeForm from '@/app/components/EmailCodeForm'
 import {
   DEFAULT_ONBOARDING_DRAFT,
   type OnboardingAudienceType,
   type OnboardingDraft,
   type OnboardingInvite,
 } from '@/types/onboarding'
-import { payloadLogin, useSession } from '@/app/components/AuthProvider'
+import { useSession } from '@/app/components/AuthProvider'
 
 type OnboardingStep = 1 | 2 | 3 | 4 | 5 | 6
 
@@ -215,6 +216,7 @@ export default function OnboardingPage() {
   const router = useRouter()
   const { data: session, status, update: refreshSession } = useSession()
   const [step, setStep] = useState<OnboardingStep>(1)
+  const [awaitingVerification, setAwaitingVerification] = useState(false)
   const [loading, setLoading] = useState(false)
   const [pageLoading, setPageLoading] = useState(true)
   const [error, setError] = useState('')
@@ -687,17 +689,9 @@ export default function OnboardingPage() {
 
     await assertOk(signupRes, 'Failed to create account')
 
-    const loginResult = await payloadLogin(email, password)
-
-    if (!loginResult.ok) {
-      throw new Error(
-        'Your account was created, but we could not sign you in automatically. Please sign in to continue setup.'
-      )
-    }
-
-    await refreshSession()
-    setStep(2)
-    router.refresh()
+    // Account created but unverified — signup emailed a magic link + code.
+    // Show the inline verify step; verifying sets the session and continues.
+    setAwaitingVerification(true)
   }
 
   const handleNext = async () => {
@@ -763,14 +757,47 @@ export default function OnboardingPage() {
     }
   }
 
-  const renderAccountStep = () => (
+  const renderAccountStep = () => {
+    if (awaitingVerification && !isAuthenticated) {
+      return (
+        <div className={styles.stepContent}>
+          <span className={styles.stepEyebrow}>Verify email</span>
+          <h2>Confirm your email</h2>
+          <p className={styles.stepDescription}>
+            We sent a magic link and a 6-digit code to keep your account secure.
+            Enter the code to continue setup.
+          </p>
+          <div className={styles.formShell}>
+            <EmailCodeForm
+              email={signupFields.email.trim().toLowerCase()}
+              onVerified={() => {
+                void refreshSession().then(() => {
+                  setAwaitingVerification(false)
+                  setStep(2)
+                })
+              }}
+            />
+            <button
+              type="button"
+              onClick={() => setAwaitingVerification(false)}
+              className={styles.secondaryInlineAction}
+              style={{ marginTop: '0.75rem' }}
+            >
+              Use a different email
+            </button>
+          </div>
+        </div>
+      )
+    }
+
+    return (
     <div className={styles.stepContent}>
       <span className={styles.stepEyebrow}>Account</span>
       <h2>{isAuthenticated ? 'You are signed in' : 'Create your CareShare account'}</h2>
       <p className={styles.stepDescription}>
         {isAuthenticated
           ? 'We have your account ready. Continue to choose the care path that fits today.'
-          : "Create your account once. We'll keep you signed in and continue setup right here."}
+          : "Create your account once. We'll email you a code to confirm it, then continue setup right here."}
       </p>
 
       {isAuthenticated ? (
@@ -855,7 +882,8 @@ export default function OnboardingPage() {
         </>
       )}
     </div>
-  )
+    )
+  }
 
   const renderAudienceStep = () => (
     <div className={styles.stepContent}>
@@ -1612,7 +1640,9 @@ export default function OnboardingPage() {
                   <span />
                 )}
 
-                {step < 6 ? (
+                {awaitingVerification && step === 1 ? (
+                  <span />
+                ) : step < 6 ? (
                   <button
                     type="button"
                     onClick={handleNext}
