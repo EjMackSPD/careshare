@@ -9,6 +9,7 @@ import { prisma } from "@/lib/prisma"
 import { logFamilyAuditEvent, requireAuth } from "@/lib/auth-utils"
 import { hydrateStoredDraft } from "@/lib/onboarding"
 import { normalizeFamilyRole } from "@/lib/family-permissions"
+import { sendFamilyMemberAddedEmail } from "@/lib/email"
 import {
   DEFAULT_ONBOARDING_DRAFT,
   DECISION_AUTHORITY_OPTIONS,
@@ -477,6 +478,13 @@ export async function POST(request: NextRequest) {
             userId: existingUser.id,
             role: invite.role as FamilyRole,
           },
+        })
+
+        await sendFamilyMemberAddedEmail({
+          to: existingUser.email,
+          familyName: family.name,
+          inviterName: user.name ?? null,
+          role: invite.role,
         })
 
         await logFamilyAuditEvent({

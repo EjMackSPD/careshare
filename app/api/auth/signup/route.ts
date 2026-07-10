@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { OnboardingStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { upsertPayloadUser } from "@/lib/payload-users";
+import { sendWelcomeEmail } from "@/lib/email";
 
 export async function POST(request: Request) {
   try {
@@ -35,6 +36,8 @@ export async function POST(request: Request) {
       onboardingStep: 1,
       mustResetPassword: false,
     });
+
+    await sendWelcomeEmail({ to: email, name: name || null });
 
     return NextResponse.json(
       {

@@ -10,21 +10,7 @@ import CareRecipientWidget from "../../components/widgets/CareRecipientWidget";
 import TasksWidget from "../../components/widgets/TasksWidget";
 import FinancialWidget from "../../components/widgets/FinancialWidget";
 import CalendarWidget from "../../components/widgets/CalendarWidget";
-import CollaborationWidget from "../../components/widgets/CollaborationWidget";
-import ResourcesWidget from "../../components/widgets/ResourcesWidget";
-import CarePlanWidget from "../../components/widgets/CarePlanWidget";
 import CareConciergeHighlightWidget from "../../components/widgets/CareConciergeHighlightWidget";
-import {
-  CheckSquare,
-  Calendar as CalendarIcon,
-  Wallet,
-  Heart,
-  Gift,
-  UtensilsCrossed,
-  ClipboardList,
-  DollarSign,
-  CalendarDays,
-} from "lucide-react";
 import styles from "./page.module.css";
 
 export default async function Dashboard() {
@@ -58,35 +44,12 @@ export default async function Dashboard() {
               eventDate: "asc",
             },
           },
-          tasks: {
-            include: {
-              assignments: true,
-            },
-          },
           careRecipient: true,
           medications: {
             where: { active: true },
             select: { id: true },
           },
-          messages: {
-            take: 5,
-            orderBy: { createdAt: "desc" },
-            include: {
-              user: { select: { name: true, email: true } },
-            },
-          },
-          resources: {
-            take: 5,
-            orderBy: { createdAt: "desc" },
-          },
           carePlan: true,
-          members: {
-            select: {
-              id: true,
-              role: true,
-              user: { select: { name: true, email: true } },
-            },
-          },
         },
       },
     },
@@ -166,26 +129,6 @@ export default async function Dashboard() {
     ? await getOrRefreshHighlight(primaryFamily.id)
     : null;
 
-  const allTasks = families.flatMap((family) => family.tasks);
-  const totalTasks = allTasks.length;
-  const completedTasks = allTasks.filter(
-    (task) => task.status === "COMPLETED"
-  ).length;
-  const unassignedTasks = allTasks.filter((task) => {
-    const hasNoAssignments = !task.assignments || task.assignments.length === 0;
-    return task.status !== "COMPLETED" && hasNoAssignments;
-  }).length;
-  const openTasks = allTasks.filter((task) => task.status !== "COMPLETED").length;
-  const pendingBills = families.reduce((sum, family) => sum + family.costs.length, 0);
-  const totalDue = families.reduce(
-    (sum, family) =>
-      sum + family.costs.reduce((familySum, cost) => familySum + cost.amount, 0),
-    0
-  );
-  const upcomingEvents = families.reduce(
-    (sum, family) => sum + family.events.length,
-    0
-  );
   const activeFamilyName = primaryFamily?.name || "Your care workspace";
   const careRecipientName = primaryFamily?.elderName || "Care recipient";
   const isIndividualAudience = onboardingDraft.audienceType === "INDIVIDUAL";
@@ -223,20 +166,16 @@ export default async function Dashboard() {
                   {isCoordinator ? "Care Coordinator Dashboard" : "Family Dashboard"}
                 </div>
 
-                <div className={styles.header}>
-                  <div>
-                    <h1>Welcome back, {user.name || "there"}.</h1>
-                    <p className={styles.headerSubtitle}>
-                      {isCoordinator
-                        ? "Track care activity, upcoming obligations, and family coordination from one working view."
-                        : `See what's happening in ${activeFamilyName}'s care, and find ways you can help today.`}
-                    </p>
-                  </div>
-                </div>
+                <h1>Welcome back, {user.name || "there"}.</h1>
+                <p className={styles.headerSubtitle}>
+                  {isCoordinator
+                    ? "Track care activity, upcoming obligations, and family coordination from one working view."
+                    : `See what's happening in ${activeFamilyName}'s care, and find ways you can help today.`}
+                </p>
 
                 <div className={styles.heroMeta}>
                   <div className={styles.heroMetaItem}>
-                    <span className={styles.heroMetaLabel}>Active workspace</span>
+                    <span className={styles.heroMetaLabel}>Workspace</span>
                     <strong>{activeFamilyName}</strong>
                   </div>
                   <div className={styles.heroMetaItem}>
@@ -249,198 +188,8 @@ export default async function Dashboard() {
                   </div>
                 </div>
               </div>
-
-              {families.length > 0 && (
-                <div className={styles.careGraphic} aria-hidden="true">
-                  <div className={styles.careGraphicHalo} />
-                  <div className={styles.careGraphicCard}>
-                    <div className={styles.careGraphicAvatar}>
-                      {careRecipientName.charAt(0).toUpperCase()}
-                    </div>
-                    <div className={styles.careGraphicLine} />
-                    <div className={styles.careGraphicLineShort} />
-                    <div className={styles.careGraphicStats}>
-                      <span>{openTasks}</span>
-                      <span>{upcomingEvents}</span>
-                      <span>{pendingBills}</span>
-                    </div>
-                  </div>
-                  <div className={styles.careGraphicNodePrimary} />
-                  <div className={styles.careGraphicNodeSecondary} />
-                </div>
-              )}
             </div>
           </section>
-
-          {families.length > 0 && (
-            <div className={styles.statsOverview}>
-              <section className={styles.summaryPanel}>
-                <div className={styles.summaryPanelHeader}>
-                  <div className={styles.summaryIcon}>
-                    <ClipboardList size={18} />
-                  </div>
-                  <div>
-                    <h3>Tasks</h3>
-                    <p>What needs attention now</p>
-                  </div>
-                </div>
-                <div className={styles.summaryMetrics}>
-                  <Link href="/dashboard/tasks" className={styles.metricCard}>
-                    <span className={styles.metricValue}>{totalTasks}</span>
-                    <span className={styles.metricLabel}>Total tracked</span>
-                  </Link>
-                  <Link href="/dashboard/tasks?tab=open" className={styles.metricCard}>
-                    <span className={`${styles.metricValue} ${styles.metricOpen}`}>
-                      {openTasks}
-                    </span>
-                    <span className={styles.metricLabel}>Open now</span>
-                  </Link>
-                  <Link
-                    href="/dashboard/tasks?tab=unassigned"
-                    className={`${styles.metricCard} ${
-                      unassignedTasks > 0 ? styles.metricAlert : ""
-                    }`}
-                  >
-                    <span className={`${styles.metricValue} ${styles.metricWarn}`}>
-                      {unassignedTasks}
-                    </span>
-                    <span className={styles.metricLabel}>Unassigned</span>
-                  </Link>
-                  <Link
-                    href="/dashboard/tasks?tab=completed"
-                    className={styles.metricCard}
-                  >
-                    <span className={`${styles.metricValue} ${styles.metricDone}`}>
-                      {completedTasks}
-                    </span>
-                    <span className={styles.metricLabel}>Completed</span>
-                  </Link>
-                </div>
-              </section>
-
-              <section className={styles.summaryPanel}>
-                <div className={styles.summaryPanelHeader}>
-                  <div className={styles.summaryIcon}>
-                    <DollarSign size={18} />
-                  </div>
-                  <div>
-                    <h3>Finances</h3>
-                    <p>Pending costs across families</p>
-                  </div>
-                </div>
-                <div className={styles.summaryStack}>
-                  <div className={styles.summaryRow}>
-                    <span>Pending bills</span>
-                    <strong>{pendingBills}</strong>
-                  </div>
-                  <div className={styles.summaryRow}>
-                    <span>Total due</span>
-                    <strong>${totalDue.toFixed(0)}</strong>
-                  </div>
-                  <Link href="/dashboard/finances" className={styles.summaryLink}>
-                    Open finances
-                  </Link>
-                </div>
-              </section>
-
-              <section className={styles.summaryPanel}>
-                <div className={styles.summaryPanelHeader}>
-                  <div className={styles.summaryIcon}>
-                    <CalendarDays size={18} />
-                  </div>
-                  <div>
-                    <h3>Calendar</h3>
-                    <p>Appointments, visits, and milestones</p>
-                  </div>
-                </div>
-                <div className={styles.summaryStack}>
-                  <div className={styles.summaryRow}>
-                    <span>Upcoming events</span>
-                    <strong>{upcomingEvents}</strong>
-                  </div>
-                  <Link href="/dashboard/calendar" className={styles.summaryLink}>
-                    View calendar
-                  </Link>
-                  <Link href="/dashboard/calendar" className={styles.summaryButton}>
-                    Add event
-                  </Link>
-                </div>
-              </section>
-            </div>
-          )}
-
-          {families.length > 0 && (
-            <section className={styles.quickLinks}>
-              <div className={styles.sectionHeading}>
-                <div>
-                  <h2>Quick actions</h2>
-                  <p>Jump straight into the areas people use most.</p>
-                </div>
-              </div>
-
-              <div className={styles.linksGrid}>
-                <Link href="/dashboard/tasks" className={styles.quickLink}>
-                  <div className={styles.linkIcon}>
-                    <CheckSquare size={20} />
-                  </div>
-                  <div className={styles.quickLinkBody}>
-                    <span>Manage tasks</span>
-                    <small>Assignments, follow-ups, deadlines</small>
-                  </div>
-                </Link>
-
-                <Link href="/dashboard/calendar" className={styles.quickLink}>
-                  <div className={styles.linkIcon}>
-                    <CalendarIcon size={20} />
-                  </div>
-                  <div className={styles.quickLinkBody}>
-                    <span>View calendar</span>
-                    <small>Visits, appointments, reminders</small>
-                  </div>
-                </Link>
-
-                <Link href="/dashboard/finances" className={styles.quickLink}>
-                  <div className={styles.linkIcon}>
-                    <Wallet size={20} />
-                  </div>
-                  <div className={styles.quickLinkBody}>
-                    <span>Track finances</span>
-                    <small>Bills, contributions, totals</small>
-                  </div>
-                </Link>
-
-                <Link href="/dashboard/care-plan" className={styles.quickLink}>
-                  <div className={styles.linkIcon}>
-                    <Heart size={20} />
-                  </div>
-                  <div className={styles.quickLinkBody}>
-                    <span>Care plan</span>
-                    <small>Goals, routines, scenarios</small>
-                  </div>
-                </Link>
-
-                <Link href="/dashboard/gifts" className={styles.quickLink}>
-                  <div className={styles.linkIcon}>
-                    <Gift size={20} />
-                  </div>
-                  <div className={styles.quickLinkBody}>
-                    <span>Send a gift</span>
-                    <small>Support from a distance</small>
-                  </div>
-                </Link>
-
-                <Link href="/dashboard/food" className={styles.quickLink}>
-                  <div className={styles.linkIcon}>
-                    <UtensilsCrossed size={20} />
-                  </div>
-                  <div className={styles.quickLinkBody}>
-                    <span>Order food</span>
-                    <small>Meals and delivery support</small>
-                  </div>
-                </Link>
-              </div>
-            </section>
-          )}
 
           {families.length === 0 ? (
             <div className={styles.emptyState}>
@@ -475,7 +224,7 @@ export default async function Dashboard() {
                 <div className={styles.sectionHeading}>
                   <div>
                     <h2>Live workspace</h2>
-                    <p>Operational panels for notes, tasks, finances, calendar, and coordination.</p>
+                    <p>Notes, tasks, finances, and calendar in one working view.</p>
                   </div>
                 </div>
 
@@ -508,40 +257,6 @@ export default async function Dashboard() {
                   </div>
                   <div className={styles.widgetMedium}>
                     <CalendarWidget />
-                  </div>
-                  <div className={styles.widgetMedium}>
-                    <CollaborationWidget
-                      familyId={primaryFamily?.id}
-                      members={(primaryFamily?.members ?? []).map((member) => ({
-                        id: member.id,
-                        name: member.user.name || member.user.email,
-                        role: member.role,
-                      }))}
-                      messages={(primaryFamily?.messages ?? []).map((message) => ({
-                        id: message.id,
-                        authorName: message.user.name || message.user.email,
-                        message: message.message,
-                        createdAt: message.createdAt.toISOString(),
-                      }))}
-                    />
-                  </div>
-                  <div className={styles.widgetLarge}>
-                    <ResourcesWidget
-                      resources={(primaryFamily?.resources ?? []).map((resource) => ({
-                        id: resource.id,
-                        title: resource.title,
-                        category: resource.category,
-                        url: resource.url ?? resource.fileUrl ?? null,
-                      }))}
-                    />
-                  </div>
-                  <div className={styles.widgetLarge}>
-                    <CarePlanWidget
-                      careLevel={primaryCarePlan?.careLevel ?? null}
-                      careLevelDescription={primaryCarePlan?.careLevelDescription ?? null}
-                      estimatedCostMin={primaryCarePlan?.estimatedCostMin ?? null}
-                      estimatedCostMax={primaryCarePlan?.estimatedCostMax ?? null}
-                    />
                   </div>
                 </div>
               </section>

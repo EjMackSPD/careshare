@@ -112,6 +112,17 @@ export async function GET(
       where: { id: familyId },
       include: {
         careRecipient: true,
+        members: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+              },
+            },
+          },
+        },
         _count: {
           select: {
             members: true,

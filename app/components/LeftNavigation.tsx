@@ -30,6 +30,7 @@ import {
   Sparkles,
   FileText,
   Shield,
+  UserCog,
 } from "lucide-react";
 import styles from "./LeftNavigation.module.css";
 
@@ -62,6 +63,7 @@ const marketplaceMenuItems = [
 ];
 
 const adminMenuItems = [
+  { href: "/dashboard/users", label: "User Directory", icon: UserCog },
   { href: "/admin/collections/users", label: "Manage Users", icon: Users },
   { href: "/admin/collections/pages", label: "Pages", icon: FileText },
   { href: "/admin/collections/posts", label: "Blog Posts", icon: BookOpen },
@@ -89,8 +91,11 @@ export default function LeftNavigation() {
   const [selectedFamilyId, setSelectedFamilyId] = useState<string | null>(null);
   const [showFamilyDropdown, setShowFamilyDropdown] = useState(false);
 
-  // Check if user is admin
-  const isAdmin = session?.user?.role === "ADMIN";
+  // Check if user is an operational admin (Prisma ADMIN role, or Payload super-admin/support-admin)
+  const isAdmin =
+    session?.user?.role === "ADMIN" ||
+    session?.user?.roles?.includes("super-admin") ||
+    session?.user?.roles?.includes("support-admin");
 
   // Fetch user's families
   useEffect(() => {

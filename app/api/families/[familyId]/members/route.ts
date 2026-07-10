@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { logFamilyAuditEvent, requireFamilyCapability, requireFamilyMembership } from "@/lib/auth-utils";
-import { normalizeFamilyRole } from "@/lib/family-permissions";
+import { managerRoles, normalizeFamilyRole } from "@/lib/family-permissions";
+import { isOperationalAdmin } from "@/lib/auth";
+import { sendFamilyMemberAddedEmail } from "@/lib/email";
 
 // GET - Fetch all members for a family
 export async function GET(
@@ -11,9 +13,11 @@ export async function GET(
   try {
     const { familyId } = await params;
     let membership
+    let currentUser
     try {
       const result = await requireFamilyMembership(familyId);
       membership = result.membership;
+      currentUser = result.user;
     } catch (error) {
       return NextResponse.json(
         { error: "Not authorized to view members for this family" },
@@ -35,9 +39,16 @@ export async function GET(
       },
     });
 
+    // Operational admins can manage any family even without a membership row;
+    // otherwise the member's own role decides.
+    const canManage =
+      isOperationalAdmin(currentUser) ||
+      (!!membership && managerRoles.includes(membership.role));
+
     return NextResponse.json({
       members,
       currentUserRole: membership?.role ?? null,
+      canManage,
     });
   } catch (error) {
     console.error("Error fetching family members:", error);
@@ -101,7 +112,30 @@ export async function POST(
             email: true,
           },
         },
+        family: {
+          select: {
+            name: true,
+          },
+        },
       },
+    });
+
+    // If this user had a pending invitation to the family, resolve it so it no
+    // longer lingers in the pending list.
+    await prisma.familyInvitation.updateMany({
+      where: {
+        familyId,
+        email: newMember.user.email,
+        status: "PENDING",
+      },
+      data: { status: "ACCEPTED" },
+    });
+
+    await sendFamilyMemberAddedEmail({
+      to: newMember.user.email,
+      familyName: newMember.family.name,
+      inviterName: user.name ?? null,
+      role: newMember.role,
     });
 
     await logFamilyAuditEvent({

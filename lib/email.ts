@@ -93,3 +93,119 @@ export async function sendFamilyInvitationEmail(input: {
     console.error("Failed to send invitation email:", error)
   }
 }
+
+export async function sendWelcomeEmail(input: { to: string; name: string | null }) {
+  const resend = getResendClient()
+
+  if (!resend) {
+    console.warn("RESEND_API_KEY not set; skipping welcome email to", input.to)
+    return
+  }
+
+  const from = process.env.EMAIL_FROM || "CareShare <onboarding@resend.dev>"
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+  const greetingName = input.name ? escapeHtml(input.name) : "there"
+
+  const bodyHtml = `
+    <p style="margin:0 0 16px; font-size:15px; line-height:1.6; color:${brand.text};">
+      Hi ${greetingName}, welcome to CareShare! We help families coordinate care for the people they love &mdash; shared costs, tasks, documents, and an AI care assistant, all in one place.
+    </p>
+    <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
+      <tr>
+        <td style="border-radius:10px; background:${brand.brand};">
+          <a href="${siteUrl}/dashboard" style="display:inline-block; padding:12px 24px; font-size:15px; font-weight:600; color:#ffffff; text-decoration:none;">
+            Go to your dashboard
+          </a>
+        </td>
+      </tr>
+    </table>
+    <p style="margin:0; font-size:13px; line-height:1.6; color:${brand.muted};">
+      Questions? <a href="${siteUrl}/contact" style="color:${brand.brand};">Contact us</a> anytime.
+    </p>
+  `
+
+  try {
+    const result = await resend.emails.send({
+      from,
+      to: input.to,
+      subject: "Welcome to CareShare",
+      html: renderEmailLayout({
+        siteUrl,
+        preview: "Welcome to CareShare",
+        bodyHtml,
+      }),
+      text: [
+        `Hi ${input.name || "there"}, welcome to CareShare!`,
+        "We help families coordinate care for the people they love — shared costs, tasks, documents, and an AI care assistant, all in one place.",
+        `Go to your dashboard: ${siteUrl}/dashboard`,
+      ].join("\n\n"),
+    })
+
+    if (result.error) {
+      console.error("Resend rejected welcome email:", result.error)
+    }
+  } catch (error) {
+    console.error("Failed to send welcome email:", error)
+  }
+}
+
+export async function sendFamilyMemberAddedEmail(input: {
+  to: string
+  familyName: string
+  inviterName: string | null
+  role: string
+}) {
+  const resend = getResendClient()
+
+  if (!resend) {
+    console.warn("RESEND_API_KEY not set; skipping family-added email to", input.to)
+    return
+  }
+
+  const from = process.env.EMAIL_FROM || "CareShare <onboarding@resend.dev>"
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+  const roleLabel = input.role.replace(/_/g, " ").toLowerCase()
+  const inviterName = input.inviterName ? escapeHtml(input.inviterName) : "Someone"
+  const familyName = escapeHtml(input.familyName)
+
+  const bodyHtml = `
+    <p style="margin:0 0 16px; font-size:15px; line-height:1.6; color:${brand.text};">
+      <strong>${inviterName}</strong> added you to <strong>${familyName}</strong> on CareShare as a <strong>${escapeHtml(roleLabel)}</strong>.
+    </p>
+    <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
+      <tr>
+        <td style="border-radius:10px; background:${brand.brand};">
+          <a href="${siteUrl}/dashboard" style="display:inline-block; padding:12px 24px; font-size:15px; font-weight:600; color:#ffffff; text-decoration:none;">
+            View your dashboard
+          </a>
+        </td>
+      </tr>
+    </table>
+    <p style="margin:0; font-size:13px; line-height:1.6; color:${brand.muted};">
+      Sign in with this same email address to see what's new.
+    </p>
+  `
+
+  try {
+    const result = await resend.emails.send({
+      from,
+      to: input.to,
+      subject: `You've been added to ${input.familyName} on CareShare`,
+      html: renderEmailLayout({
+        siteUrl,
+        preview: `${input.inviterName || "Someone"} added you to ${input.familyName} on CareShare`,
+        bodyHtml,
+      }),
+      text: [
+        `${input.inviterName || "Someone"} added you to ${input.familyName} on CareShare as a ${roleLabel}.`,
+        `View your dashboard: ${siteUrl}/dashboard`,
+      ].join("\n\n"),
+    })
+
+    if (result.error) {
+      console.error("Resend rejected family-added email:", result.error)
+    }
+  } catch (error) {
+    console.error("Failed to send family-added email:", error)
+  }
+}

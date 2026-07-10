@@ -1,8 +1,22 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import Link from 'next/link'
+import {
+  Users,
+  CalendarDays,
+  DollarSign,
+  Clock,
+  Phone,
+  MapPin,
+  Cake,
+  Siren,
+  Pill,
+  Settings,
+  Star,
+  ClipboardList,
+} from 'lucide-react'
 import styles from './page.module.css'
 
 const caregiverRoles = new Set(['OWNER', 'PRIMARY_CAREGIVER', 'FAMILY_ADMIN'])
@@ -43,7 +57,6 @@ type Cost = {
 
 export default function FamilyDetail() {
   const params = useParams()
-  const router = useRouter()
   const familyId = params.familyId as string
   const [family, setFamily] = useState<Family | null>(null)
   const [events, setEvents] = useState<Event[]>([])
@@ -52,62 +65,54 @@ export default function FamilyDetail() {
   const [error, setError] = useState('')
 
   useEffect(() => {
+    async function fetchAllData() {
+      try {
+        // Single-family endpoint authorizes operational admins even when they are
+        // not a member, so admins can open any family.
+        const familyResponse = await fetch(`/api/families/${familyId}`)
+        if (!familyResponse.ok) {
+          setError(
+            familyResponse.status === 403
+              ? 'You do not have access to this family'
+              : 'Family not found'
+          )
+          setLoading(false)
+          return
+        }
+
+        const currentFamily = await familyResponse.json()
+        setFamily(currentFamily)
+
+        const eventsResponse = await fetch(`/api/families/${familyId}/events`)
+        if (eventsResponse.ok) {
+          setEvents(await eventsResponse.json())
+        }
+
+        const costsResponse = await fetch(`/api/families/${familyId}/costs`)
+        if (costsResponse.ok) {
+          setCosts(await costsResponse.json())
+        }
+
+        setLoading(false)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Something went wrong')
+        setLoading(false)
+      }
+    }
+
     fetchAllData()
   }, [familyId])
-
-  const fetchAllData = async () => {
-    try {
-      // Fetch family
-      const familiesResponse = await fetch('/api/families')
-      if (!familiesResponse.ok) throw new Error('Failed to fetch families')
-      
-      const families = await familiesResponse.json()
-      const currentFamily = families.find((f: Family) => f.id === familyId)
-      
-      if (!currentFamily) {
-        setError('Family not found')
-        setLoading(false)
-        return
-      }
-      
-      setFamily(currentFamily)
-
-      // Fetch events
-      const eventsResponse = await fetch(`/api/families/${familyId}/events`)
-      if (eventsResponse.ok) {
-        const eventsData = await eventsResponse.json()
-        setEvents(eventsData)
-      }
-
-      // Fetch costs
-      const costsResponse = await fetch(`/api/families/${familyId}/costs`)
-      if (costsResponse.ok) {
-        const costsData = await costsResponse.json()
-        setCosts(costsData)
-      }
-      
-      setLoading(false)
-    } catch (error: any) {
-      setError(error.message)
-      setLoading(false)
-    }
-  }
 
   const getUpcomingEvents = () => {
     const now = new Date()
     return events
-      .filter(event => new Date(event.eventDate) >= now)
+      .filter((event) => new Date(event.eventDate) >= now)
       .sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime())
       .slice(0, 3)
   }
 
-  const getTotalCosts = () => {
-    return costs.reduce((sum, cost) => sum + cost.amount, 0)
-  }
-
-  const getPendingCosts = () => {
-    return costs.filter(cost => cost.status === 'PENDING').length
-  }
+  const getTotalCosts = () => costs.reduce((sum, cost) => sum + cost.amount, 0)
+  const getPendingCosts = () => costs.filter((cost) => cost.status === 'PENDING').length
 
   if (loading) {
     return (
@@ -128,198 +133,194 @@ export default function FamilyDetail() {
     )
   }
 
+  const hasCareRecipientInfo = family.elderPhone || family.elderAddress || family.emergencyContact || family.medicalNotes
+
   return (
     <div className={styles.container}>
       <div className={styles.layout}>
         <main className={styles.main}>
-        <div className={styles.header}>
-          <div className={styles.headerContent}>
-            <div>
-              <h1>{family.name}</h1>
-              {family.elderName && (
-                <p className={styles.elderName}>Care for: {family.elderName}</p>
-              )}
-              {family.description && (
-                <p className={styles.description}>{family.description}</p>
-              )}
+      <div className={styles.header}>
+        <div>
+          <h1>{family.name}</h1>
+          {family.elderName && (
+            <p className={styles.elderName}>Care for: {family.elderName}</p>
+          )}
+          {family.description && (
+            <p className={styles.description}>{family.description}</p>
+          )}
+        </div>
+        <Link href={`/family/${familyId}/settings`} className={styles.settingsBtn}>
+          <Settings size={16} />
+          Settings
+        </Link>
+      </div>
+
+      {hasCareRecipientInfo && (
+        <div className={styles.careRecipientCard}>
+          <h3><ClipboardList size={18} /> Care Recipient Information</h3>
+          <div className={styles.infoGrid}>
+            {family.elderPhone && (
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}><Phone size={13} /> Phone</span>
+                <a href={`tel:${family.elderPhone}`} className={styles.infoValue}>
+                  {family.elderPhone}
+                </a>
+              </div>
+            )}
+            {family.elderAddress && (
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}><MapPin size={13} /> Address</span>
+                <span className={styles.infoValue}>{family.elderAddress}</span>
+              </div>
+            )}
+            {family.elderBirthday && (
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}><Cake size={13} /> Birthday</span>
+                <span className={styles.infoValue}>
+                  {new Date(family.elderBirthday).toLocaleDateString()}
+                </span>
+              </div>
+            )}
+            {family.emergencyContact && (
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}><Siren size={13} /> Emergency Contact</span>
+                <span className={styles.infoValue}>{family.emergencyContact}</span>
+              </div>
+            )}
+            {family.medicalNotes && (
+              <div className={styles.infoItem}>
+                <span className={styles.infoLabel}><Pill size={13} /> Medical Notes</span>
+                <span className={styles.infoValue}>{family.medicalNotes}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div className={styles.content}>
+        <div className={styles.summaryGrid}>
+          <div className={styles.summaryCard}>
+            <div className={styles.summaryIcon}><Users size={18} /></div>
+            <div className={styles.summaryInfo}>
+              <h3>{family.members.length}</h3>
+              <p>Family Members</p>
             </div>
-            <Link href={`/family/${familyId}/settings`} className={styles.settingsBtn}>
-              ⚙️ Settings
+          </div>
+          <div className={styles.summaryCard}>
+            <div className={styles.summaryIcon}><CalendarDays size={18} /></div>
+            <div className={styles.summaryInfo}>
+              <h3>{getUpcomingEvents().length}</h3>
+              <p>Upcoming Events</p>
+            </div>
+          </div>
+          <div className={styles.summaryCard}>
+            <div className={styles.summaryIcon}><DollarSign size={18} /></div>
+            <div className={styles.summaryInfo}>
+              <h3>${getTotalCosts().toFixed(2)}</h3>
+              <p>Total Costs</p>
+            </div>
+          </div>
+          <div className={styles.summaryCard}>
+            <div className={styles.summaryIcon}><Clock size={18} /></div>
+            <div className={styles.summaryInfo}>
+              <h3>{getPendingCosts()}</h3>
+              <p>Pending Payments</p>
+            </div>
+          </div>
+        </div>
+
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2>Upcoming Events</h2>
+            <Link href={`/family/${familyId}/events`} className={styles.viewAllLink}>
+              View All →
             </Link>
           </div>
-        </div>
-
-        {/* Care Recipient Info Card */}
-        {(family.elderPhone || family.elderAddress || family.emergencyContact) && (
-          <div className={styles.careRecipientCard}>
-            <h3>📋 Care Recipient Information</h3>
-            <div className={styles.infoGrid}>
-              {family.elderPhone && (
-                <div className={styles.infoItem}>
-                  <span className={styles.infoLabel}>📞 Phone:</span>
-                  <a href={`tel:${family.elderPhone}`} className={styles.infoValue}>
-                    {family.elderPhone}
-                  </a>
-                </div>
-              )}
-              {family.elderAddress && (
-                <div className={styles.infoItem}>
-                  <span className={styles.infoLabel}>📍 Address:</span>
-                  <span className={styles.infoValue}>{family.elderAddress}</span>
-                </div>
-              )}
-              {family.elderBirthday && (
-                <div className={styles.infoItem}>
-                  <span className={styles.infoLabel}>🎂 Birthday:</span>
-                  <span className={styles.infoValue}>
-                    {new Date(family.elderBirthday).toLocaleDateString()}
-                  </span>
-                </div>
-              )}
-              {family.emergencyContact && (
-                <div className={styles.infoItem}>
-                  <span className={styles.infoLabel}>🚨 Emergency Contact:</span>
-                  <span className={styles.infoValue}>{family.emergencyContact}</span>
-                </div>
-              )}
-              {family.medicalNotes && (
-                <div className={styles.infoItem}>
-                  <span className={styles.infoLabel}>💊 Medical Notes:</span>
-                  <span className={styles.infoValue}>{family.medicalNotes}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        <div className={styles.content}>
-          {/* Summary Cards */}
-          <div className={styles.summaryGrid}>
-            <div className={styles.summaryCard}>
-              <div className={styles.summaryIcon}>👥</div>
-              <div className={styles.summaryInfo}>
-                <h3>{family.members.length}</h3>
-                <p>Family Members</p>
-              </div>
-            </div>
-            <div className={styles.summaryCard}>
-              <div className={styles.summaryIcon}>📅</div>
-              <div className={styles.summaryInfo}>
-                <h3>{getUpcomingEvents().length}</h3>
-                <p>Upcoming Events</p>
-              </div>
-            </div>
-            <div className={styles.summaryCard}>
-              <div className={styles.summaryIcon}>💰</div>
-              <div className={styles.summaryInfo}>
-                <h3>${getTotalCosts().toFixed(2)}</h3>
-                <p>Total Costs</p>
-              </div>
-            </div>
-            <div className={styles.summaryCard}>
-              <div className={styles.summaryIcon}>⏳</div>
-              <div className={styles.summaryInfo}>
-                <h3>{getPendingCosts()}</h3>
-                <p>Pending Payments</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Upcoming Events */}
-          <section className={styles.section}>
-            <div className={styles.sectionHeader}>
-              <h2>Upcoming Events</h2>
-              <Link href={`/family/${familyId}/events`} className={styles.viewAllLink}>
-                View All →
-              </Link>
-            </div>
-            {getUpcomingEvents().length === 0 ? (
-              <p className={styles.emptyState}>No upcoming events scheduled</p>
-            ) : (
-              <div className={styles.eventsList}>
-                {getUpcomingEvents().map((event) => (
-                  <div key={event.id} className={styles.eventItem}>
-                    <div className={styles.eventDate}>
-                      <span className={styles.eventMonth}>
-                        {new Date(event.eventDate).toLocaleDateString('en-US', { month: 'short' })}
-                      </span>
-                      <span className={styles.eventDay}>
-                        {new Date(event.eventDate).getDate()}
-                      </span>
-                    </div>
-                    <div className={styles.eventDetails}>
-                      <h4>{event.title}</h4>
-                      <p>{event.type.replace('_', ' ')}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-
-          {/* Recent Costs */}
-          <section className={styles.section}>
-            <div className={styles.sectionHeader}>
-              <h2>Recent Costs</h2>
-              <Link href={`/family/${familyId}/costs`} className={styles.viewAllLink}>
-                View All →
-              </Link>
-            </div>
-            {costs.length === 0 ? (
-              <p className={styles.emptyState}>No costs recorded yet</p>
-            ) : (
-              <div className={styles.costsList}>
-                {costs.slice(0, 3).map((cost) => (
-                  <div key={cost.id} className={styles.costItem}>
-                    <div className={styles.costInfo}>
-                      <h4>{cost.description}</h4>
-                      <span className={`${styles.costStatus} ${styles[cost.status.toLowerCase()]}`}>
-                        {cost.status}
-                      </span>
-                    </div>
-                    <div className={styles.costAmount}>${cost.amount.toFixed(2)}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-
-          {/* Family Members */}
-          <section className={styles.section}>
-            <div className={styles.sectionHeader}>
-              <h2>Family Members</h2>
-              <Link href={`/family/${familyId}/members`} className={styles.viewAllLink}>
-                Manage →
-              </Link>
-            </div>
-            <div className={styles.membersList}>
-              {family.members.map((member) => {
-                const isCareManager = caregiverRoles.has(member.role)
-                return (
-                  <Link 
-                    key={member.user.id} 
-                    href={`/family/${familyId}/members/${member.user.id}`}
-                    className={`${styles.memberCard} ${isCareManager ? styles.careManager : ''}`}
-                  >
-                    <div className={styles.memberAvatar}>
-                      {member.user.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div className={styles.memberInfo}>
-                      <h3>{member.user.name}</h3>
-                      <p>{member.user.email}</p>
-                    </div>
-                    <span className={`${styles.memberRole} ${isCareManager ? styles.careManagerBadge : styles.familyMemberBadge}`}>
-                      {isCareManager ? '⭐ Care Team Lead' : member.role.replaceAll('_', ' ')}
+          {getUpcomingEvents().length === 0 ? (
+            <p className={styles.emptyState}>No upcoming events scheduled</p>
+          ) : (
+            <div className={styles.eventsList}>
+              {getUpcomingEvents().map((event) => (
+                <div key={event.id} className={styles.eventItem}>
+                  <div className={styles.eventDate}>
+                    <span className={styles.eventMonth}>
+                      {new Date(event.eventDate).toLocaleDateString('en-US', { month: 'short' })}
                     </span>
-                  </Link>
-                )
-              })}
+                    <span className={styles.eventDay}>
+                      {new Date(event.eventDate).getDate()}
+                    </span>
+                  </div>
+                  <div className={styles.eventDetails}>
+                    <h4>{event.title}</h4>
+                    <p>{event.type.replace('_', ' ')}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-          </section>
-        </div>
-      </main>
+          )}
+        </section>
+
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2>Recent Costs</h2>
+            <Link href={`/family/${familyId}/costs`} className={styles.viewAllLink}>
+              View All →
+            </Link>
+          </div>
+          {costs.length === 0 ? (
+            <p className={styles.emptyState}>No costs recorded yet</p>
+          ) : (
+            <div className={styles.costsList}>
+              {costs.slice(0, 3).map((cost) => (
+                <div key={cost.id} className={styles.costItem}>
+                  <div className={styles.costInfo}>
+                    <h4>{cost.description}</h4>
+                    <span className={`${styles.costStatus} ${styles[cost.status.toLowerCase()] ?? ''}`}>
+                      {cost.status}
+                    </span>
+                  </div>
+                  <div className={styles.costAmount}>${cost.amount.toFixed(2)}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2>Family Members</h2>
+            <Link href={`/family/${familyId}/members`} className={styles.viewAllLink}>
+              Manage →
+            </Link>
+          </div>
+          <div className={styles.membersList}>
+            {family.members.map((member) => {
+              const isCareManager = caregiverRoles.has(member.role)
+              return (
+                <Link
+                  key={member.user.id}
+                  href={`/family/${familyId}/members/${member.user.id}`}
+                  className={styles.memberCard}
+                >
+                  <div className={styles.memberAvatar}>
+                    {member.user.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className={styles.memberInfo}>
+                    <h3>{member.user.name}</h3>
+                    <p>{member.user.email}</p>
+                  </div>
+                  <span className={`${styles.memberRole} ${isCareManager ? styles.careManagerBadge : styles.familyMemberBadge}`}>
+                    {isCareManager && <Star size={12} />}
+                    {isCareManager ? 'Care Team Lead' : member.role.replaceAll('_', ' ')}
+                  </span>
+                </Link>
+              )
+            })}
+          </div>
+        </section>
+      </div>
+        </main>
       </div>
     </div>
   )
 }
-

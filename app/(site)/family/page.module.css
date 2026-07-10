@@ -1,6 +1,6 @@
 .container {
   min-height: 100vh;
-  background: #f8f9fa;
+  background: var(--cs-color-surface);
   padding-top: 100px;
 }
 
@@ -12,9 +12,7 @@
 .main {
   flex: 1;
   max-width: 1400px;
-  
   padding: 2rem;
-  
   width: 100%;
 }
 
@@ -22,154 +20,166 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   flex-wrap: wrap;
   gap: 1rem;
 }
 
 .header h1 {
-  font-size: 2rem;
-  color: #212529;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--cs-color-ink);
   margin: 0;
 }
 
 .createBtn {
-  background: #2563eb;
+  background: var(--cs-button-primary-bg);
   color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--cs-button-radius);
   text-decoration: none;
   font-weight: 600;
-  transition: all 0.2s;
+  font-size: 0.9rem;
 }
 
 .createBtn:hover {
-  background: #1d4ed8;
-  transform: translateY(-1px);
+  background: var(--cs-button-primary-bg-hover);
 }
 
 .emptyState {
-  background: white;
-  border-radius: 1rem;
-  padding: 4rem 2rem;
+  background: var(--cs-color-surface-raised);
+  border-radius: var(--cs-radius-xl);
+  padding: 3.5rem 2rem;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--cs-color-border);
+  box-shadow: var(--cs-shadow-soft);
 }
 
 .emptyState h2 {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   margin-bottom: 0.5rem;
-  color: #212529;
+  color: var(--cs-color-text);
 }
 
 .emptyState p {
-  color: #6c757d;
-  margin-bottom: 2rem;
+  color: var(--cs-color-muted);
+  margin-bottom: 1.5rem;
 }
 
 .primaryBtn {
-  background: #2563eb;
+  background: var(--cs-button-primary-bg);
   color: white;
-  padding: 1rem 2rem;
-  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--cs-button-radius);
   text-decoration: none;
   font-weight: 600;
   display: inline-block;
-  transition: all 0.2s;
 }
 
 .primaryBtn:hover {
-  background: #1d4ed8;
-  transform: translateY(-1px);
+  background: var(--cs-button-primary-bg-hover);
 }
 
 .familyGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
 }
 
 .familyCard {
-  background: white;
-  border-radius: 1rem;
-  padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background: var(--cs-color-surface-raised);
+  border-radius: var(--cs-radius-xl);
+  padding: 1.5rem;
+  border: 1px solid var(--cs-color-border);
+  box-shadow: var(--cs-shadow-soft);
   text-decoration: none;
   color: inherit;
-  transition: all 0.2s;
+  transition: transform 0.15s, box-shadow 0.15s;
   display: flex;
   flex-direction: column;
 }
 
 .familyCard:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--cs-shadow-lift);
 }
 
 .familyCardHeader {
   display: flex;
   justify-content: space-between;
-  align-items: start;
-  margin-bottom: 0.75rem;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.6rem;
 }
 
 .familyCard h2 {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   margin: 0;
-  color: #212529;
+  color: var(--cs-color-ink);
 }
 
 .badge {
-  background: #e7f5ff;
-  color: #1971c2;
-  padding: 0.25rem 0.75rem;
-  border-radius: 1rem;
-  font-size: 0.75rem;
-  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--cs-color-warm);
+  color: #5a3a00;
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 .elderName {
-  color: #6c757d;
-  margin: 0 0 1rem 0;
+  color: var(--cs-color-muted);
+  margin: 0 0 0.75rem 0;
   font-size: 0.9rem;
 }
 
 .description {
-  color: #495057;
-  margin: 0 0 1.5rem 0;
+  color: var(--cs-color-muted-strong);
+  margin: 0 0 1.25rem 0;
   line-height: 1.5;
   flex-grow: 1;
+  font-size: 0.9rem;
 }
 
 .stats {
   display: flex;
-  gap: 2rem;
+  gap: 1.5rem;
   padding-top: 1rem;
-  border-top: 1px solid #f8f9fa;
+  margin-top: auto;
+  border-top: 1px solid var(--cs-color-border);
 }
 
 .stat {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 0.15rem;
+  color: var(--cs-color-brand);
 }
 
 .statNumber {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   font-weight: 700;
-  color: #2563eb;
+  color: var(--cs-color-ink);
 }
 
 .statLabel {
-  font-size: 0.8rem;
-  color: #6c757d;
+  font-size: 0.72rem;
+  color: var(--cs-color-muted);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.03em;
 }
 
 @media (max-width: 768px) {
+  .main {
+    padding: 1.25rem;
+  }
+
   .familyGrid {
     grid-template-columns: 1fr;
   }
 }
-

@@ -45,7 +45,25 @@ export async function GET(
       },
     })
 
-    return NextResponse.json(invitations)
+    // Flag invitations whose email now belongs to a registered user, so the UI
+    // can offer a one-click "add now" instead of waiting for the invitee to accept.
+    const emails = invitations.map((invitation) => invitation.email)
+    const registeredUsers = emails.length
+      ? await prisma.user.findMany({
+          where: { email: { in: emails } },
+          select: { id: true, name: true, email: true },
+        })
+      : []
+    const registeredByEmail = new Map(
+      registeredUsers.map((user) => [user.email.toLowerCase(), user])
+    )
+
+    const enriched = invitations.map((invitation) => ({
+      ...invitation,
+      registeredUser: registeredByEmail.get(invitation.email.toLowerCase()) ?? null,
+    }))
+
+    return NextResponse.json(enriched)
   } catch (error) {
     console.error('Error fetching invitations:', error)
     return NextResponse.json({ error: 'Failed to fetch invitations' }, { status: 500 })

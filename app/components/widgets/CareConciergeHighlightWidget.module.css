@@ -89,6 +89,10 @@
   font-size: 0.85rem;
   color: var(--cs-color-muted);
   line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .suggestedTask {
@@ -119,6 +123,10 @@
   margin: 0;
   font-size: 0.8rem;
   color: var(--cs-color-muted);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .addTaskBtn {
