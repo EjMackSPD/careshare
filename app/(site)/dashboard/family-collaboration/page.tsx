@@ -1,15 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   UserPlus,
-  MoreVertical,
   Send,
   Calendar,
   Mail,
-  Phone,
+  MessageCircle,
 } from "lucide-react";
 import styles from "./page.module.css";
 
@@ -27,14 +25,6 @@ const mapEventType = (dbType: string): string => {
   return typeMap[dbType] || dbType;
 };
 
-type TeamMember = {
-  id: string;
-  name: string;
-  initials: string;
-  color: string;
-  active: boolean;
-};
-
 type MessageType = {
   id: string;
   message: string;
@@ -46,25 +36,15 @@ type MessageType = {
   };
 };
 
-type Event = {
-  id: string;
-  title: string;
-  description: string;
-  date: string;
-  category: string;
-  categoryColor: string;
-  attendees: string[];
-};
-
-// Team members and events are now fetched from database
+// Team members and events are fetched from the database
 
 const avatarColors = [
-  "#6366f1",
-  "#8b5cf6",
-  "#ec4899",
-  "#10b981",
-  "#f59e0b",
-  "#06b6d4",
+  "#287fae",
+  "#0f766e",
+  "#1d648d",
+  "#c7771d",
+  "#115e59",
+  "#3f565d",
 ];
 
 function getInitials(name: string | null, email: string): string {
@@ -86,19 +66,42 @@ function getAvatarColor(userId: string): string {
   return avatarColors[hash % avatarColors.length];
 }
 
+function formatDayLabel(dateStr: string): string {
+  const date = new Date(dateStr);
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+
+  if (date.toDateString() === today.toDateString()) return "Today";
+  if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
+  return date.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+  });
+}
+
 export default function FamilyCollaborationPage() {
-  const router = useRouter();
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState<MessageType[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [familyId, setFamilyId] = useState<string | null>(null);
+  const [elderName, setElderName] = useState<string>("your care recipient");
   const [familyMembers, setFamilyMembers] = useState<any[]>([]);
   const [tasks, setTasks] = useState<any[]>([]);
   const [taskDistribution, setTaskDistribution] = useState<any[]>([]);
   const [showRebalance, setShowRebalance] = useState(false);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const previousMessageCountRef = useRef(0);
   const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setCurrentUserId(data?.user?.id ?? null))
+      .catch(() => setCurrentUserId(null));
+  }, []);
 
   // Fetch user's first family and members
   useEffect(() => {
@@ -114,19 +117,25 @@ export default function FamilyCollaborationPage() {
         if (familiesArray.length > 0) {
           const family = familiesArray[0];
           setFamilyId(family.id);
+          if (family.careRecipient?.name) {
+            setElderName(family.careRecipient.name);
+          } else if (family.name) {
+            setElderName(family.name);
+          }
 
           // Fetch family members
           const membersRes = await fetch(`/api/families/${family.id}/members`);
           if (membersRes.ok) {
             const membersData = await membersRes.json();
-            setFamilyMembers(membersData.members ?? []);
+            const members = membersData.members ?? [];
+            setFamilyMembers(members);
 
             // Fetch tasks
             const tasksRes = await fetch(`/api/families/${family.id}/tasks`);
             if (tasksRes.ok) {
               const tasksData = await tasksRes.json();
               setTasks(tasksData);
-              calculateTaskDistribution(tasksData, membersData);
+              calculateTaskDistribution(tasksData, members);
             }
 
             // Fetch upcoming events
@@ -141,7 +150,7 @@ export default function FamilyCollaborationPage() {
                     new Date(a.eventDate).getTime() -
                     new Date(b.eventDate).getTime()
                 )
-                .slice(0, 2)
+                .slice(0, 3)
                 .map((evt: any) => ({
                   id: evt.id,
                   title: evt.title,
@@ -150,9 +159,7 @@ export default function FamilyCollaborationPage() {
                     month: "short",
                     day: "numeric",
                   }),
-                  category: mapEventType(evt.type), // Convert DB type to display type
-                  categoryColor: "#6366f1",
-                  attendees: ["FM"], // Can be enhanced later
+                  category: mapEventType(evt.type),
                 }));
               setUpcomingEvents(upcoming);
             }
@@ -165,7 +172,7 @@ export default function FamilyCollaborationPage() {
     fetchFamily();
   }, []);
 
-  const calculateTaskDistribution = (tasksData: any[], membersData: any[]) => {
+  function calculateTaskDistribution(tasksData: any[], membersData: any[]) {
     // Count tasks per member
     const memberTaskCounts: { [key: string]: number } = {};
     const totalTasks = tasksData.filter((t) => t.status !== "COMPLETED").length;
@@ -185,7 +192,7 @@ export default function FamilyCollaborationPage() {
     });
 
     const distribution = membersData
-      .map((member, index) => {
+      .map((member) => {
         const taskCount = memberTaskCounts[member.userId] || 0;
         const percentage = totalTasks > 0 ? (taskCount / totalTasks) * 100 : 0;
         const color = getAvatarColor(member.userId);
@@ -201,7 +208,7 @@ export default function FamilyCollaborationPage() {
       .sort((a, b) => b.taskCount - a.taskCount);
 
     setTaskDistribution(distribution);
-  };
+  }
 
   const handleReassignTask = async (taskId: string, newUserId: string) => {
     try {
@@ -253,15 +260,14 @@ export default function FamilyCollaborationPage() {
 
     fetchMessages();
 
-    // Poll for new messages every 3 seconds
-    const interval = setInterval(fetchMessages, 3000);
+    // Poll for new messages every 5 seconds
+    const interval = setInterval(fetchMessages, 5000);
 
     return () => clearInterval(interval);
   }, [familyId]);
 
-  // Update previous message count (for future enhancements)
   useEffect(() => {
-    previousMessageCountRef.current = messages.length;
+    messagesEndRef.current?.scrollIntoView({ block: "end" });
   }, [messages.length]);
 
   const handleSendMessage = async () => {
@@ -278,7 +284,8 @@ export default function FamilyCollaborationPage() {
       if (!res.ok) throw new Error("Failed to send message");
 
       const newMessage = await res.json();
-      setMessages((prev) => [newMessage, ...prev]); // Add new message at the top
+      // API returns newest-first; oldest-first is what we render, so append.
+      setMessages((prev) => [...prev, newMessage]);
       setMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
@@ -288,15 +295,21 @@ export default function FamilyCollaborationPage() {
     }
   };
 
+  // Messages come back newest-first from the API; render oldest-first like a real chat.
+  const orderedMessages = [...messages].reverse();
+
+  let lastDayLabel = "";
+  let lastSenderId = "";
+
   return (
     <div className={styles.container}>
       <div className={styles.layout}>
         <main className={styles.main}>
           <div className={styles.pageHeader}>
             <div>
-              <h1>Family Collaboration</h1>
+              <h1>Family Chat</h1>
               <p className={styles.subtitle}>
-                Connect and coordinate with your caregiving team
+                Everyone helping care for {elderName}, in one place
               </p>
             </div>
             <button className={styles.inviteBtn}>
@@ -306,84 +319,78 @@ export default function FamilyCollaborationPage() {
           </div>
 
           <div className={styles.topGrid}>
-            {/* Caregiving Team */}
-            <div className={styles.card}>
-              <h2>Caregiving Team</h2>
-              <p className={styles.cardSubtitle}>
-                People helping with Martha Johnson's care
-              </p>
-
-              <div className={styles.teamList}>
-                {familyMembers.map((member) => {
-                  const memberColor = getAvatarColor(member.userId);
-                  const initials = (member.user.name || member.user.email)
-                    .charAt(0)
-                    .toUpperCase();
-
-                  return (
-                    <Link
-                      key={member.id}
-                      href={`/family/${familyId}/members/${member.userId}`}
-                      className={styles.teamMember}
-                    >
-                      <div
-                        className={styles.avatar}
-                        style={{ background: memberColor }}
-                      >
-                        {initials}
-                      </div>
-                      <div className={styles.memberInfo}>
-                        <div className={styles.memberName}>
-                          {member.user.name || member.user.email}
-                        </div>
-                        <div className={styles.memberRole}>
-                          {caregiverRoles.has(member.role)
-                            ? "⭐ Care Team Lead"
-                            : member.role.replaceAll("_", " ")}
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                })}
-              </div>
-
-              <button className={styles.inviteMemberBtn}>
-                <UserPlus size={16} />
-                Invite Family Member
-              </button>
-            </div>
-
             {/* Family Communication */}
-            <div className={styles.card}>
-              <h2>Family Communication</h2>
-              <p className={styles.cardSubtitle}>
-                Messages about Martha Johnson's care
-              </p>
+            <div className={styles.chatCard}>
+              <div className={styles.chatCardHeader}>
+                <MessageCircle size={18} className={styles.chatCardHeaderIcon} />
+                <div>
+                  <h2>Family thread</h2>
+                  <p className={styles.cardSubtitle}>
+                    Updates and notes about {elderName}&apos;s care
+                  </p>
+                </div>
+              </div>
 
               <div className={styles.messagesArea}>
                 {loading ? (
                   <div className={styles.loadingState}>Loading messages...</div>
-                ) : messages.length === 0 ? (
+                ) : orderedMessages.length === 0 ? (
                   <div className={styles.emptyState}>
-                    <p>No messages yet. Start the conversation!</p>
+                    <MessageCircle size={32} className={styles.emptyStateIcon} />
+                    <p>No messages yet</p>
+                    <span>Share an update to start the conversation</span>
                   </div>
                 ) : (
-                  messages.map((msg) => {
+                  orderedMessages.map((msg) => {
+                    const isSelf = msg.user.id === currentUserId;
+                    const dayLabel = formatDayLabel(msg.createdAt);
+                    const showDayDivider = dayLabel !== lastDayLabel;
+                    const showHeader =
+                      showDayDivider || msg.user.id !== lastSenderId;
+                    lastDayLabel = dayLabel;
+                    lastSenderId = msg.user.id;
+
                     const initials = getInitials(msg.user.name, msg.user.email);
                     const color = getAvatarColor(msg.user.id);
+
                     return (
-                      <div key={msg.id} className={styles.messageBubble}>
+                      <div key={msg.id}>
+                        {showDayDivider && (
+                          <div className={styles.dayDivider}>
+                            <span>{dayLabel}</span>
+                          </div>
+                        )}
                         <div
-                          className={styles.messageAvatar}
-                          style={{ background: color }}
+                          className={`${styles.messageRow} ${
+                            isSelf ? styles.messageRowSelf : ""
+                          }`}
                         >
-                          {initials}
-                        </div>
-                        <div className={styles.messageWrapper}>
-                          <div className={styles.messageMeta}>
-                            <span className={styles.messageSender}>
-                              {msg.user.name || msg.user.email}
-                            </span>
+                          {!isSelf && (
+                            <div
+                              className={styles.messageAvatar}
+                              style={{
+                                background: color,
+                                visibility: showHeader ? "visible" : "hidden",
+                              }}
+                            >
+                              {initials}
+                            </div>
+                          )}
+                          <div className={styles.messageWrapper}>
+                            {showHeader && !isSelf && (
+                              <div className={styles.messageMeta}>
+                                <span className={styles.messageSender}>
+                                  {msg.user.name || msg.user.email}
+                                </span>
+                              </div>
+                            )}
+                            <div
+                              className={`${styles.messageContent} ${
+                                isSelf ? styles.messageContentSelf : ""
+                              }`}
+                            >
+                              {msg.message}
+                            </div>
                             <span className={styles.messageTime}>
                               {new Date(msg.createdAt).toLocaleTimeString([], {
                                 hour: "2-digit",
@@ -391,35 +398,110 @@ export default function FamilyCollaborationPage() {
                               })}
                             </span>
                           </div>
-                          <div className={styles.messageContent}>
-                            {msg.message}
-                          </div>
                         </div>
                       </div>
                     );
                   })
                 )}
+                <div ref={messagesEndRef} />
               </div>
 
               <div className={styles.messageInput}>
                 <input
                   type="text"
-                  placeholder="Type a message..."
+                  placeholder="Share an update with the family..."
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  onKeyPress={(e) =>
-                    e.key === "Enter" && !e.shiftKey && handleSendMessage()
-                  }
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
+                  }}
                   disabled={sending || !familyId}
                 />
                 <button
                   onClick={handleSendMessage}
                   className={styles.sendBtn}
                   disabled={sending || !message.trim() || !familyId}
+                  aria-label="Send message"
                 >
                   <Send size={18} />
                 </button>
               </div>
+            </div>
+
+            {/* Caregiving Team */}
+            <div className={styles.sideCol}>
+              <div className={styles.card}>
+                <h2>Care Team</h2>
+                <p className={styles.cardSubtitle}>
+                  {familyMembers.length} people helping care for {elderName}
+                </p>
+
+                <div className={styles.teamList}>
+                  {familyMembers.map((member) => {
+                    const memberColor = getAvatarColor(member.userId);
+                    const initials = getInitials(
+                      member.user.name,
+                      member.user.email
+                    );
+
+                    return (
+                      <Link
+                        key={member.id}
+                        href={`/family/${familyId}/members/${member.userId}`}
+                        className={styles.teamMember}
+                      >
+                        <div
+                          className={styles.avatar}
+                          style={{ background: memberColor }}
+                        >
+                          {initials}
+                        </div>
+                        <div className={styles.memberInfo}>
+                          <div className={styles.memberName}>
+                            {member.user.name || member.user.email}
+                          </div>
+                          <div className={styles.memberRole}>
+                            {caregiverRoles.has(member.role)
+                              ? "Care Team Lead"
+                              : member.role.replaceAll("_", " ")}
+                          </div>
+                        </div>
+                        <Mail
+                          size={15}
+                          className={styles.memberEmailIcon}
+                          aria-label={member.user.email}
+                        />
+                      </Link>
+                    );
+                  })}
+                  {familyMembers.length === 0 && (
+                    <p className={styles.emptyText}>No family members yet</p>
+                  )}
+                </div>
+              </div>
+
+              {upcomingEvents.length > 0 && (
+                <div className={styles.card}>
+                  <h2>Coming up</h2>
+                  <div className={styles.upcomingList}>
+                    {upcomingEvents.map((event) => (
+                      <div key={event.id} className={styles.upcomingItem}>
+                        <div className={styles.upcomingDate}>
+                          <Calendar size={14} />
+                          {event.date}
+                        </div>
+                        <div className={styles.upcomingTitle}>{event.title}</div>
+                        <span className={styles.upcomingCategory}>
+                          {event.category}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -469,96 +551,6 @@ export default function FamilyCollaborationPage() {
                 Rebalance Tasks
               </button>
             )}
-          </div>
-
-          {/* Upcoming Family Events */}
-          <div className={styles.eventsSection}>
-            <h2>Upcoming Family Events</h2>
-
-            <div className={styles.eventsGrid}>
-              {upcomingEvents.map((event) => (
-                <div key={event.id} className={styles.eventCard}>
-                  <div className={styles.eventHeader}>
-                    <span
-                      className={styles.eventCategory}
-                      style={{ background: event.categoryColor }}
-                    >
-                      {event.category}
-                    </span>
-                    <div className={styles.eventDate}>
-                      <Calendar size={14} />
-                      {event.date}
-                    </div>
-                  </div>
-                  <h3>{event.title}</h3>
-                  <p>{event.description}</p>
-                  <div className={styles.eventAttendees}>
-                    {event.attendees.map((attendee: string, idx: number) => (
-                      <div key={idx} className={styles.attendeeAvatar}>
-                        {attendee}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-
-              <div className={styles.scheduleEventCard}>
-                <Calendar size={48} className={styles.calendarIcon} />
-                <h3>Plan a Family Event</h3>
-                <p>Schedule time together to coordinate care and connect</p>
-                <button className={styles.scheduleBtn}>Schedule Event</button>
-              </div>
-            </div>
-          </div>
-
-          {/* Family Contact Information */}
-          <div className={styles.contactSection}>
-            <h2>Family Contact Information</h2>
-
-            <div className={styles.contactGrid}>
-              {familyMembers.map((member) => {
-                const memberColor = getAvatarColor(member.userId);
-                const initials = getInitials(
-                  member.user.name,
-                  member.user.email
-                );
-
-                return (
-                  <div key={member.id} className={styles.contactCard}>
-                    <div
-                      className={styles.contactAvatar}
-                      style={{ background: memberColor }}
-                    >
-                      {initials}
-                    </div>
-                    <h3>{member.user.name || member.user.email}</h3>
-                    <div className={styles.contactInfo}>
-                      <Mail size={14} />
-                      <span>{member.user.email}</span>
-                    </div>
-                    <div className={styles.contactInfo}>
-                      <Phone size={14} />
-                      <span>
-                        {caregiverRoles.has(member.role)
-                          ? "Primary Contact"
-                          : "Contact info not available"}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-              {familyMembers.length === 0 && (
-                <div
-                  style={{
-                    padding: "2rem",
-                    color: "#6c757d",
-                    gridColumn: "1 / -1",
-                  }}
-                >
-                  No family members yet
-                </div>
-              )}
-            </div>
           </div>
 
           {/* Rebalance Tasks Modal */}

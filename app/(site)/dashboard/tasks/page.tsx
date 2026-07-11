@@ -1094,15 +1094,6 @@ function TasksPageContent() {
                             onAddSuggestedTask={quickAddSuggestedTask}
                           />
                         )}
-                        <button
-                          type="button"
-                          className={styles.primaryButton}
-                          onClick={openAddComposer}
-                          disabled={!selectedFamily}
-                        >
-                          <Plus size={18} />
-                          Add task
-                        </button>
                       </div>
                     ) : (
                       <form className={styles.composerForm} onSubmit={handleSubmit}>

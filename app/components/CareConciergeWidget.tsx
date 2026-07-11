@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   AlertTriangle,
   Lightbulb,
@@ -13,6 +13,7 @@ import type {
   AssistantRecommendation,
   AssistantSuggestedTask,
 } from "@/types/assistant";
+import CareConciergeMark from "@/app/components/icons/CareConciergeMark";
 import styles from "./CareConciergeWidget.module.css";
 
 const INSIGHTS_PROMPT =
@@ -67,7 +68,7 @@ export default function CareConciergeWidget({
 }) {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [insights, setInsights] = useState<InsightsState | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [addedTitles, setAddedTitles] = useState<string[]>([]);
 
@@ -106,35 +107,24 @@ export default function CareConciergeWidget({
     }
   }
 
+  useEffect(() => {
+    // Fetch is deferred a tick so the initial setLoading() call doesn't run
+    // synchronously inside the effect itself.
+    const timeoutId = setTimeout(fetchInsights, 0);
+    return () => clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [familyId]);
+
   function handleAdd(task: AssistantSuggestedTask) {
     onAddSuggestedTask(task);
     setAddedTitles((current) => [...current, task.title]);
-  }
-
-  if (!insights && !loading && !error) {
-    return (
-      <div className={styles.idle}>
-        <div className={styles.idleIcon}>
-          <Sparkles size={24} />
-        </div>
-        <h3>Care Concierge</h3>
-        <p className={styles.idleBody}>
-          Get an AI summary of what needs attention, a few recommendations,
-          and quick tasks you can add in one click.
-        </p>
-        <button type="button" className={styles.getInsightsBtn} onClick={fetchInsights}>
-          <Sparkles size={16} />
-          Get insights
-        </button>
-      </div>
-    );
   }
 
   return (
     <div className={styles.panel}>
       <div className={styles.panelHeader}>
         <div className={styles.panelTitle}>
-          <Sparkles size={16} />
+          <CareConciergeMark size={18} />
           <span>Care Concierge</span>
         </div>
         <button

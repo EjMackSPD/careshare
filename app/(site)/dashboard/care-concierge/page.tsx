@@ -5,7 +5,6 @@ import Link from "next/link"
 import {
   ArrowUp,
   BrainCircuit,
-  ChevronDown,
   Flag,
   Lightbulb,
   LifeBuoy,
@@ -313,32 +312,16 @@ export default function CareConciergePage() {
                 Family-aware guidance across tasks, medications, events, notes,
                 resources, local providers, and care plans.
               </p>
-            </div>
-
-            <div className={styles.topbarControls}>
-              <label className={styles.familyLabel} htmlFor="family-select">
-                Workspace
-              </label>
-              <div className={styles.familyPicker}>
-                <select
-                  id="family-select"
-                  className={styles.familySelect}
-                  value={selectedFamilyId}
-                  onChange={(event) => setSelectedFamilyId(event.target.value)}
-                  disabled={loadingFamilies || pending}
-                >
-                  {families.map((family) => (
-                    <option key={family.id} value={family.id}>
-                      {family.name}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown size={16} className={styles.familyPickerIcon} />
-              </div>
-              <div className={styles.familyMeta}>
-                <span>{selectedFamily?.elderName || "Care workspace"}</span>
-                <span>{conversations.length} saved threads</span>
-              </div>
+              {selectedFamily && (
+                <div className={styles.topbarMeta}>
+                  <span>{selectedFamily.elderName || selectedFamily.name}</span>
+                  <span className={styles.topbarMetaDivider} aria-hidden="true" />
+                  <span>
+                    {conversations.length} saved thread
+                    {conversations.length === 1 ? "" : "s"}
+                  </span>
+                </div>
+              )}
             </div>
           </section>
 
