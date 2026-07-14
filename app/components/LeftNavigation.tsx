@@ -32,6 +32,7 @@ import {
   Shield,
   UserCog,
   Activity,
+  Repeat,
 } from "lucide-react";
 import styles from "./LeftNavigation.module.css";
 
@@ -41,6 +42,7 @@ const mainMenuItems = [
   { href: "/dashboard/calendar", label: "Calendar", icon: Calendar },
   { href: "/dashboard/finances", label: "Finances", icon: Wallet },
   { href: "/dashboard/liabilities", label: "Liability Accounts", icon: Landmark },
+  { href: "/dashboard/bills-deposits", label: "Bills & Direct Deposit", icon: Repeat },
   { href: "/dashboard/care-plan", label: "Care Plan", icon: Heart },
   { href: "/dashboard/resources", label: "Resources", icon: BookOpen },
   { href: "/dashboard/care-concierge", label: "Care Concierge", icon: Sparkles },

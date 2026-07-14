@@ -197,6 +197,10 @@ export async function CareShareDashboard({ payload, user }: AdminViewServerProps
     ]);
 
   const email = typeof user?.email === "string" ? user.email : "CareShare admin";
+  const roles = Array.isArray((user as { roles?: unknown })?.roles)
+    ? ((user as { roles?: unknown }).roles as unknown[])
+    : [];
+  const isSuperAdmin = roles.includes("super-admin");
   const contentItems = toContentItems(recentPages, recentPosts);
   const submissionItems = toSubmissionItems(recentSubmissions);
 
@@ -211,9 +215,16 @@ export async function CareShareDashboard({ payload, user }: AdminViewServerProps
               <h1>Admin dashboard</h1>
             </div>
           </div>
-          <div className="careshare-dashboard-header__user">
-            <span>Signed in</span>
-            <strong>{email}</strong>
+          <div className="careshare-dashboard-header__actions">
+            {isSuperAdmin && (
+              <Link className="careshare-dashboard-header__cta" href="/dashboard">
+                Go to family dashboard
+              </Link>
+            )}
+            <div className="careshare-dashboard-header__user">
+              <span>Signed in</span>
+              <strong>{email}</strong>
+            </div>
           </div>
         </header>
 

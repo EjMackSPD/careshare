@@ -390,6 +390,30 @@ tr:hover td {
   border-radius: 8px;
 }
 
+.careshare-dashboard-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.careshare-dashboard-header__cta {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  border-radius: 8px;
+  background: var(--careshare-care);
+  color: var(--careshare-text-on-brand);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 16px;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+}
+
+.careshare-dashboard-header__cta:hover {
+  background: var(--careshare-care-dark);
+}
+
 .careshare-dashboard-header__identity p,
 .careshare-dashboard-header__user span {
   margin: 0;
@@ -702,6 +726,11 @@ tr:hover td {
   .careshare-dashboard-manage a {
     grid-template-columns: 1fr;
     display: grid;
+  }
+
+  .careshare-dashboard-header__actions {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .careshare-dashboard-header__user,

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import MarketingNav from "../../components/MarketingNav";
 import Footer from "../../components/Footer";
+import PasswordStrengthMeter from "../../components/PasswordStrengthMeter";
 import styles from "./page.module.css";
 
 function ResetPasswordForm() {
@@ -93,6 +94,7 @@ function ResetPasswordForm() {
             minLength={8}
             placeholder="••••••••"
           />
+          <PasswordStrengthMeter password={password} />
         </div>
         <div className={styles.formGroup}>
           <label htmlFor="confirmPassword">Confirm new password</label>

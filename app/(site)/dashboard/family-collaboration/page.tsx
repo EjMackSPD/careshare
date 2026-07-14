@@ -8,10 +8,47 @@ import {
   Calendar,
   Mail,
   MessageCircle,
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  X,
 } from "lucide-react";
 import styles from "./page.module.css";
 
 const caregiverRoles = new Set(["OWNER", "PRIMARY_CAREGIVER", "FAMILY_ADMIN"]);
+
+const INVITE_ROLE_OPTIONS = [
+  {
+    value: "PRIMARY_CAREGIVER",
+    label: "Primary Caregiver",
+    description:
+      "Manages day-to-day care, pays bills, and can invite others. Full access.",
+  },
+  {
+    value: "FAMILY_ADMIN",
+    label: "Family Admin",
+    description:
+      "Organizes tasks, documents, and costs. Can't see sensitive info or make payments.",
+  },
+  {
+    value: "CONTRIBUTOR",
+    label: "Contributor",
+    description:
+      "Pitches in on tasks and costs, and joins the family chat. Read-only on the rest.",
+  },
+  {
+    value: "VIEWER",
+    label: "Viewer",
+    description:
+      "Stays in the loop with read-only updates. A good fit for extended family.",
+  },
+  {
+    value: "CARE_RECIPIENT",
+    label: "Care Recipient",
+    description:
+      "For the person receiving care, if they'd like their own login.",
+  },
+] as const;
 
 // Map database EventType to display type
 const mapEventType = (dbType: string): string => {
@@ -95,6 +132,15 @@ export default function FamilyCollaborationPage() {
   const [sending, setSending] = useState(false);
   const [upcomingEvents, setUpcomingEvents] = useState<any[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteStep, setInviteStep] = useState<1 | 2>(1);
+  const [inviteName, setInviteName] = useState("");
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<string>("");
+  const [inviteSending, setInviteSending] = useState(false);
+  const [inviteError, setInviteError] = useState("");
+  const [inviteSuccess, setInviteSuccess] = useState(false);
 
   useEffect(() => {
     fetch("/api/auth/me")
@@ -241,6 +287,56 @@ export default function FamilyCollaborationPage() {
     }
   };
 
+  function resetInviteModal() {
+    setShowInviteModal(false);
+    setInviteStep(1);
+    setInviteName("");
+    setInviteEmail("");
+    setInviteRole("");
+    setInviteError("");
+    setInviteSuccess(false);
+  }
+
+  function handleInviteContinue() {
+    if (!inviteEmail.trim() || !inviteEmail.includes("@")) {
+      setInviteError("Enter a valid email address.");
+      return;
+    }
+    setInviteError("");
+    setInviteStep(2);
+  }
+
+  async function handleSendInvite() {
+    if (!inviteRole || !familyId) return;
+
+    setInviteSending(true);
+    setInviteError("");
+    try {
+      const res = await fetch(`/api/families/${familyId}/invitations`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: inviteEmail.trim(),
+          role: inviteRole,
+          invitedName: inviteName.trim() || undefined,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.error || "Failed to send invitation");
+      }
+
+      setInviteSuccess(true);
+    } catch (error) {
+      setInviteError(
+        error instanceof Error ? error.message : "Failed to send invitation"
+      );
+    } finally {
+      setInviteSending(false);
+    }
+  }
+
   // Fetch messages when familyId is available
   useEffect(() => {
     if (!familyId) return;
@@ -312,7 +408,11 @@ export default function FamilyCollaborationPage() {
                 Everyone helping care for {elderName}, in one place
               </p>
             </div>
-            <button className={styles.inviteBtn}>
+            <button
+              className={styles.inviteBtn}
+              onClick={() => setShowInviteModal(true)}
+              disabled={!familyId}
+            >
               <UserPlus size={18} />
               Invite Family Member
             </button>
@@ -635,6 +735,139 @@ export default function FamilyCollaborationPage() {
                     Done
                   </button>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* Invite Family Member Modal */}
+          {showInviteModal && (
+            <div className={styles.modal} onClick={resetInviteModal}>
+              <div
+                className={styles.inviteModalContent}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  type="button"
+                  className={styles.inviteModalClose}
+                  onClick={resetInviteModal}
+                  aria-label="Close"
+                >
+                  <X size={18} />
+                </button>
+
+                {inviteSuccess ? (
+                  <div className={styles.inviteSuccess}>
+                    <div className={styles.inviteSuccessIcon}>
+                      <Check size={28} />
+                    </div>
+                    <h2>Invitation sent</h2>
+                    <p>
+                      We emailed {inviteEmail} to join and help care for{" "}
+                      {elderName}.
+                    </p>
+                    <button className={styles.doneBtn} onClick={resetInviteModal}>
+                      Done
+                    </button>
+                  </div>
+                ) : inviteStep === 1 ? (
+                  <>
+                    <div className={styles.inviteModalHeader}>
+                      <span className={styles.inviteStepLabel}>Step 1 of 2</span>
+                      <h2>Who are you inviting?</h2>
+                      <p>We&apos;ll send them an email to join the family circle.</p>
+                    </div>
+
+                    {inviteError && (
+                      <div className={styles.inviteError}>{inviteError}</div>
+                    )}
+
+                    <div className={styles.formGroupStack}>
+                      <label htmlFor="invite-name">Name (optional)</label>
+                      <input
+                        id="invite-name"
+                        type="text"
+                        value={inviteName}
+                        onChange={(e) => setInviteName(e.target.value)}
+                        placeholder="Jordan Smith"
+                      />
+                    </div>
+                    <div className={styles.formGroupStack}>
+                      <label htmlFor="invite-email">Email address</label>
+                      <input
+                        id="invite-email"
+                        type="email"
+                        value={inviteEmail}
+                        onChange={(e) => setInviteEmail(e.target.value)}
+                        placeholder="jordan@example.com"
+                        onKeyDown={(e) => e.key === "Enter" && handleInviteContinue()}
+                        autoFocus
+                      />
+                    </div>
+
+                    <div className={styles.inviteModalActions}>
+                      <button
+                        className={styles.inviteContinueBtn}
+                        onClick={handleInviteContinue}
+                      >
+                        Continue
+                        <ArrowRight size={16} />
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className={styles.inviteModalHeader}>
+                      <span className={styles.inviteStepLabel}>Step 2 of 2</span>
+                      <h2>How will they help?</h2>
+                      <p>
+                        Pick the role that best fits what{" "}
+                        {inviteName.trim() || "they"}&apos;ll be doing for{" "}
+                        {elderName}. You can change this anytime.
+                      </p>
+                    </div>
+
+                    {inviteError && (
+                      <div className={styles.inviteError}>{inviteError}</div>
+                    )}
+
+                    <div className={styles.roleOptionList}>
+                      {INVITE_ROLE_OPTIONS.map((option) => (
+                        <button
+                          type="button"
+                          key={option.value}
+                          className={`${styles.roleOption} ${
+                            inviteRole === option.value ? styles.roleOptionActive : ""
+                          }`}
+                          onClick={() => setInviteRole(option.value)}
+                        >
+                          <span className={styles.roleOptionRadio} aria-hidden="true" />
+                          <span className={styles.roleOptionText}>
+                            <strong>{option.label}</strong>
+                            <span>{option.description}</span>
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className={styles.inviteModalActions}>
+                      <button
+                        type="button"
+                        className={styles.inviteBackBtn}
+                        onClick={() => setInviteStep(1)}
+                      >
+                        <ArrowLeft size={16} />
+                        Back
+                      </button>
+                      <button
+                        className={styles.inviteContinueBtn}
+                        onClick={handleSendInvite}
+                        disabled={!inviteRole || inviteSending}
+                      >
+                        {inviteSending ? "Sending…" : "Send invitation"}
+                      </button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           )}

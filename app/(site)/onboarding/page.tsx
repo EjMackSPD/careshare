@@ -18,6 +18,7 @@ import {
 import styles from './page.module.css'
 import MarketingNav from '@/app/components/MarketingNav'
 import Footer from '@/app/components/Footer'
+import PasswordStrengthMeter from '@/app/components/PasswordStrengthMeter'
 import EmailCodeForm from '@/app/components/EmailCodeForm'
 import {
   DEFAULT_ONBOARDING_DRAFT,
@@ -864,6 +865,7 @@ export default function OnboardingPage() {
                   autoComplete="new-password"
                   placeholder="Minimum 6 characters"
                 />
+                <PasswordStrengthMeter password={signupFields.password} />
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="signup-confirm-password">Confirm password *</label>

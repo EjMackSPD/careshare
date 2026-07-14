@@ -90,6 +90,7 @@ model User {
   uploadedDocuments Document[]
   aiConversations AIConversation[]
   auditLogs         AuditLog[]
+  atomicTasks       AtomicTask[]
 
   @@index([email])
 }
@@ -107,6 +108,8 @@ model Family {
   medicalNotes String?  // Medical notes/allergies
   notificationPreferences Json? // Notification and alert settings
   topNeeds    Json?
+  coverImageUrl String? // Uploaded dashboard header photo (takes priority over coverPattern)
+  coverPattern  String? // Predefined dashboard header pattern id, used when no photo is set
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   createdBy   String
@@ -123,6 +126,7 @@ model Family {
   giftOrders    GiftOrder[]
   foodOrders    FoodOrder[]
   liabilityAccounts FamilyLiabilityAccount[]
+  atomicTasks   AtomicTask[]
   messages      Message[]
   lifeStories   LifeStory[]
   medications   Medication[]
@@ -471,6 +475,30 @@ model FamilyLiabilityAccount {
   family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
 
   @@index([familyId])
+}
+
+// Bill/subscription management (PayLink "manage") and payroll direct-deposit
+// switch ("deposit") tasks run through Atomic Transact. One row per Transact
+// session; status is refreshed from Atomic's task-details response and kept
+// current by the /api/webhooks/atomic receiver as async tasks complete.
+model AtomicTask {
+  id                 String    @id @default(cuid())
+  familyId           String
+  userId             String
+  operation          String    // manage, deposit
+  atomicTaskId       String    @unique
+  status             String    @default("processing") // processing, completed, failed
+  companyName        String?
+  distributionType   String?   // total, fixed, percent (deposit tasks only)
+  distributionAmount Float?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([familyId])
+  @@index([userId])
 }
 
 // Food delivery orders

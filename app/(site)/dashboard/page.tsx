@@ -6,6 +6,9 @@ import { resolveDashboardPersona } from "@/lib/dashboard-persona";
 import { getCarePlanCompleteness } from "@/lib/care-plan-completeness";
 import Link from "next/link";
 import PendingInvitationsBanner from "../../components/PendingInvitationsBanner";
+import DashboardHero from "../../components/DashboardHero";
+import { managerRoles } from "@/lib/family-permissions";
+import { toDisplayBlobUrl } from "@/lib/blob";
 import CareRecipientWidget from "../../components/widgets/CareRecipientWidget";
 import TasksWidget from "../../components/widgets/TasksWidget";
 import FinancialWidget from "../../components/widgets/FinancialWidget";
@@ -160,37 +163,24 @@ export default async function Dashboard() {
             }))}
           />
 
-          <section className={styles.hero}>
-            <div className={styles.heroContent}>
-              <div className={styles.heroCopy}>
-                <div className={styles.eyebrow}>
-                  {isCoordinator ? "Care Coordinator Dashboard" : "Family Dashboard"}
-                </div>
-
-                <h1>Welcome back, {user.name || "there"}.</h1>
-                <p className={styles.headerSubtitle}>
-                  {isCoordinator
-                    ? "Track care activity, upcoming obligations, and family coordination from one working view."
-                    : `See what's happening in ${activeFamilyName}'s care, and find ways you can help today.`}
-                </p>
-
-                <div className={styles.heroMeta}>
-                  <div className={styles.heroMetaItem}>
-                    <span className={styles.heroMetaLabel}>Workspace</span>
-                    <strong>{activeFamilyName}</strong>
-                  </div>
-                  <div className={styles.heroMetaItem}>
-                    <span className={styles.heroMetaLabel}>Care recipient</span>
-                    <strong>{careRecipientName}</strong>
-                  </div>
-                  <div className={styles.heroMetaItem}>
-                    <span className={styles.heroMetaLabel}>Families</span>
-                    <strong>{families.length}</strong>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
+          <DashboardHero
+            familyId={primaryFamily?.id ?? null}
+            canEditCover={Boolean(
+              familyMembers[0] && managerRoles.includes(familyMembers[0].role)
+            )}
+            eyebrow={isCoordinator ? "Care Coordinator Dashboard" : "Family Dashboard"}
+            userName={user.name ?? null}
+            subtitle={
+              isCoordinator
+                ? "Track care activity, upcoming obligations, and family coordination from one working view."
+                : `See what's happening in ${activeFamilyName}'s care, and find ways you can help today.`
+            }
+            workspaceName={activeFamilyName}
+            careRecipientName={careRecipientName}
+            familiesCount={families.length}
+            initialCoverImageUrl={toDisplayBlobUrl(primaryFamily?.coverImageUrl)}
+            initialCoverPattern={primaryFamily?.coverPattern ?? null}
+          />
 
           {carePlanCompleteness && (
             <CarePlanStatusBar completeness={carePlanCompleteness} />
