@@ -42,6 +42,33 @@
   color: var(--cs-color-brand);
 }
 
+/* raised center "Ask" (Care Concierge) */
+.centerTab {
+  justify-content: flex-end;
+  color: var(--cs-color-brand);
+  font-weight: 700;
+}
+.centerActive {
+  color: var(--cs-color-brand-dark);
+}
+.centerFab {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(150deg, var(--cs-color-brand), var(--cs-color-brand-dark));
+  color: #fff;
+  display: grid;
+  place-items: center;
+  margin-top: -22px;
+  margin-bottom: 3px;
+  box-shadow: var(--cs-shadow-brand);
+  border: 3px solid var(--cs-color-surface-raised);
+}
+.centerFab svg {
+  width: 24px;
+  height: 24px;
+}
+
 @media (min-width: 768px) {
   .tabBar {
     display: none;

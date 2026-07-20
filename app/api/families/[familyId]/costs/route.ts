@@ -71,7 +71,7 @@ export async function POST(
 
     const { familyId } = await params
     const body = await request.json()
-    const { description, amount, status, dueDate, assignedTo, receiptUrl, fileName } = body
+    const { description, amount, status, dueDate, assignedTo, paidBy, receiptUrl, fileName } = body
 
     if (!description || !amount) {
       return NextResponse.json(
@@ -97,6 +97,8 @@ export async function POST(
         status: status || 'PENDING',
         dueDate: dueDate ? new Date(dueDate) : null,
         assignedTo,
+        // Who fronted the money — defaults to the person logging it (for balances).
+        paidBy: paidBy || (user as { id: string }).id,
         receiptUrl: receiptUrl || null,
         fileName: fileName || null,
       },

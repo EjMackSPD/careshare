@@ -1,0 +1,82 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.55rem 0;
+}
+.row + .row {
+  border-top: 1px solid var(--cs-color-border);
+}
+
+.check {
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 2px solid var(--cs-color-border-strong);
+  background: var(--cs-color-surface-raised);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: #fff;
+  cursor: pointer;
+  padding: 0;
+}
+.check:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.checked {
+  background: var(--cs-color-care);
+  border-color: var(--cs-color-care);
+}
+
+.title {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.9rem;
+  font-weight: 550;
+  color: var(--cs-color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.title.done {
+  color: var(--cs-color-subtle);
+  text-decoration: line-through;
+}
+
+.dueChip {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--cs-color-warm-dark);
+  background: #fbf0dd;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.dueMuted {
+  font-size: 0.75rem;
+  color: var(--cs-color-muted);
+  white-space: nowrap;
+}
+
+.avatars {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+.avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--cs-color-brand);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--cs-color-surface-raised);
+  margin-left: -6px;
+}
+.avatar:first-child {
+  margin-left: 0;
+}

@@ -76,7 +76,8 @@ model User {
   familyMembers     FamilyMember[]
   sentInvitations   FamilyInvitation[]
   createdFamilies   Family[]           @relation("FamilyCreator")
-  costs             Cost[]
+  costs             Cost[]             @relation("CostAssignedTo")
+  costsPaid         Cost[]             @relation("CostPaidBy")
   costSplits        CostSplit[]
   adminFamilies     AdminFamily[]
   assignedTasks     Task[]             @relation("AssignedTasks")
@@ -86,6 +87,7 @@ model User {
   messages          Message[]
   lifeStories       LifeStory[]
   medications       Medication[]
+  medicationDosesTaken MedicationDose[]
   notes             Note[]
   uploadedDocuments Document[]
   aiConversations AIConversation[]
@@ -130,6 +132,7 @@ model Family {
   messages      Message[]
   lifeStories   LifeStory[]
   medications   Medication[]
+  medicationDoses MedicationDose[]
   notes         Note[]
   documents     Document[]
   carePlan      CarePlan?
@@ -280,6 +283,7 @@ model Cost {
   dueDate     DateTime?
   paidDate    DateTime?
   assignedTo  String?    // User assigned to pay this cost (deprecated - use splits)
+  paidBy      String?    // User who fronted the money (for balance/settlement)
   splitType   String     @default("EQUAL") // EQUAL, CUSTOM, SINGLE
   receiptUrl  String?    // URL/path to receipt/bill file
   fileName    String?    // Original file name
@@ -287,12 +291,14 @@ model Cost {
   updatedAt   DateTime   @updatedAt
 
   family       Family     @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  assignedUser User?      @relation(fields: [assignedTo], references: [id])
+  assignedUser User?      @relation("CostAssignedTo", fields: [assignedTo], references: [id])
+  paidByUser   User?      @relation("CostPaidBy", fields: [paidBy], references: [id])
   splits       CostSplit[]
 
   @@index([familyId])
   @@index([status])
   @@index([assignedTo])
+  @@index([paidBy])
 }
 
 // Individual cost splits for each family member
@@ -615,10 +621,29 @@ model Medication {
 
   family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  doses  MedicationDose[]
 
   @@index([familyId])
   @@index([userId])
   @@index([active])
+}
+
+// One row per medication per day it's marked taken (v1 adherence = per-day boolean).
+model MedicationDose {
+  id           String   @id @default(cuid())
+  medicationId String
+  familyId     String
+  takenOn      DateTime @db.Date
+  takenAt      DateTime @default(now())
+  takenBy      String
+
+  medication Medication @relation(fields: [medicationId], references: [id], onDelete: Cascade)
+  family     Family     @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  takenByUser User      @relation(fields: [takenBy], references: [id])
+
+  @@unique([medicationId, takenOn])
+  @@index([familyId])
+  @@index([takenOn])
 }
 
 // Care notes and updates
